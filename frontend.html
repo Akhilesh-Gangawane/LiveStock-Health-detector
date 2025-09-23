@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FarmCare Pro - Livestock Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            padding: 15px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+
+        .logo i {
+            margin-right: 10px;
+            font-size: 2rem;
+        }
+
+        .search-bar {
+            display: flex;
+            flex-grow: 0.5;
+            margin: 0 30px;
+            position: relative;
+        }
+
+        .search-bar input {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 25px;
+            width: 100%;
+            font-size: 1rem;
+            outline: none;
+            padding-left: 45px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-bar input:focus {
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.2);
+        }
+
+        .search-bar i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #8b4513;
+            z-index: 1;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border-radius: 0 0 15px 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 1000;
+        }
+
+        .search-result-item {
+            padding: 12px 20px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: background-color 0.2s;
+        }
+
+        .search-result-item:hover {
+            background-color: #f8f9fa;
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        .search-result-item i {
+            color: #2d5a27;
+            width: 20px;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+
+        .user-menu {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .user-icon {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .user-icon:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        /* Dashboard Navigation */
+        .dashboard-nav {
+            background: white;
+            padding: 20px 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .dashboard-nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .dashboard-nav-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-nav-link {
+            padding: 10px 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            color: #2c3e50;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .dashboard-nav-link:hover, .dashboard-nav-link.active {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(45, 90, 39, 0.2);
+        }
+
+        /* Hero Section */
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('https://images.unsplash.com/photo-1596733430284-f7437764b1a9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') center/cover;
+            color: white;
+            padding: 120px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(45, 90, 39, 0.8) 0%, rgba(139, 69, 19, 0.6) 100%);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .hero p {
+            font-size: 1.4rem;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(139, 69, 19, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(139, 69, 19, 0.6);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+
+        .btn-secondary:hover {
+            background: white;
+            color: #2d5a27;
+            transform: translateY(-3px);
+        }
+
+        /* Feature Cards */
+        .features-section {
+            padding: 100px 0;
+            background: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: #2d5a27;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(135deg, #8b4513 0%, #a0522d 100%);
+            margin: 20px auto;
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #2d5a27 0%, #8b4513 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px;
+            font-size: 2rem;
+            color: #2d5a27;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1);
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+        }
+
+        .feature-card h3 {
+            color: #2d5a27;
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.7;
+        }
+
+        /* Page Sections */
+        .page-section {
+            display: none;
+            min-height: 100vh;
+            padding: 40px 0;
+        }
+
+        .page-section.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Dashboard Cards */
+        .dashboard-overview {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .overview-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .overview-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-color, #2d5a27);
+        }
+
+        .overview-card.farms { --card-color: #2d5a27; }
+        .overview-card.animals { --card-color: #4a7c59; }
+        .overview-card.sick { --card-color: #dc3545; }
+        .overview-card.reminders { --card-color: #ffc107; }
+
+        .overview-card h3 {
+            color: #666;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+        }
+
+        .overview-card .number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--card-color);
+            margin-bottom: 10px;
+        }
+
+        .overview-card .change {
+            font-size: 0.9rem;
+            color: #28a745;
+        }
+
+        /* Forms */
+        .form-container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+        }
+
+        .form-container h2 {
+            color: #2d5a27;
+            margin-bottom: 30px;
+            font-size: 2rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2d5a27;
+            box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+        }
+
+        /* Tables */
+        .table-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table th,
+        .table td {
+            padding: 18px 20px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
+        }
+
+        .table tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Upload Area */
+        .upload-area {
+            border: 3px dashed #ccc;
+            border-radius: 15px;
+            padding: 60px 40px;
+            text-align: center;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 30px;
+        }
+
+        .upload-area:hover, .upload-area.dragover {
+            border-color: #2d5a27;
+            background: #f0f8f0;
+        }
+
+        .upload-area i {
+            font-size: 4rem;
+            color: #ccc;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .upload-area h3 {
+            color: #2d5a27;
+            margin-bottom: 10px;
+        }
+
+        /* Symptom Checker */
+        .symptoms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .symptom-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .symptom-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .symptom-card.selected {
+            border-color: #2d5a27;
+            background: #f0f8f0;
+        }
+
+        .symptom-card input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: #2d5a27;
+        }
+
+        /* Knowledge Base */
+        .knowledge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+        }
+
+        .disease-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .disease-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .disease-image {
+            width: 100%;
+            height: 200px;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: #ccc;
+        }
+
+        .disease-info {
+            padding: 25px;
+        }
+
+        .disease-info h4 {
+            color: #2d5a27;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        /* Result Cards */
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-top: 30px;
+            border-left: 5px solid #2d5a27;
+        }
+
+        /* Charts */
+        .chart-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+        }
+
+        .chart-container h3 {
+            color: #2d5a27;
+            margin-bottom: 25px;
+            font-size: 1.5rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+        }
+
+        .quick-actions h3 {
+            color: #2d5a27;
+            margin-bottom: 25px;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .action-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .action-btn.success {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+
+        .action-btn.info {
+            background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+        }
+
+        .action-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        /* Activity List */
+        .activity-list {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .activity-header {
+            padding: 25px 30px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .activity-header h3 {
+            color: #2d5a27;
+            margin: 0;
+        }
+
+        .activity-item {
+            padding: 20px 30px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            transition: background-color 0.3s;
+        }
+
+        .activity-item:hover {
+            background: #f8f9fa;
+        }
+
+        .activity-item:last-child {
+            border-bottom: none;
+        }
+
+        .activity-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #2d5a27;
+            font-size: 1.2rem;
+        }
+
+        /* Login/Register Styles */
+        .auth-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('https://images.unsplash.com/photo-1549317661-bd32c8ce0db2?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') center/cover;
+            padding: 40px 20px;
+        }
+
+        .auth-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
+            transition: all 0.3s ease;
+        }
+
+        .auth-header {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .auth-header h2 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        .auth-header p {
+            opacity: 0.9;
+        }
+
+        .auth-body {
+            padding: 40px 30px;
+        }
+
+        .auth-footer {
+            padding: 20px 30px;
+            background: #f8f9fa;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .auth-footer a {
+            color: #2d5a27;
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+
+            .features-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .search-bar {
+                width: 100%;
+                margin: 0;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .dashboard-nav-links {
+                justify-content: center;
+            }
+
+            .hero {
+                padding: 80px 0;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .hero p {
+                font-size: 1.1rem;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+
+            .dashboard-overview {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+
+            .form-container {
+                padding: 25px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            .btn {
+                padding: 12px 25px;
+                font-size: 1rem;
+            }
+
+            .feature-card {
+                padding: 30px 20px;
+            }
+
+            .overview-card .number {
+                font-size: 2rem;
+            }
+
+            .auth-card {
+                margin: 20px;
+            }
+
+            .auth-header {
+                padding: 30px 20px;
+            }
+
+            .auth-body {
+                padding: 30px 20px;
+            }
+
+            .dashboard-nav-link {
+                padding: 8px 15px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" onclick="showPage('home')">
+                <i class="fas fa-paw"></i>
+                FarmCare Pro
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search animals, diseases, treatments..." id="searchInput">
+                <div class="search-results" id="searchResults"></div>
+            </div>
+            <div class="nav-links">
+                <a href="#" class="nav-link active" data-page="home">Home</a>
+                <a href="#" class="nav-link" data-page="dashboard">Dashboard</a>
+                <a href="#" class="nav-link" data-page="login">Login</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="home" class="page-section active">
+        <!-- Hero Section -->
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Smart Livestock Management</h1>
+                <p>AI-powered illness detection, comprehensive farm management, and veterinary support - all in one professional platform designed for modern farmers</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" onclick="showPage('dashboard')">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Get Started
+                    </button>
+                    <button class="btn btn-secondary" onclick="showPage('login')">
+                        <i class="fas fa-user"></i>
+                        Login / Register
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features Section -->
+        <section class="features-section">
+            <div class="container">
+                <h2 class="section-title">Comprehensive Livestock Care</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3>AI-Powered Detection</h3>
+                        <p>Advanced machine learning algorithms analyze photos and audio recordings to detect potential illnesses with high accuracy, enabling early intervention and better outcomes.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3>Farm Management</h3>
+                        <p>Comprehensive tracking of your livestock, farm lands, health records, vaccination schedules, and productivity metrics in one integrated platform.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3>Veterinary Network</h3>
+                        <p>Connect directly with qualified veterinarians in your area. Get professional consultations, emergency support, and expert advice when you need it most.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Dashboard -->
+    <div id="dashboard" class="page-section">
+        <!-- Dashboard Navigation -->
+        <div class="dashboard-nav">
+            <div class="dashboard-nav-container">
+                <div class="dashboard-nav-links">
+                    <a href="#" class="dashboard-nav-link active" data-page="dashboard-main">Overview</a>
+                    <a href="#" class="dashboard-nav-link" data-page="detection">AI Detection</a>
+                    <a href="#" class="dashboard-nav-link" data-page="symptoms">Symptoms</a>
+                    <a href="#" class="dashboard-nav-link" data-page="knowledge">Knowledge</a>
+                    <a href="#" class="dashboard-nav-link" data-page="vets">Vets</a>
+                    <a href="#" class="dashboard-nav-link" data-page="reports">Reports</a>
+                    <a href="#" class="dashboard-nav-link" data-page="add-land">Add Farm Land</a>
+                    <a href="#" class="dashboard-nav-link" data-page="add-animal">Add Animal</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="container">
+            <h2 class="section-title">Farm Dashboard</h2>
+            
+            <div class="dashboard-overview">
+                <div class="overview-card farms">
+                    <h3>Total Farm Land</h3>
+                    <div class="number">25.5</div>
+                    <div class="change">acres</div>
+                </div>
+                <div class="overview-card animals">
+                    <h3>Total Animals</h3>
+                    <div class="number">147</div>
+                    <div class="change">+5 this month</div>
+                </div>
+                <div class="overview-card sick">
+                    <h3>Sick Animals</h3>
+                    <div class="number">3</div>
+                    <div class="change">-2 from last week</div>
+                </div>
+                <div class="overview-card reminders">
+                    <h3>Reminders</h3>
+                    <div class="number">8</div>
+                    <div class="change">pending actions</div>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="action-grid">
+                        <button class="action-btn success" onclick="showPage('add-land')">
+                            <i class="fas fa-plus"></i>
+                            Add Farm Land
+                        </button>
+                        <button class="action-btn info" onclick="showPage('add-animal')">
+                            <i class="fas fa-paw"></i>
+                            Add Animal
+                        </button>
+                        <button class="action-btn primary" onclick="showPage('detection')">
+                            <i class="fas fa-microscope"></i>
+                            AI Detection
+                        </button>
+                    </div>
+                </div>
+
+                <div class="activity-list">
+                    <div class="activity-header">
+                        <h3>Recent Activity</h3>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <div>
+                            <strong>Health check completed</strong>
+                            <br><small style="color: #666;">Cow #C127 - 2 hours ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-syringe"></i>
+                        </div>
+                        <div>
+                            <strong>Vaccination reminder sent</strong>
+                            <br><small style="color: #666;">Buffalo #B045 - 5 hours ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-seedling"></i>
+                        </div>
+                        <div>
+                            <strong>New farm land registered</strong>
+                            <br><small style="color: #666;">North Field - 1 day ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="login" class="page-section">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Welcome Back</h2>
+                    <p>Sign in to access your farm management dashboard</p>
+                </div>
+                <div class="auth-body">
+                    <form id="loginForm">
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" class="form-control" placeholder="Enter your phone number" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" placeholder="Enter your password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                            <i class="fas fa-sign-in-alt"></i>
+                            Login
+                        </button>
+                    </form>
+                </div>
+                <div class="auth-footer">
+                    <p>Don't have an account? <a href="#" onclick="showPage('register')">Register here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div id="register" class="page-section">
+        <div class="auth-container">
+            <div class="auth-card">
+                <div class="auth-header">
+                    <h2>Create Account</h2>
+                    <p>Join FarmCare Pro to manage your livestock efficiently</p>
+                </div>
+                <div class="auth-body">
+                    <form id="registerForm">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" class="form-control" placeholder="Enter your full name" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="tel" class="form-control" placeholder="Enter your phone number" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Village/City</label>
+                            <input type="text" class="form-control" placeholder="Enter your village/city" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Preferred Language</label>
+                            <select class="form-control" required>
+                                <option value="">Select Language</option>
+                                <option value="english">English</option>
+                                <option value="hindi">Hindi</option>
+                                <option value="marathi">Marathi</option>
+                                <option value="gujarati">Gujarati</option>
+                                <option value="punjabi">Punjabi</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" class="form-control" placeholder="Create a password" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
+                            <i class="fas fa-user-plus"></i>
+                            Register
+                        </button>
+                    </form>
+                </div>
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="#" onclick="showPage('login')">Login here</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Farm Land Page -->
+    <div id="add-land" class="page-section">
+        <div class="container">
+            <h2 class="section-title">Add Farm Land</h2>
+            
+            <div class="form-container">
+                <form id="addLandForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Land Size (acres)</label>
+                            <input type="number" class="form-control" placeholder="Enter land size" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Location</label>
+                            <input type="text" class="form-control" placeholder="Enter location" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Crops Grown</label>
+                        <input type="text" class="form-control" placeholder="Enter crops (comma separated)" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus"></i>
+                        Add Farm Land
+                    </button>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Land ID</th>
+                            <th>Size (acres)</th>
+                            <th>Location</th>
+                            <th>Crops</th>
+                            <th>Added Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>L001</strong></td>
+                            <td>10.5</td>
+                            <td>North Field</td>
+                            <td>Wheat, Maize</td>
+                            <td>2024-01-15</td>
+                            <td>
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>L002</strong></td>
+                            <td>8.2</td>
+                            <td>South Valley</td>
+                            <td>Rice, Sugarcane</td>
+                            <td>2024-02-20</td>
+                            <td>
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>L003</strong></td>
+                            <td>6.8</td>
+                            <td>East Hills</td>
+                            <td>Cotton, Jowar</td>
+                            <td>2024-03-10</td>
+                            <td>
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Animal Page -->
+    <div id="add-animal" class="page-section">
+        <div class="container">
+            <h2 class="section-title">Add Animal</h2>
+            
+            <div class="form-container">
+                <form id="addAnimalForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Animal Type</label>
+                            <select class="form-control" required>
+                                <option value="">Select Type</option>
+                                <option value="cow">Cow</option>
+                                <option value="buffalo">Buffalo</option>
+                                <option value="goat">Goat</option>
+                                <option value="sheep">Sheep</option>
+                                <option value="chicken">Chicken</option>
+                                <option value="pig">Pig</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Breed</label>
+                            <input type="text" class="form-control" placeholder="Enter breed" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Age (months)</label>
+                            <input type="number" class="form-control" placeholder="Enter age" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Number of Animals</label>
+                            <input type="number" class="form-control" placeholder="Enter count" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-paw"></i>
+                        Add Animal
+                    </button>
+                </form>
+            </div>
+
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Animal ID</th>
+                            <th>Type</th>
+                            <th>Breed</th>
+                            <th>Age</th>
+                            <th>Count</th>
+                            <th>Health Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>A001</strong></td>
+                            <td>Cow</td>
+                            <td>Holstein</td>
+                            <td>36 months</td>
+                            <td>15</td>
+                            <td><span style="color: #28a745; font-weight: bold;">Healthy</span></td>
+                            <td>
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-stethoscope"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>A002</strong></td>
+                            <td>Buffalo</td>
+                            <td>Murrah</td>
+                            <td>48 months</td>
+                            <td>8</td>
+                            <td><span style="color: #28a745; font-weight: bold;">Healthy</span></td>
+                            <td>
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-stethoscope"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>A003</strong></td>
+                            <td>Goat</td>
+                            <td>Boer</td>
+                            <td>24 months</td>
+                            <td>25</td>
+                            <td><span style="color: #dc3545; font-weight: bold;">Sick</span></td>
+                            <td>
+                                <button class="btn" style="background: #dc3545; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Detection Page -->
+    <div id="detection" class="page-section">
+        <div class="container">
+            <h2 class="section-title">AI Illness Detection</h2>
+            
+            <div class="form-container">
+                <div class="form-group">
+                    <label>Select Animal</label>
+                    <select class="form-control" id="animalSelect" required>
+                        <option value="">Choose animal to analyze</option>
+                        <option value="cow-c127">Cow #C127 - Holstein</option>
+                        <option value="buffalo-b045">Buffalo #B045 - Murrah</option>
+                        <option value="goat-g089">Goat #G089 - Boer</option>
+                        <option value="sheep-s156">Sheep #S156 - Dorper</option>
+                    </select>
+                </div>
+
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <input type="file" id="fileInput" accept="image/*,audio/*" style="display: none;">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <h3>Upload Image or Audio File</h3>
+                    <p>Click to browse or drag and drop files here</p>
+                    <p style="color: #666; margin-top: 10px; font-size: 0.9rem;">Supported formats: JPG, PNG, MP3, WAV (Max 10MB)</p>
+                </div>
+
+                <button class="btn btn-primary" onclick="runDetection()" style="width: 100%; margin-top: 20px;">
+                    <i class="fas fa-microscope"></i>
+                    Run AI Analysis
+                </button>
+            </div>
+
+            <div id="detectionResult" class="result-card" style="display: none;">
+                <h3 style="color: #dc3545; margin-bottom: 20px;">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Potential Health Issue Detected
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <div>
+                        <strong>Disease:</strong><br>
+                        <span style="color: #dc3545;">Bovine Respiratory Disease</span>
+                    </div>
+                    <div>
+                        <strong>Confidence Level:</strong><br>
+                        <span style="color: #ffc107;">87%</span>
+                    </div>
+                    <div>
+                        <strong>Severity:</strong><br>
+                        <span style="color: #fd7e14;">Moderate</span>
+                    </div>
+                </div>
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 4px solid #dc3545;">
+                    <h4 style="color: #dc3545; margin-bottom: 15px;">
+                        <i class="fas fa-list-ul"></i>
+                        Recommended Actions
+                    </h4>
+                    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                        <li>Isolate the animal immediately to prevent spread</li>
+                        <li>Contact veterinarian within 24 hours</li>
+                        <li>Monitor temperature and appetite closely</li>
+                        <li>Ensure proper ventilation in housing area</li>
+                        <li>Document symptoms and recovery progress</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Symptom Checker Page -->
+    <div id="symptoms" class="page-section">
+        <div class="container">
+            <h2 class="section-title">Symptom Checker</h2>
+            
+            <div class="form-container">
+                <h3 style="color: #2d5a27; margin-bottom: 25px;">Select Observed Symptoms</h3>
+                <div class="symptoms-grid">
+                    <div class="symptom-card" onclick="toggleSymptom(this)">
+                        <input type="checkbox" id="fever">
+                        <i class="fas fa-thermometer-half" style="color: #dc3545;"></i>
+                        <label for="fever">Fever</label>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this)">
+                        <input type="checkbox" id="coughing">
+                        <i class="fas fa-lungs" style="color: #17a2b8;"></i>
+                        <label for="coughing">Coughing</label>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this)">
+                        <input type="checkbox" id="wounds">
+                        <i class="fas fa-band-aid" style="color: #fd7e14;"></i>
+                        <label for="wounds">Wounds/Cuts</label>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this)">
+                        <input type="checkbox" id="diarrhea">
+                        <i class="fas fa-tint" style="color: #6f42c1;"></i>
+                        <label for="diarrhea">Diarrhea</label>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this)">
+                        <input type="checkbox" id="loss-appetite">
+                        <i class="fas fa-utensils" style="color: #28a745;"></i>
+                        <label for="loss-appetite">Loss of Appetite</label>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this)">
+                        <input type="checkbox" id="discharge">
+                        <i class="fas fa-eye-dropper" style="color: #20c997;"></i>
+                        <label for="discharge">Nasal Discharge</label>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this)">
+                        <input type="checkbox" id="lameness">
+                        <i class="fas fa-walking" style="color: #e83e8c;"></i>
+                        <label for="lameness">Lameness</label>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this)">
+                        <input type="checkbox" id="swelling">
+                        <i class="fas fa-circle" style="color: #ffc107;"></i>
+                        <label for="swelling">Swelling</label>
+                    </div>
+                </div>
+                
+                <button class="btn btn-primary" onclick="checkSymptoms()" style="width: 100%;">
+                    <i class="fas fa-search"></i>
+                    Analyze Symptoms
+                </button>
+            </div>
+
+            <div id="symptomResult" class="result-card" style="display: none;">
+                <h3 style="color: #ffc107; margin-bottom: 20px;">
+                    <i class="fas fa-search"></i>
+                    Symptom Analysis Results
+                </h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                    <div>
+                        <strong>Possible Condition:</strong><br>
+                        <span style="color: #17a745;">Respiratory Infection</span>
+                    </div>
+                    <div>
+                        <strong>Match Probability:</strong><br>
+                        <span style="color: #ffc107;">78%</span>
+                    </div>
+                    <div>
+                        <strong>Urgency Level:</strong><br>
+                        <span style="color: #fd7e14;">Medium</span>
+                    </div>
+                </div>
+                <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 4px solid #ffc107;">
+                    <h4 style="color: #ffc107; margin-bottom: 15px;">
+                        <i class="fas fa-lightbulb"></i>
+                        Recommendations
+                    </h4>
+                    <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                        <li>Schedule veterinary examination as soon as possible</li>
+                        <li>Keep animal warm and comfortable</li>
+                        <li>Monitor symptoms closely and document changes</li>
+                        <li>Consider antibiotics if prescribed by veterinarian</li>
+                        <li>Separate from healthy animals if contagious</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Knowledge Base Page -->
+    <div id="knowledge" class="page-section">
+        <div class="container">
+            <h2 class="section-title">Disease Knowledge Base</h2>
+            
+            <div class="knowledge-grid">
+                <div class="disease-card">
+                    <div class="disease-image">
+                        <i class="fas fa-lungs" style="color: #dc3545;"></i>
+                    </div>
+                    <div class="disease-info">
+                        <h4>Bovine Respiratory Disease</h4>
+                        <p>Common respiratory infection affecting cattle. Symptoms include coughing, nasal discharge, and fever. Early treatment with antibiotics is crucial for recovery and preventing spread to other animals.</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
+                            <strong>Prevention:</strong> Proper ventilation, vaccination, quarantine of new animals
+                        </div>
+                    </div>
+                </div>
+                <div class="disease-card">
+                    <div class="disease-image">
+                        <i class="fas fa-virus" style="color: #e74c3c;"></i>
+                    </div>
+                    <div class="disease-info">
+                        <h4>Foot and Mouth Disease</h4>
+                        <p>Highly contagious viral disease affecting cloven-hoofed animals. Causes fever, blisters in mouth and on feet. Requires immediate isolation and veterinary intervention.</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
+                            <strong>Prevention:</strong> Vaccination, biosecurity measures, movement restrictions
+                        </div>
+                    </div>
+                </div>
+                <div class="disease-card">
+                    <div class="disease-image">
+                        <i class="fas fa-heart" style="color: #e91e63;"></i>
+                    </div>
+                    <div class="disease-info">
+                        <h4>Mastitis</h4>
+                        <p>Inflammation of mammary gland, common in dairy cows. Causes swelling, heat, and changes in milk quality. Significantly affects milk production and animal welfare.</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
+                            <strong>Prevention:</strong> Proper milking hygiene, teat dipping, dry cow therapy
+                        </div>
+                    </div>
+                </div>
+                <div class="disease-card">
+                    <div class="disease-image">
+                        <i class="fas fa-skull-crossbones" style="color: #6c757d;"></i>
+                    </div>
+                    <div class="disease-info">
+                        <h4>Anthrax</h4>
+                        <p>Serious bacterial infection affecting all warm-blooded animals. Can cause sudden death without warning signs. Vaccination is the most effective prevention method.</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
+                            <strong>Prevention:</strong> Annual vaccination, proper carcass disposal, quarantine
+                        </div>
+                    </div>
+                </div>
+                <div class="disease-card">
+                    <div class="disease-image">
+                        <i class="fas fa-baby" style="color: #795548;"></i>
+                    </div>
+                    <div class="disease-info">
+                        <h4>Brucellosis</h4>
+                        <p>Bacterial infection causing reproductive problems in cattle. Can cause abortions and infertility. Also zoonotic, meaning it can transfer to humans through contact.</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
+                            <strong>Prevention:</strong> Vaccination, testing, culling infected animals
+                        </div>
+                    </div>
+                </div>
+                <div class="disease-card">
+                    <div class="disease-image">
+                        <i class="fas fa-bone" style="color: #607d8b;"></i>
+                    </div>
+                    <div class="disease-info">
+                        <h4>Milk Fever (Hypocalcemia)</h4>
+                        <p>Calcium deficiency in dairy cows around calving time. Causes weakness, inability to stand, and can be life-threatening. Requires immediate calcium supplementation.</p>
+                        <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
+                            <strong>Prevention:</strong> Proper nutrition, calcium supplementation, monitoring
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Veterinarian Directory Page -->
+    <div id="vets" class="page-section">
+        <div class="container">
+            <h2 class="section-title">Veterinarian Directory</h2>
+            
+            <div class="table-container">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Veterinarian</th>
+                            <th>Specialization</th>
+                            <th>Location</th>
+                            <th>Contact</th>
+                            <th>Distance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong style="color: #2d5a27;">Dr. Rajesh Sharma</strong><br>
+                                    <small style="color: #666;">15 years experience</small>
+                                </div>
+                            </td>
+                            <td>Large Animal Medicine</td>
+                            <td>Village Center, Pune</td>
+                            <td>+91 98765 43210</td>
+                            <td>
+                                <span style="color: #28a745; font-weight: bold;">2.5 km</span>
+                            </td>
+                            <td>
+                                <button class="btn" onclick="callVet('+91 98765 43210')" style="background: #28a745; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; margin-right: 8px;">
+                                    <i class="fas fa-phone"></i>
+                                </button>
+                                <button class="btn" onclick="whatsappVet('+91 98765 43210')" style="background: #25d366; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong style="color: #2d5a27;">Dr. Priya Patel</strong><br>
+                                    <small style="color: #666;">12 years experience</small>
+                                </div>
+                            </td>
+                            <td>Dairy Cattle Specialist</td>
+                            <td>Market Road, Pune</td>
+                            <td>+91 87654 32109</td>
+                            <td>
+                                <span style="color: #ffc107; font-weight: bold;">4.2 km</span>
+                            </td>
+                            <td>
+                                <button class="btn" onclick="callVet('+91 87654 32109')" style="background: #28a745; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; margin-right: 8px;">
+                                    <i class="fas fa-phone"></i>
+                                </button>
+                                <button class="btn" onclick="whatsappVet('+91 87654 32109')" style="background: #25d366; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong style="color: #2d5a27;">Dr. Amit Kumar</strong><br>
+                                    <small style="color: #666;">8 years experience</small>
+                                </div>
+                            </td>
+                            <td>Poultry & Small Animals</td>
+                            <td>Hospital Road, Pune</td>
+                            <td>+91 76543 21098</td>
+                            <td>
+                                <span style="color: #fd7e14; font-weight: bold;">6.8 km</span>
+                            </td>
+                            <td>
+                                <button class="btn" onclick="callVet('+91 76543 21098')" style="background: #28a745; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; margin-right: 8px;">
+                                    <i class="fas fa-phone"></i>
+                                </button>
+                                <button class="btn" onclick="whatsappVet('+91 76543 21098')" style="background: #25d366; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <div>
+                                    <strong style="color: #2d5a27;">Dr. Sunita Desai</strong><br>
+                                    <small style="color: #666;">20 years experience</small>
+                                </div>
+                            </td>
+                            <td>Emergency & Critical Care</td>
+                            <td>Main Street, Pune</td>
+                            <td>+91 65432 10987</td>
+                            <td>
+                                <span style="color: #dc3545; font-weight: bold;">8.1 km</span>
+                            </td>
+                            <td>
+                                <button class="btn" onclick="callVet('+91 65432 10987')" style="background: #28a745; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer; margin-right: 8px;">
+                                    <i class="fas fa-phone"></i>
+                                </button>
+                                <button class="btn" onclick="whatsappVet('+91 65432 10987')" style="background: #25d366; color: white; padding: 8px 12px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fab fa-whatsapp"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Page -->
+    <div id="reports" class="page-section">
+        <div class="container">
+            <h2 class="section-title">Farm Analytics & Reports</h2>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 40px;">
+                <div class="chart-container">
+                    <h3>Animal Health Trends</h3>
+                    <canvas id="healthChart" width="400" height="200"></canvas>
+                </div>
+                
+                <div class="chart-container">
+                    <h3>Livestock Population Distribution</h3>
+                    <canvas id="populationChart" width="400" height="200"></canvas>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <div style="padding: 25px 30px; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
+                    <h3 style="color: #2d5a27; margin: 0;">
+                        <i class="fas fa-syringe"></i>
+                        Vaccination Schedule & Reminders
+                    </h3>
+                </div>
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Animal ID</th>
+                            <th>Type & Breed</th>
+                            <th>Vaccination</th>
+                            <th>Due Date</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>C127</strong></td>
+                            <td>
+                                <div>
+                                    <strong>Holstein Cow</strong><br>
+                                    <small style="color: #666;">Age: 36 months</small>
+                                </div>
+                            </td>
+                            <td>FMD Vaccine</td>
+                            <td>2024-02-15</td>
+                            <td>
+                                <span style="background: #dc3545; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
+                                    <i class="fas fa-exclamation-circle"></i> Overdue
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn" style="background: #dc3545; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-bell"></i> Urgent
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>B045</strong></td>
+                            <td>
+                                <div>
+                                    <strong>Murrah Buffalo</strong><br>
+                                    <small style="color: #666;">Age: 48 months</small>
+                                </div>
+                            </td>
+                            <td>Anthrax Vaccine</td>
+                            <td>2024-02-18</td>
+                            <td>
+                                <span style="background: #ffc107; color: #000; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
+                                    <i class="fas fa-clock"></i> Due Soon
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn" style="background: #ffc107; color: #000; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-calendar"></i> Schedule
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>G089</strong></td>
+                            <td>
+                                <div>
+                                    <strong>Boer Goat</strong><br>
+                                    <small style="color: #666;">Age: 24 months</small>
+                                </div>
+                            </td>
+                            <td>PPR Vaccine</td>
+                            <td>2024-02-25</td>
+                            <td>
+                                <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
+                                    <i class="fas fa-check"></i> Scheduled
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-eye"></i> View
+                                </button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>S156</strong></td>
+                            <td>
+                                <div>
+                                    <strong>Dorper Sheep</strong><br>
+                                    <small style="color: #666;">Age: 18 months</small>
+                                </div>
+                            </td>
+                            <td>Clostridial Vaccine</td>
+                            <td>2024-03-05</td>
+                            <td>
+                                <span style="background: #6c757d; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
+                                    <i class="fas fa-calendar-alt"></i> Upcoming
+                                </span>
+                            </td>
+                            <td>
+                                <button class="btn" style="background: #28a745; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-plus"></i> Add
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Health Summary Cards -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px;">
+                <div class="overview-card">
+                    <h3>Health Score</h3>
+                    <div class="number" style="color: #28a745;">92%</div>
+                    <div class="change">Overall farm health rating</div>
+                </div>
+                <div class="overview-card">
+                    <h3>Treatments This Month</h3>
+                    <div class="number" style="color: #17a2b8;">7</div>
+                    <div class="change">-3 from last month</div>
+                </div>
+                <div class="overview-card">
+                    <h3>Vaccination Coverage</h3>
+                    <div class="number" style="color: #ffc107;">85%</div>
+                    <div class="change">15 animals pending</div>
+                </div>
+                <div class="overview-card">
+                    <h3>Avg Recovery Time</h3>
+                    <div class="number" style="color: #6f42c1;">4.2</div>
+                    <div class="change">days (improved)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let currentPage = 'home';
+        let searchData = [
+            { type: 'animal', name: 'Cow #C127 - Holstein', page: 'detection', icon: 'fas fa-cow' },
+            { type: 'animal', name: 'Buffalo #B045 - Murrah', page: 'detection', icon: 'fas fa-hippo' },
+            { type: 'animal', name: 'Goat #G089 - Boer', page: 'detection', icon: 'fas fa-kiwi-bird' },
+            { type: 'disease', name: 'Bovine Respiratory Disease', page: 'knowledge', icon: 'fas fa-lungs' },
+            { type: 'disease', name: 'Foot and Mouth Disease', page: 'knowledge', icon: 'fas fa-virus' },
+            { type: 'disease', name: 'Mastitis', page: 'knowledge', icon: 'fas fa-heart' },
+            { type: 'treatment', name: 'Antibiotics for Respiratory Infection', page: 'knowledge', icon: 'fas fa-pills' },
+            { type: 'veterinarian', name: 'Dr. Rajesh Sharma', page: 'vets', icon: 'fas fa-user-md' },
+            { type: 'veterinarian', name: 'Dr. Priya Patel', page: 'vets', icon: 'fas fa-user-md' },
+            { type: 'farm', name: 'North Field', page: 'add-land', icon: 'fas fa-tractor' },
+            { type: 'farm', name: 'South Valley', page: 'add-land', icon: 'fas fa-tractor' }
+        ];
+
+        // Page Navigation System
+        function showPage(pageId) {
+            // Hide all pages
+            document.querySelectorAll('.page-section').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Remove active class from nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Remove active class from dashboard nav links
+            document.querySelectorAll('.dashboard-nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Show selected page
+            const targetPage = document.getElementById(pageId);
+            if (targetPage) {
+                targetPage.classList.add('active');
+                currentPage = pageId;
+            }
+            
+            // Add active class to corresponding nav link
+            const navLink = document.querySelector(`[data-page="${pageId}"]`);
+            if (navLink) {
+                navLink.classList.add('active');
+            }
+
+            // Initialize charts if reports page is shown
+            if (pageId === 'reports') {
+                setTimeout(initializeCharts, 100);
+            }
+
+            // Smooth scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Navigation Event Listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Nav link click handlers
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+
+            // Dashboard nav link click handlers
+            document.querySelectorAll('.dashboard-nav-link').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const pageId = this.getAttribute('data-page');
+                    showPage(pageId);
+                });
+            });
+
+            // Initialize home page
+            showPage('home');
+        });
+
+        // Search Functionality
+        function handleSearch() {
+            const query = document.getElementById('searchInput').value.trim();
+            if (query) {
+                alert(`Searching for: "${query}"\nThis feature will be implemented with backend integration.`);
+                document.getElementById('searchInput').value = '';
+            }
+        }
+
+        // Search on Enter key
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('searchInput');
+            const searchResults = document.getElementById('searchResults');
+            
+            if (searchInput && searchResults) {
+                searchInput.addEventListener('input', function(e) {
+                    const query = this.value.trim().toLowerCase();
+                    
+                    if (query.length > 0) {
+                        const results = searchData.filter(item => 
+                            item.name.toLowerCase().includes(query)
+                        );
+                        
+                        displaySearchResults(results);
+                    } else {
+                        searchResults.style.display = 'none';
+                    }
+                });
+                
+                searchInput.addEventListener('focus', function() {
+                    if (this.value.trim().length > 0) {
+                        const query = this.value.trim().toLowerCase();
+                        const results = searchData.filter(item => 
+                            item.name.toLowerCase().includes(query)
+                        );
+                        displaySearchResults(results);
+                    }
+                });
+                
+                // Hide search results when clicking outside
+                document.addEventListener('click', function(e) {
+                    if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+                        searchResults.style.display = 'none';
+                    }
+                });
+            }
+        });
+
+        // Display search results
+        function displaySearchResults(results) {
+            const searchResults = document.getElementById('searchResults');
+            
+            if (results.length > 0) {
+                searchResults.innerHTML = '';
+                
+                results.forEach(result => {
+                    const resultItem = document.createElement('div');
+                    resultItem.className = 'search-result-item';
+                    resultItem.innerHTML = `
+                        <i class="${result.icon}"></i>
+                        <div>
+                            <div style="font-weight: bold;">${result.name}</div>
+                            <div style="font-size: 0.8rem; color: #666;">${result.type.charAt(0).toUpperCase() + result.type.slice(1)}</div>
+                        </div>
+                    `;
+                    
+                    resultItem.addEventListener('click', function() {
+                        showPage(result.page);
+                        document.getElementById('searchInput').value = '';
+                        searchResults.style.display = 'none';
+                    });
+                    
+                    searchResults.appendChild(resultItem);
+                });
+                
+                searchResults.style.display = 'block';
+            } else {
+                searchResults.innerHTML = '<div class="search-result-item">No results found</div>';
+                searchResults.style.display = 'block';
+            }
+        }
+
+        // Form Submission Handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login Form
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Login successful! Redirecting to dashboard...');
+                    showPage('dashboard');
+                });
+            }
+
+            // Register Form
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Registration successful! Please login to continue.');
+                    showPage('login');
+                });
+            }
+
+            // Add Land Form
+            const addLandForm = document.getElementById('addLandForm');
+            if (addLandForm) {
+                addLandForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Farm land added successfully to your records!');
+                    this.reset();
+                });
+            }
+
+            // Add Animal Form
+            const addAnimalForm = document.getElementById('addAnimalForm');
+            if (addAnimalForm) {
+                addAnimalForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('Animal added successfully to your inventory!');
+                    this.reset();
+                });
+            }
+        });
+
+        // File Upload Handling
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('fileInput');
+            const uploadArea = document.querySelector('.upload-area');
+
+            if (fileInput && uploadArea) {
+                fileInput.addEventListener('change', function(e) {
+                    if (e.target.files.length > 0) {
+                        const fileName = e.target.files[0].name;
+                        const fileSize = (e.target.files[0].size / (1024 * 1024)).toFixed(2);
+                        uploadArea.innerHTML = `
+                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                            <h3 style="color: #28a745;">File Selected Successfully</h3>
+                            <p><strong>${fileName}</strong></p>
+                            <p style="color: #666;">Size: ${fileSize} MB</p>
+                            <p style="color: #28a745; margin-top: 15px;">
+                                <i class="fas fa-thumbs-up"></i> Ready for AI analysis
+                            </p>
+                        `;
+                    }
+                });
+
+                // Drag and drop functionality
+                uploadArea.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('dragover');
+                });
+
+                uploadArea.addEventListener('dragleave', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                });
+
+                uploadArea.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('dragover');
+                    const files = e.dataTransfer.files;
+                    if (files.length > 0) {
+                        fileInput.files = files;
+                        const fileName = files[0].name;
+                        const fileSize = (files[0].size / (1024 * 1024)).toFixed(2);
+                        this.innerHTML = `
+                            <i class="fas fa-check-circle" style="color: #28a745;"></i>
+                            <h3 style="color: #28a745;">File Dropped Successfully</h3>
+                            <p><strong>${fileName}</strong></p>
+                            <p style="color: #666;">Size: ${fileSize} MB</p>
+                            <p style="color: #28a745; margin-top: 15px;">
+                                <i class="fas fa-thumbs-up"></i> Ready for AI analysis
+                            </p>
+                        `;
+                    }
+                });
+            }
+        });
+
+        // AI Detection Function
+        function runDetection() {
+            const animalSelect = document.getElementById('animalSelect');
+            const fileInput = document.getElementById('fileInput');
+            
+            if (!animalSelect.value) {
+                alert('Please select an animal first.');
+                return;
+            }
+            
+            if (!fileInput.files.length) {
+                alert('Please upload an image or audio file.');
+                return;
+            }
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            button.disabled = true;
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                document.getElementById('detectionResult').style.display = 'block';
+                document.getElementById('detectionResult').scrollIntoView({ behavior: 'smooth' });
+                
+                // Show success notification
+                showNotification('AI analysis completed successfully!', 'success');
+            }, 3000);
+        }
+
+        // Symptom Checker Functions
+        function toggleSymptom(card) {
+            const checkbox = card.querySelector('input[type="checkbox"]');
+            checkbox.checked = !checkbox.checked;
+            card.classList.toggle('selected', checkbox.checked);
+        }
+
+        function checkSymptoms() {
+            const checkboxes = document.querySelectorAll('.symptom-card input[type="checkbox"]:checked');
+            
+            if (checkboxes.length === 0) {
+                alert('Please select at least one symptom to analyze.');
+                return;
+            }
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Symptoms...';
+            button.disabled = true;
+            
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                document.getElementById('symptomResult').style.display = 'block';
+                document.getElementById('symptomResult').scrollIntoView({ behavior: 'smooth' });
+                
+                showNotification(`Analysis complete! Found ${checkboxes.length} symptoms to evaluate.`, 'info');
+            }, 2000);
+        }
+
+        // Veterinarian Contact Functions
+        function callVet(phoneNumber) {
+            if (confirm(`Do you want to call ${phoneNumber}?`)) {
+                showNotification(`Calling ${phoneNumber}...`, 'info');
+                // In a real app, this would initiate a phone call
+                window.open(`tel:${phoneNumber}`, '_self');
+            }
+        }
+
+        function whatsappVet(phoneNumber) {
+            const message = encodeURIComponent("Hello, I need veterinary assistance for my livestock. Can you help?");
+            const whatsappURL = `https://wa.me/${phoneNumber.replace(/\D/g, '')}?text=${message}`;
+            window.open(whatsappURL, '_blank');
+            showNotification('Opening WhatsApp...', 'success');
+        }
+
+        // Notification System
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+                color: white;
+                padding: 15px 25px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                font-weight: 500;
+                animation: slideIn 0.3s ease-out;
+            `;
+            notification.innerHTML = `<i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i> ${message}`;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-in';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // Add CSS for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Charts Initialization
+        function initializeCharts() {
+            // Health Status Trend Chart
+            const healthCtx = document.getElementById('healthChart');
+            if (healthCtx && !healthCtx.chartInstance) {
+                healthCtx.chartInstance = new Chart(healthCtx, {
+                    type: 'line',
+                    data: {
+                        labels: ['January', 'February', 'March', 'April', 'May', 'June'],
+                        datasets: [{
+                            label: 'Healthy Animals',
+                            data: [140, 142, 145, 144, 147, 144],
+                            borderColor: '#28a745',
+                            backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }, {
+                            label: 'Sick Animals',
+                            data: [7, 5, 2, 3, 0, 3],
+                            borderColor: '#dc3545',
+                            backgroundColor: 'rgba(220, 53, 69, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(0,0,0,0.1)'
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    display: false
+                                }
+                            }
+                        },
+                        elements: {
+                            point: {
+                                radius: 5,
+                                hoverRadius: 8
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Population Distribution Chart
+            const populationCtx = document.getElementById('populationChart');
+            if (populationCtx && !populationCtx.chartInstance) {
+                populationCtx.chartInstance = new Chart(populationCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Cows', 'Buffaloes', 'Goats', 'Sheep', 'Chickens'],
+                        datasets: [{
+                            data: [45, 25, 30, 20, 27],
+                            backgroundColor: [
+                                '#2d5a27',
+                                '#4a7c59',
+                                '#8b4513',
+                                '#a0522d',
+                                '#6b8e23'
+                            ],
+                            borderWidth: 0,
+                            hoverBorderWidth: 3,
+                            hoverBorderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    padding: 20
+                                }
+                            }
+                        },
+                        cutout: '60%'
+                    }
+                });
+            }
+        }
+
+        // Initialize app on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set initial active page
+            showPage('home');
+            
+            // Add smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+
+            // Initialize tooltips and other interactive elements
+            console.log('FarmCare Pro initialized successfully!');
+        });
+    </script>
+</body>
+</html>
