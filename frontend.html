@@ -1,11 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="mr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FarmCare Pro - Livestock Management System</title>
+    <title>फार्मकेअर प्रो - लाइव्हस्टॉक व्यवस्थापन प्रणाली</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <style>
         * {
             margin: 0;
@@ -829,6 +834,355 @@
             text-decoration: underline;
         }
 
+        /* Dashboard Features on Home Page */
+        .dashboard-features {
+            padding: 80px 0;
+            background: #f8f9fa;
+        }
+
+        .dashboard-features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+
+        .dashboard-feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-align: center;
+            border: 2px solid transparent;
+        }
+
+        .dashboard-feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            border-color: #2d5a27;
+        }
+
+        .dashboard-feature-icon {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 1.8rem;
+            color: #2d5a27;
+            transition: all 0.3s ease;
+        }
+
+        .dashboard-feature-card:hover .dashboard-feature-icon {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+        }
+
+        .dashboard-feature-card h3 {
+            color: #2d5a27;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+        }
+
+        .dashboard-feature-card p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Language Toggle */
+        .language-toggle {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .language-btn {
+            background: white;
+            border: 2px solid #2d5a27;
+            color: #2d5a27;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .language-btn:hover {
+            background: #2d5a27;
+            color: white;
+        }
+
+        /* Subsidies Section */
+        .subsidies-section {
+            padding: 80px 0;
+            background: white;
+        }
+
+        .filters-container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            margin-bottom: 40px;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .subsidies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+        }
+
+        .subsidy-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .subsidy-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .subsidy-header {
+            padding: 25px;
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+        }
+
+        .subsidy-header h4 {
+            font-size: 1.3rem;
+            margin-bottom: 10px;
+        }
+
+        .subsidy-body {
+            padding: 25px;
+        }
+
+        .subsidy-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        /* User Profile */
+        .profile-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            overflow: hidden;
+            margin-bottom: 40px;
+        }
+
+        .profile-header {
+            padding: 40px;
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .profile-avatar {
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 2.5rem;
+        }
+
+        .profile-body {
+            padding: 40px;
+        }
+
+        /* Voice Prediction Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .modal-header h3 {
+            color: #2d5a27;
+            margin: 0;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .voice-recorder {
+            text-align: center;
+            padding: 30px;
+            border: 2px dashed #e1e8ed;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .voice-recorder.active {
+            border-color: #2d5a27;
+            background: #f0f8f0;
+        }
+        
+        .voice-recorder i {
+            font-size: 4rem;
+            color: #2d5a27;
+            margin-bottom: 20px;
+        }
+        
+        .record-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            margin-top: 20px;
+        }
+        
+        .record-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(45, 90, 39, 0.4);
+        }
+        
+        .record-btn.recording {
+            background: linear-gradient(135deg, #dc3545 0%, #e74c3c 100%);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .transcript {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            min-height: 100px;
+        }
+        
+        .symptom-selector {
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .symptom-group {
+            margin-bottom: 25px;
+        }
+        
+        .symptom-group h4 {
+            color: #2d5a27;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .symptom-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+        }
+        
+        .symptom-option {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .symptom-option:hover {
+            background: #e9ecef;
+        }
+        
+        .symptom-option.selected {
+            background: #e8f5e8;
+            border: 1px solid #2d5a27;
+        }
+        
         /* Responsive Design */
         @media (max-width: 1024px) {
             .hero h1 {
@@ -893,6 +1247,15 @@
             .form-row {
                 grid-template-columns: 1fr;
             }
+
+            .language-toggle {
+                top: 80px;
+                right: 10px;
+            }
+
+            .subsidies-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         @media (max-width: 480px) {
@@ -933,12 +1296,20 @@
     </style>
 </head>
 <body>
+    <!-- Language Toggle -->
+    <div class="language-toggle">
+        <button class="language-btn" id="languageToggle">
+            <i class="fas fa-language"></i>
+            <span id="languageText">मराठी</span>
+        </button>
+    </div>
+
     <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <div class="logo" onclick="showPage('home')">
                 <i class="fas fa-paw"></i>
-                FarmCare Pro
+                <span class="lang" data-key="appName">FarmCare Pro</span>
             </div>
             <div class="search-bar">
                 <i class="fas fa-search"></i>
@@ -946,9 +1317,27 @@
                 <div class="search-results" id="searchResults"></div>
             </div>
             <div class="nav-links">
-                <a href="#" class="nav-link active" data-page="home">Home</a>
-                <a href="#" class="nav-link" data-page="dashboard">Dashboard</a>
-                <a href="#" class="nav-link" data-page="login">Login</a>
+                <a href="#" class="nav-link active" data-page="home">
+                    <span class="lang" data-key="home">Home</span>
+                </a>
+                <a href="#" class="nav-link" data-page="login" id="authLink">
+                    <span class="lang" data-key="login">Login</span>
+                </a>
+                <div class="user-menu" id="userMenu" style="display: none;">
+                    <div class="user-icon" id="userDropdown">
+                        <i class="fas fa-user-circle"></i>
+                        <span id="userName">User</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="user-dropdown" id="userDropdownMenu" style="display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 10px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); min-width: 200px; z-index: 1000;">
+                        <a href="#" class="dropdown-item" onclick="showPage('profile')" style="display: block; padding: 12px 20px; color: #2c3e50; text-decoration: none; border-bottom: 1px solid #f0f0f0;">
+                            <i class="fas fa-user"></i> Profile
+                        </a>
+                        <a href="#" class="dropdown-item" onclick="logout()" style="display: block; padding: 12px 20px; color: #2c3e50; text-decoration: none;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -958,16 +1347,16 @@
         <!-- Hero Section -->
         <section class="hero">
             <div class="hero-content">
-                <h1>Smart Livestock Management</h1>
-                <p>AI-powered illness detection, comprehensive farm management, and veterinary support - all in one professional platform designed for modern farmers</p>
+                <h1 class="lang" data-key="heroTitle">Smart Livestock Management</h1>
+                <p class="lang" data-key="heroSubtitle">AI-powered illness detection, comprehensive farm management, and veterinary support - all in one professional platform designed for modern farmers</p>
                 <div class="hero-buttons">
                     <button class="btn btn-primary" onclick="showPage('dashboard')">
                         <i class="fas fa-tachometer-alt"></i>
-                        Get Started
+                        <span class="lang" data-key="getStarted">Get Started</span>
                     </button>
                     <button class="btn btn-secondary" onclick="showPage('login')">
                         <i class="fas fa-user"></i>
-                        Login / Register
+                        <span class="lang" data-key="loginRegister">Login / Register</span>
                     </button>
                 </div>
             </div>
@@ -976,28 +1365,97 @@
         <!-- Features Section -->
         <section class="features-section">
             <div class="container">
-                <h2 class="section-title">Comprehensive Livestock Care</h2>
+                <h2 class="section-title lang" data-key="comprehensiveCare">Comprehensive Livestock Care</h2>
                 <div class="features-grid">
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="fas fa-robot"></i>
                         </div>
-                        <h3>AI-Powered Detection</h3>
-                        <p>Advanced machine learning algorithms analyze photos and audio recordings to detect potential illnesses with high accuracy, enabling early intervention and better outcomes.</p>
+                        <h3 class="lang" data-key="aiDetection">AI-Powered Detection</h3>
+                        <p class="lang" data-key="aiDetectionDesc">Advanced machine learning algorithms analyze photos and audio recordings to detect potential illnesses with high accuracy, enabling early intervention and better outcomes.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="fas fa-chart-line"></i>
                         </div>
-                        <h3>Farm Management</h3>
-                        <p>Comprehensive tracking of your livestock, farm lands, health records, vaccination schedules, and productivity metrics in one integrated platform.</p>
+                        <h3 class="lang" data-key="farmManagement">Farm Management</h3>
+                        <p class="lang" data-key="farmManagementDesc">Comprehensive tracking of your livestock, farm lands, health records, vaccination schedules, and productivity metrics in one integrated platform.</p>
                     </div>
                     <div class="feature-card">
                         <div class="feature-icon">
                             <i class="fas fa-user-md"></i>
                         </div>
-                        <h3>Veterinary Network</h3>
-                        <p>Connect directly with qualified veterinarians in your area. Get professional consultations, emergency support, and expert advice when you need it most.</p>
+                        <h3 class="lang" data-key="vetNetwork">Veterinary Network</h3>
+                        <p class="lang" data-key="vetNetworkDesc">Connect directly with qualified veterinarians in your area. Get professional consultations, emergency support, and expert advice when you need it most.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Features Section -->
+        <section class="dashboard-features">
+            <div class="container">
+                <h2 class="section-title lang" data-key="dashboardFeatures">Dashboard Features</h2>
+                <div class="dashboard-features-grid">
+                    <div class="dashboard-feature-card" onclick="showPage('detection')">
+                        <div class="dashboard-feature-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <h3 class="lang" data-key="predictDisease">Predict Disease</h3>
+                        <p class="lang" data-key="predictDiseaseDesc">Use AI to detect potential illnesses in your livestock through image and audio analysis.</p>
+                        <button class="btn btn-primary">
+                            <span class="lang" data-key="tryNow">Try Now</span>
+                        </button>
+                    </div>
+                    <div class="dashboard-feature-card" onclick="showPage('symptoms')">
+                        <div class="dashboard-feature-icon">
+                            <i class="fas fa-stethoscope"></i>
+                        </div>
+                        <h3 class="lang" data-key="symptomChecker">Symptom Checker</h3>
+                        <p class="lang" data-key="symptomCheckerDesc">Identify potential health issues by selecting observed symptoms in your animals.</p>
+                        <button class="btn btn-primary">
+                            <span class="lang" data-key="checkNow">Check Now</span>
+                        </button>
+                    </div>
+                    <div class="dashboard-feature-card" onclick="showPage('knowledge')">
+                        <div class="dashboard-feature-icon">
+                            <i class="fas fa-book-medical"></i>
+                        </div>
+                        <h3 class="lang" data-key="knowledgeBase">Knowledge Base</h3>
+                        <p class="lang" data-key="knowledgeBaseDesc">Access comprehensive information about common livestock diseases and treatments.</p>
+                        <button class="btn btn-primary">
+                            <span class="lang" data-key="explore">Explore</span>
+                        </button>
+                    </div>
+                    <div class="dashboard-feature-card" onclick="showPage('vets')">
+                        <div class="dashboard-feature-icon">
+                            <i class="fas fa-user-md"></i>
+                        </div>
+                        <h3 class="lang" data-key="findVet">Find Veterinarian</h3>
+                        <p class="lang" data-key="findVetDesc">Connect with qualified veterinarians in your area for professional consultations.</p>
+                        <button class="btn btn-primary">
+                            <span class="lang" data-key="findNow">Find Now</span>
+                        </button>
+                    </div>
+                    <div class="dashboard-feature-card" onclick="showPage('add-animal')">
+                        <div class="dashboard-feature-icon">
+                            <i class="fas fa-paw"></i>
+                        </div>
+                        <h3 class="lang" data-key="manageAnimals">Manage Animals</h3>
+                        <p class="lang" data-key="manageAnimalsDesc">Add and track your livestock with detailed health records and management tools.</p>
+                        <button class="btn btn-primary">
+                            <span class="lang" data-key="manage">Manage</span>
+                        </button>
+                    </div>
+                    <div class="dashboard-feature-card" onclick="showPage('subsidies')">
+                        <div class="dashboard-feature-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <h3 class="lang" data-key="subsidies">Subsidies & Schemes</h3>
+                        <p class="lang" data-key="subsidiesDesc">Explore government subsidies and schemes available for livestock farmers.</p>
+                        <button class="btn btn-primary">
+                            <span class="lang" data-key="explore">Explore</span>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1010,93 +1468,88 @@
         <div class="dashboard-nav">
             <div class="dashboard-nav-container">
                 <div class="dashboard-nav-links">
-                    <a href="#" class="dashboard-nav-link active" data-page="dashboard-main">Overview</a>
-                    <a href="#" class="dashboard-nav-link" data-page="detection">AI Detection</a>
-                    <a href="#" class="dashboard-nav-link" data-page="symptoms">Symptoms</a>
-                    <a href="#" class="dashboard-nav-link" data-page="knowledge">Knowledge</a>
-                    <a href="#" class="dashboard-nav-link" data-page="vets">Vets</a>
-                    <a href="#" class="dashboard-nav-link" data-page="reports">Reports</a>
-                    <a href="#" class="dashboard-nav-link" data-page="add-land">Add Farm Land</a>
-                    <a href="#" class="dashboard-nav-link" data-page="add-animal">Add Animal</a>
+                    <a href="#" class="dashboard-nav-link active" data-page="dashboard-main">
+                        <span class="lang" data-key="overview">Overview</span>
+                    </a>
+                    <a href="#" class="dashboard-nav-link" data-page="detection">
+                        <span class="lang" data-key="aiDetection">AI Detection</span>
+                    </a>
+                    <a href="#" class="dashboard-nav-link" data-page="symptoms">
+                        <span class="lang" data-key="symptoms">Symptoms</span>
+                    </a>
+                    <a href="#" class="dashboard-nav-link" data-page="knowledge">
+                        <span class="lang" data-key="knowledge">Knowledge</span>
+                    </a>
+                    <a href="#" class="dashboard-nav-link" data-page="vets">
+                        <span class="lang" data-key="vets">Vets</span>
+                    </a>
+                    <a href="#" class="dashboard-nav-link" data-page="reports">
+                        <span class="lang" data-key="reports">Reports</span>
+                    </a>
+                    <a href="#" class="dashboard-nav-link" data-page="add-land">
+                        <span class="lang" data-key="addFarmLand">Add Farm Land</span>
+                    </a>
+                    <a href="#" class="dashboard-nav-link" data-page="add-animal">
+                        <span class="lang" data-key="addAnimal">Add Animal</span>
+                    </a>
+                    <a href="#" class="dashboard-nav-link" data-page="subsidies">
+                        <span class="lang" data-key="subsidies">Subsidies</span>
+                    </a>
                 </div>
             </div>
         </div>
         
         <div class="container">
-            <h2 class="section-title">Farm Dashboard</h2>
+            <h2 class="section-title lang" data-key="farmDashboard">Farm Dashboard</h2>
             
             <div class="dashboard-overview">
                 <div class="overview-card farms">
-                    <h3>Total Farm Land</h3>
-                    <div class="number">25.5</div>
-                    <div class="change">acres</div>
+                    <h3 class="lang" data-key="totalFarmLand">Total Farm Land</h3>
+                    <div class="number" id="totalLand">0</div>
+                    <div class="change lang" data-key="acres">acres</div>
                 </div>
                 <div class="overview-card animals">
-                    <h3>Total Animals</h3>
-                    <div class="number">147</div>
-                    <div class="change">+5 this month</div>
+                    <h3 class="lang" data-key="totalAnimals">Total Animals</h3>
+                    <div class="number" id="totalAnimals">0</div>
+                    <div class="change lang" data-key="thisMonth">+5 this month</div>
                 </div>
                 <div class="overview-card sick">
-                    <h3>Sick Animals</h3>
-                    <div class="number">3</div>
-                    <div class="change">-2 from last week</div>
+                    <h3 class="lang" data-key="sickAnimals">Sick Animals</h3>
+                    <div class="number" id="sickAnimals">0</div>
+                    <div class="change lang" data-key="lastWeek">-2 from last week</div>
                 </div>
                 <div class="overview-card reminders">
-                    <h3>Reminders</h3>
-                    <div class="number">8</div>
-                    <div class="change">pending actions</div>
+                    <h3 class="lang" data-key="reminders">Reminders</h3>
+                    <div class="number" id="totalReminders">0</div>
+                    <div class="change lang" data-key="pendingActions">pending actions</div>
                 </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
                 <div class="quick-actions">
-                    <h3>Quick Actions</h3>
+                    <h3 class="lang" data-key="quickActions">Quick Actions</h3>
                     <div class="action-grid">
                         <button class="action-btn success" onclick="showPage('add-land')">
                             <i class="fas fa-plus"></i>
-                            Add Farm Land
+                            <span class="lang" data-key="addFarmLand">Add Farm Land</span>
                         </button>
                         <button class="action-btn info" onclick="showPage('add-animal')">
                             <i class="fas fa-paw"></i>
-                            Add Animal
+                            <span class="lang" data-key="addAnimal">Add Animal</span>
                         </button>
                         <button class="action-btn primary" onclick="showPage('detection')">
                             <i class="fas fa-microscope"></i>
-                            AI Detection
+                            <span class="lang" data-key="aiDetection">AI Detection</span>
                         </button>
                     </div>
                 </div>
 
                 <div class="activity-list">
                     <div class="activity-header">
-                        <h3>Recent Activity</h3>
+                        <h3 class="lang" data-key="recentActivity">Recent Activity</h3>
                     </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-stethoscope"></i>
-                        </div>
-                        <div>
-                            <strong>Health check completed</strong>
-                            <br><small style="color: #666;">Cow #C127 - 2 hours ago</small>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-syringe"></i>
-                        </div>
-                        <div>
-                            <strong>Vaccination reminder sent</strong>
-                            <br><small style="color: #666;">Buffalo #B045 - 5 hours ago</small>
-                        </div>
-                    </div>
-                    <div class="activity-item">
-                        <div class="activity-icon">
-                            <i class="fas fa-seedling"></i>
-                        </div>
-                        <div>
-                            <strong>New farm land registered</strong>
-                            <br><small style="color: #666;">North Field - 1 day ago</small>
-                        </div>
+                    <div id="recentActivities">
+                        <!-- Activities will be loaded here -->
                     </div>
                 </div>
             </div>
@@ -1108,27 +1561,31 @@
         <div class="auth-container">
             <div class="auth-card">
                 <div class="auth-header">
-                    <h2>Welcome Back</h2>
-                    <p>Sign in to access your farm management dashboard</p>
+                    <h2 class="lang" data-key="welcomeBack">Welcome Back</h2>
+                    <p class="lang" data-key="signInToAccess">Sign in to access your farm management dashboard</p>
                 </div>
                 <div class="auth-body">
                     <form id="loginForm">
                         <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="tel" class="form-control" placeholder="Enter your phone number" required>
+                            <label class="lang" data-key="email">Email</label>
+                            <input type="email" class="form-control" id="loginEmail" placeholder="Enter your email" required>
                         </div>
                         <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" class="form-control" placeholder="Enter your password" required>
+                            <label class="lang" data-key="password">Password</label>
+                            <input type="password" class="form-control" id="loginPassword" placeholder="Enter your password" required>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
                             <i class="fas fa-sign-in-alt"></i>
-                            Login
+                            <span class="lang" data-key="login">Login</span>
                         </button>
                     </form>
-                </div>
-                <div class="auth-footer">
-                    <p>Don't have an account? <a href="#" onclick="showPage('register')">Register here</a></p>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <p class="lang" data-key="or">Or</p>
+                        <button class="btn btn-secondary" onclick="showPage('register')" style="width: 100%;">
+                            <i class="fas fa-user-plus"></i>
+                            <span class="lang" data-key="createAccount">Create Account</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1139,46 +1596,73 @@
         <div class="auth-container">
             <div class="auth-card">
                 <div class="auth-header">
-                    <h2>Create Account</h2>
-                    <p>Join FarmCare Pro to manage your livestock efficiently</p>
+                    <h2 class="lang" data-key="createAccount">Create Account</h2>
+                    <p class="lang" data-key="joinFarmCare">Join FarmCare Pro to manage your livestock efficiently</p>
                 </div>
                 <div class="auth-body">
                     <form id="registerForm">
                         <div class="form-group">
-                            <label>Full Name</label>
-                            <input type="text" class="form-control" placeholder="Enter your full name" required>
+                            <label class="lang" data-key="fullName">Full Name</label>
+                            <input type="text" class="form-control" id="registerName" placeholder="Enter your full name" required>
                         </div>
                         <div class="form-group">
-                            <label>Phone Number</label>
-                            <input type="tel" class="form-control" placeholder="Enter your phone number" required>
+                            <label class="lang" data-key="email">Email</label>
+                            <input type="email" class="form-control" id="registerEmail" placeholder="Enter your email" required>
                         </div>
                         <div class="form-group">
-                            <label>Village/City</label>
-                            <input type="text" class="form-control" placeholder="Enter your village/city" required>
+                            <label class="lang" data-key="password">Password</label>
+                            <input type="password" class="form-control" id="registerPassword" placeholder="Create a password" required>
                         </div>
                         <div class="form-group">
-                            <label>Preferred Language</label>
-                            <select class="form-control" required>
-                                <option value="">Select Language</option>
-                                <option value="english">English</option>
-                                <option value="hindi">Hindi</option>
-                                <option value="marathi">Marathi</option>
-                                <option value="gujarati">Gujarati</option>
-                                <option value="punjabi">Punjabi</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Password</label>
-                            <input type="password" class="form-control" placeholder="Create a password" required>
+                            <label class="lang" data-key="confirmPassword">Confirm Password</label>
+                            <input type="password" class="form-control" id="registerConfirmPassword" placeholder="Confirm your password" required>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 20px;">
                             <i class="fas fa-user-plus"></i>
-                            Register
+                            <span class="lang" data-key="register">Register</span>
                         </button>
                     </form>
+                    <div style="text-align: center; margin-top: 20px;">
+                        <p class="lang" data-key="alreadyHaveAccount">Already have an account? <a href="#" onclick="showPage('login')" class="lang" data-key="loginHere">Login here</a></p>
+                    </div>
                 </div>
-                <div class="auth-footer">
-                    <p>Already have an account? <a href="#" onclick="showPage('login')">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Page -->
+    <div id="profile" class="page-section">
+        <div class="container">
+            <h2 class="section-title lang" data-key="userProfile">User Profile</h2>
+            
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <h3 id="profileName">User Name</h3>
+                    <p id="profileEmail">user@example.com</p>
+                </div>
+                <div class="profile-body">
+                    <h3 class="lang" data-key="farmDetails">Farm Details</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="lang" data-key="farmName">Farm Name</label>
+                            <input type="text" class="form-control" id="farmName" placeholder="Enter farm name">
+                        </div>
+                        <div class="form-group">
+                            <label class="lang" data-key="farmLocation">Farm Location</label>
+                            <input type="text" class="form-control" id="farmLocation" placeholder="Enter farm location">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="lang" data-key="farmDescription">Farm Description</label>
+                        <textarea class="form-control" id="farmDescription" rows="4" placeholder="Describe your farm"></textarea>
+                    </div>
+                    <button class="btn btn-primary" onclick="saveProfile()">
+                        <i class="fas fa-save"></i>
+                        <span class="lang" data-key="saveProfile">Save Profile</span>
+                    </button>
                 </div>
             </div>
         </div>
@@ -1187,27 +1671,43 @@
     <!-- Add Farm Land Page -->
     <div id="add-land" class="page-section">
         <div class="container">
-            <h2 class="section-title">Add Farm Land</h2>
+            <h2 class="section-title lang" data-key="addFarmLand">Add Farm Land</h2>
             
             <div class="form-container">
                 <form id="addLandForm">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Land Size (acres)</label>
-                            <input type="number" class="form-control" placeholder="Enter land size" required>
+                            <label class="lang" data-key="landName">Land Name</label>
+                            <input type="text" class="form-control" id="landName" placeholder="Enter land name" required>
                         </div>
                         <div class="form-group">
-                            <label>Location</label>
-                            <input type="text" class="form-control" placeholder="Enter location" required>
+                            <label class="lang" data-key="landSize">Land Size (acres)</label>
+                            <input type="number" class="form-control" id="landSize" placeholder="Enter land size" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="lang" data-key="location">Location</label>
+                            <input type="text" class="form-control" id="landLocation" placeholder="Enter location" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="lang" data-key="soilType">Soil Type</label>
+                            <select class="form-control" id="soilType" required>
+                                <option value="" class="lang" data-key="selectSoilType">Select Soil Type</option>
+                                <option value="loamy" class="lang" data-key="loamy">Loamy</option>
+                                <option value="clay" class="lang" data-key="clay">Clay</option>
+                                <option value="sandy" class="lang" data-key="sandy">Sandy</option>
+                                <option value="silt" class="lang" data-key="silt">Silt</option>
+                            </select>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Crops Grown</label>
-                        <input type="text" class="form-control" placeholder="Enter crops (comma separated)" required>
+                        <label class="lang" data-key="cropsGrown">Crops Grown</label>
+                        <input type="text" class="form-control" id="cropsGrown" placeholder="Enter crops (comma separated)" required>
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-plus"></i>
-                        Add Farm Land
+                        <span class="lang" data-key="addFarmLand">Add Farm Land</span>
                     </button>
                 </form>
             </div>
@@ -1216,51 +1716,17 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Land ID</th>
-                            <th>Size (acres)</th>
-                            <th>Location</th>
-                            <th>Crops</th>
-                            <th>Added Date</th>
-                            <th>Actions</th>
+                            <th class="lang" data-key="landName">Land Name</th>
+                            <th class="lang" data-key="size">Size (acres)</th>
+                            <th class="lang" data-key="location">Location</th>
+                            <th class="lang" data-key="soilType">Soil Type</th>
+                            <th class="lang" data-key="crops">Crops</th>
+                            <th class="lang" data-key="addedDate">Added Date</th>
+                            <th class="lang" data-key="actions">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>L001</strong></td>
-                            <td>10.5</td>
-                            <td>North Field</td>
-                            <td>Wheat, Maize</td>
-                            <td>2024-01-15</td>
-                            <td>
-                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>L002</strong></td>
-                            <td>8.2</td>
-                            <td>South Valley</td>
-                            <td>Rice, Sugarcane</td>
-                            <td>2024-02-20</td>
-                            <td>
-                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>L003</strong></td>
-                            <td>6.8</td>
-                            <td>East Hills</td>
-                            <td>Cotton, Jowar</td>
-                            <td>2024-03-10</td>
-                            <td>
-                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                            </td>
-                        </tr>
+                    <tbody id="landsTableBody">
+                        <!-- Lands will be loaded here -->
                     </tbody>
                 </table>
             </div>
@@ -1270,41 +1736,55 @@
     <!-- Add Animal Page -->
     <div id="add-animal" class="page-section">
         <div class="container">
-            <h2 class="section-title">Add Animal</h2>
+            <h2 class="section-title lang" data-key="addAnimal">Add Animal</h2>
             
             <div class="form-container">
                 <form id="addAnimalForm">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Animal Type</label>
-                            <select class="form-control" required>
-                                <option value="">Select Type</option>
-                                <option value="cow">Cow</option>
-                                <option value="buffalo">Buffalo</option>
-                                <option value="goat">Goat</option>
-                                <option value="sheep">Sheep</option>
-                                <option value="chicken">Chicken</option>
-                                <option value="pig">Pig</option>
+                            <label class="lang" data-key="animalType">Animal Type</label>
+                            <select class="form-control" id="animalType" required>
+                                <option value="" class="lang" data-key="selectType">Select Type</option>
+                                <option value="cow" class="lang" data-key="cow">Cow</option>
+                                <option value="buffalo" class="lang" data-key="buffalo">Buffalo</option>
+                                <option value="goat" class="lang" data-key="goat">Goat</option>
+                                <option value="sheep" class="lang" data-key="sheep">Sheep</option>
+                                <option value="chicken" class="lang" data-key="chicken">Chicken</option>
+                                <option value="pig" class="lang" data-key="pig">Pig</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Breed</label>
-                            <input type="text" class="form-control" placeholder="Enter breed" required>
+                            <label class="lang" data-key="breed">Breed</label>
+                            <input type="text" class="form-control" id="animalBreed" placeholder="Enter breed" required>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Age (months)</label>
-                            <input type="number" class="form-control" placeholder="Enter age" required>
+                            <label class="lang" data-key="animalName">Animal Name/ID</label>
+                            <input type="text" class="form-control" id="animalName" placeholder="Enter animal name or ID" required>
                         </div>
                         <div class="form-group">
-                            <label>Number of Animals</label>
-                            <input type="number" class="form-control" placeholder="Enter count" required>
+                            <label class="lang" data-key="age">Age (months)</label>
+                            <input type="number" class="form-control" id="animalAge" placeholder="Enter age" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label class="lang" data-key="weight">Weight (kg)</label>
+                            <input type="number" class="form-control" id="animalWeight" placeholder="Enter weight" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="lang" data-key="healthStatus">Health Status</label>
+                            <select class="form-control" id="animalHealth" required>
+                                <option value="healthy" class="lang" data-key="healthy">Healthy</option>
+                                <option value="sick" class="lang" data-key="sick">Sick</option>
+                                <option value="recovering" class="lang" data-key="recovering">Recovering</option>
+                            </select>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-paw"></i>
-                        Add Animal
+                        <span class="lang" data-key="addAnimal">Add Animal</span>
                     </button>
                 </form>
             </div>
@@ -1313,57 +1793,64 @@
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Animal ID</th>
-                            <th>Type</th>
-                            <th>Breed</th>
-                            <th>Age</th>
-                            <th>Count</th>
-                            <th>Health Status</th>
-                            <th>Actions</th>
+                            <th class="lang" data-key="animalId">Animal ID</th>
+                            <th class="lang" data-key="type">Type</th>
+                            <th class="lang" data-key="breed">Breed</th>
+                            <th class="lang" data-key="age">Age</th>
+                            <th class="lang" data-key="weight">Weight</th>
+                            <th class="lang" data-key="healthStatus">Health Status</th>
+                            <th class="lang" data-key="actions">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td><strong>A001</strong></td>
-                            <td>Cow</td>
-                            <td>Holstein</td>
-                            <td>36 months</td>
-                            <td>15</td>
-                            <td><span style="color: #28a745; font-weight: bold;">Healthy</span></td>
-                            <td>
-                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-stethoscope"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>A002</strong></td>
-                            <td>Buffalo</td>
-                            <td>Murrah</td>
-                            <td>48 months</td>
-                            <td>8</td>
-                            <td><span style="color: #28a745; font-weight: bold;">Healthy</span></td>
-                            <td>
-                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-stethoscope"></i>
-                                </button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td><strong>A003</strong></td>
-                            <td>Goat</td>
-                            <td>Boer</td>
-                            <td>24 months</td>
-                            <td>25</td>
-                            <td><span style="color: #dc3545; font-weight: bold;">Sick</span></td>
-                            <td>
-                                <button class="btn" style="background: #dc3545; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </button>
-                            </td>
-                        </tr>
+                    <tbody id="animalsTableBody">
+                        <!-- Animals will be loaded here -->
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Subsidies Page -->
+    <div id="subsidies" class="page-section">
+        <div class="container">
+            <h2 class="section-title lang" data-key="subsidiesSchemes">Subsidies & Schemes</h2>
+            
+            <div class="filters-container">
+                <h3 class="lang" data-key="filterSubsidies">Filter Subsidies</h3>
+                <div class="filters-grid">
+                    <div class="form-group">
+                        <label class="lang" data-key="schemeType">Scheme Type</label>
+                        <select class="form-control" id="schemeType">
+                            <option value="" class="lang" data-key="allTypes">All Types</option>
+                            <option value="livestock" class="lang" data-key="livestock">Livestock</option>
+                            <option value="dairy" class="lang" data-key="dairy">Dairy</option>
+                            <option value="poultry" class="lang" data-key="poultry">Poultry</option>
+                            <option value="fisheries" class="lang" data-key="fisheries">Fisheries</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="lang" data-key="state">State</label>
+                        <select class="form-control" id="stateFilter">
+                            <option value="" class="lang" data-key="allStates">All States</option>
+                            <option value="maharashtra" class="lang" data-key="maharashtra">Maharashtra</option>
+                            <option value="karnataka" class="lang" data-key="karnataka">Karnataka</option>
+                            <option value="tamilnadu" class="lang" data-key="tamilnadu">Tamil Nadu</option>
+                            <option value="andhra" class="lang" data-key="andhra">Andhra Pradesh</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="lang" data-key="search">Search</label>
+                        <input type="text" class="form-control" id="subsidySearch" placeholder="Search subsidies...">
+                    </div>
+                </div>
+                <button class="btn btn-primary" onclick="filterSubsidies()">
+                    <i class="fas fa-filter"></i>
+                    <span class="lang" data-key="applyFilters">Apply Filters</span>
+                </button>
+            </div>
+
+            <div class="subsidies-grid" id="subsidiesGrid">
+                <!-- Subsidies will be loaded here -->
             </div>
         </div>
     </div>
@@ -1371,64 +1858,67 @@
     <!-- AI Detection Page -->
     <div id="detection" class="page-section">
         <div class="container">
-            <h2 class="section-title">AI Illness Detection</h2>
+            <h2 class="section-title lang" data-key="aiIllnessDetection">AI Illness Detection</h2>
             
             <div class="form-container">
                 <div class="form-group">
-                    <label>Select Animal</label>
+                    <label class="lang" data-key="selectAnimal">Select Animal</label>
                     <select class="form-control" id="animalSelect" required>
-                        <option value="">Choose animal to analyze</option>
-                        <option value="cow-c127">Cow #C127 - Holstein</option>
-                        <option value="buffalo-b045">Buffalo #B045 - Murrah</option>
-                        <option value="goat-g089">Goat #G089 - Boer</option>
-                        <option value="sheep-s156">Sheep #S156 - Dorper</option>
+                        <option value="" class="lang" data-key="chooseAnimal">Choose animal to analyze</option>
+                        <!-- Animals will be loaded here -->
                     </select>
                 </div>
 
                 <div class="upload-area" onclick="document.getElementById('fileInput').click()">
                     <input type="file" id="fileInput" accept="image/*,audio/*" style="display: none;">
                     <i class="fas fa-cloud-upload-alt"></i>
-                    <h3>Upload Image or Audio File</h3>
-                    <p>Click to browse or drag and drop files here</p>
-                    <p style="color: #666; margin-top: 10px; font-size: 0.9rem;">Supported formats: JPG, PNG, MP3, WAV (Max 10MB)</p>
+                    <h3 class="lang" data-key="uploadImageAudio">Upload Image or Audio File</h3>
+                    <p class="lang" data-key="clickToBrowse">Click to browse or drag and drop files here</p>
+                    <p style="color: #666; margin-top: 10px; font-size: 0.9rem;" class="lang" data-key="supportedFormats">Supported formats: JPG, PNG, MP3, WAV (Max 10MB)</p>
                 </div>
 
                 <button class="btn btn-primary" onclick="runDetection()" style="width: 100%; margin-top: 20px;">
                     <i class="fas fa-microscope"></i>
-                    Run AI Analysis
+                    <span class="lang" data-key="runAiAnalysis">Run AI Analysis</span>
+                </button>
+                
+                <!-- New Voice Prediction Button -->
+                <button class="btn btn-secondary" onclick="openVoicePrediction()" style="width: 100%; margin-top: 15px;">
+                    <i class="fas fa-microphone"></i>
+                    <span class="lang" data-key="voicePrediction">Voice Prediction</span>
                 </button>
             </div>
 
             <div id="detectionResult" class="result-card" style="display: none;">
                 <h3 style="color: #dc3545; margin-bottom: 20px;">
                     <i class="fas fa-exclamation-triangle"></i>
-                    Potential Health Issue Detected
+                    <span class="lang" data-key="potentialHealthIssue">Potential Health Issue Detected</span>
                 </h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
                     <div>
-                        <strong>Disease:</strong><br>
-                        <span style="color: #dc3545;">Bovine Respiratory Disease</span>
+                        <strong class="lang" data-key="disease">Disease:</strong><br>
+                        <span style="color: #dc3545;" class="lang" data-key="bovineRespiratory">Bovine Respiratory Disease</span>
                     </div>
                     <div>
-                        <strong>Confidence Level:</strong><br>
+                        <strong class="lang" data-key="confidenceLevel">Confidence Level:</strong><br>
                         <span style="color: #ffc107;">87%</span>
                     </div>
                     <div>
-                        <strong>Severity:</strong><br>
-                        <span style="color: #fd7e14;">Moderate</span>
+                        <strong class="lang" data-key="severity">Severity:</strong><br>
+                        <span style="color: #fd7e14;" class="lang" data-key="moderate">Moderate</span>
                     </div>
                 </div>
                 <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 4px solid #dc3545;">
                     <h4 style="color: #dc3545; margin-bottom: 15px;">
                         <i class="fas fa-list-ul"></i>
-                        Recommended Actions
+                        <span class="lang" data-key="recommendedActions">Recommended Actions</span>
                     </h4>
                     <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
-                        <li>Isolate the animal immediately to prevent spread</li>
-                        <li>Contact veterinarian within 24 hours</li>
-                        <li>Monitor temperature and appetite closely</li>
-                        <li>Ensure proper ventilation in housing area</li>
-                        <li>Document symptoms and recovery progress</li>
+                        <li class="lang" data-key="action1">Isolate the animal immediately to prevent spread</li>
+                        <li class="lang" data-key="action2">Contact veterinarian within 24 hours</li>
+                        <li class="lang" data-key="action3">Monitor temperature and appetite closely</li>
+                        <li class="lang" data-key="action4">Ensure proper ventilation in housing area</li>
+                        <li class="lang" data-key="action5">Document symptoms and recovery progress</li>
                     </ul>
                 </div>
             </div>
@@ -1438,89 +1928,89 @@
     <!-- Symptom Checker Page -->
     <div id="symptoms" class="page-section">
         <div class="container">
-            <h2 class="section-title">Symptom Checker</h2>
+            <h2 class="section-title lang" data-key="symptomChecker">Symptom Checker</h2>
             
             <div class="form-container">
-                <h3 style="color: #2d5a27; margin-bottom: 25px;">Select Observed Symptoms</h3>
+                <h3 style="color: #2d5a27; margin-bottom: 25px;" class="lang" data-key="selectSymptoms">Select Observed Symptoms</h3>
                 <div class="symptoms-grid">
                     <div class="symptom-card" onclick="toggleSymptom(this)">
                         <input type="checkbox" id="fever">
                         <i class="fas fa-thermometer-half" style="color: #dc3545;"></i>
-                        <label for="fever">Fever</label>
+                        <label for="fever" class="lang" data-key="fever">Fever</label>
                     </div>
                     <div class="symptom-card" onclick="toggleSymptom(this)">
                         <input type="checkbox" id="coughing">
                         <i class="fas fa-lungs" style="color: #17a2b8;"></i>
-                        <label for="coughing">Coughing</label>
+                        <label for="coughing" class="lang" data-key="coughing">Coughing</label>
                     </div>
                     <div class="symptom-card" onclick="toggleSymptom(this)">
                         <input type="checkbox" id="wounds">
                         <i class="fas fa-band-aid" style="color: #fd7e14;"></i>
-                        <label for="wounds">Wounds/Cuts</label>
+                        <label for="wounds" class="lang" data-key="wounds">Wounds/Cuts</label>
                     </div>
                     <div class="symptom-card" onclick="toggleSymptom(this)">
                         <input type="checkbox" id="diarrhea">
                         <i class="fas fa-tint" style="color: #6f42c1;"></i>
-                        <label for="diarrhea">Diarrhea</label>
+                        <label for="diarrhea" class="lang" data-key="diarrhea">Diarrhea</label>
                     </div>
                     <div class="symptom-card" onclick="toggleSymptom(this)">
                         <input type="checkbox" id="loss-appetite">
                         <i class="fas fa-utensils" style="color: #28a745;"></i>
-                        <label for="loss-appetite">Loss of Appetite</label>
+                        <label for="loss-appetite" class="lang" data-key="lossAppetite">Loss of Appetite</label>
                     </div>
                     <div class="symptom-card" onclick="toggleSymptom(this)">
                         <input type="checkbox" id="discharge">
                         <i class="fas fa-eye-dropper" style="color: #20c997;"></i>
-                        <label for="discharge">Nasal Discharge</label>
+                        <label for="discharge" class="lang" data-key="nasalDischarge">Nasal Discharge</label>
                     </div>
                     <div class="symptom-card" onclick="toggleSymptom(this)">
                         <input type="checkbox" id="lameness">
                         <i class="fas fa-walking" style="color: #e83e8c;"></i>
-                        <label for="lameness">Lameness</label>
+                        <label for="lameness" class="lang" data-key="lameness">Lameness</label>
                     </div>
                     <div class="symptom-card" onclick="toggleSymptom(this)">
                         <input type="checkbox" id="swelling">
                         <i class="fas fa-circle" style="color: #ffc107;"></i>
-                        <label for="swelling">Swelling</label>
+                        <label for="swelling" class="lang" data-key="swelling">Swelling</label>
                     </div>
                 </div>
                 
                 <button class="btn btn-primary" onclick="checkSymptoms()" style="width: 100%;">
                     <i class="fas fa-search"></i>
-                    Analyze Symptoms
+                    <span class="lang" data-key="analyzeSymptoms">Analyze Symptoms</span>
                 </button>
             </div>
 
             <div id="symptomResult" class="result-card" style="display: none;">
                 <h3 style="color: #ffc107; margin-bottom: 20px;">
                     <i class="fas fa-search"></i>
-                    Symptom Analysis Results
+                    <span class="lang" data-key="symptomAnalysis">Symptom Analysis Results</span>
                 </h3>
                 <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
                     <div>
-                        <strong>Possible Condition:</strong><br>
-                        <span style="color: #17a745;">Respiratory Infection</span>
+                        <strong class="lang" data-key="possibleCondition">Possible Condition:</strong><br>
+                        <span style="color: #17a745;" class="lang" data-key="respiratoryInfection">Respiratory Infection</span>
                     </div>
                     <div>
-                        <strong>Match Probability:</strong><br>
+                        <strong class="lang" data-key="matchProbability">Match Probability:</strong><br>
                         <span style="color: #ffc107;">78%</span>
                     </div>
                     <div>
-                        <strong>Urgency Level:</strong><br>
-                        <span style="color: #fd7e14;">Medium</span>
+                        <strong class="lang" data-key="urgencyLevel">Urgency Level:</strong><br>
+                        <span style="color: #fd7e14;" class="lang" data-key="medium">Medium</span>
                     </div>
                 </div>
                 <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 4px solid #ffc107;">
                     <h4 style="color: #ffc107; margin-bottom: 15px;">
                         <i class="fas fa-lightbulb"></i>
-                        Recommendations
+                        <span class="lang" data-key="recommendations">Recommendations</span>
                     </h4>
                     <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
-                        <li>Schedule veterinary examination as soon as possible</li>
-                        <li>Keep animal warm and comfortable</li>
-                        <li>Monitor symptoms closely and document changes</li>
-                        <li>Consider antibiotics if prescribed by veterinarian</li>
-                        <li>Separate from healthy animals if contagious</li>
+                        <li class="lang" data-key="recommendation1">Schedule veterinary examination as soon as possible</li>
+                        <li class="lang" data-key="recommendation2">Keep animal warm and comfortable</li>
+                        <li class="lang" data-key="recommendation3">Monitor symptoms closely and document changes</li>
+                        <li class="lang" data-key="recommendation4">Consider antibiotics if prescribed by veterinarian</li>
+                        <li class="lang" data-key="recommendation5">Separate from healthy animals if contagious</li>
                     </ul>
                 </div>
             </div>
@@ -1530,7 +2020,7 @@
     <!-- Knowledge Base Page -->
     <div id="knowledge" class="page-section">
         <div class="container">
-            <h2 class="section-title">Disease Knowledge Base</h2>
+            <h2 class="section-title lang" data-key="diseaseKnowledge">Disease Knowledge Base</h2>
             
             <div class="knowledge-grid">
                 <div class="disease-card">
@@ -1538,10 +2028,10 @@
                         <i class="fas fa-lungs" style="color: #dc3545;"></i>
                     </div>
                     <div class="disease-info">
-                        <h4>Bovine Respiratory Disease</h4>
-                        <p>Common respiratory infection affecting cattle. Symptoms include coughing, nasal discharge, and fever. Early treatment with antibiotics is crucial for recovery and preventing spread to other animals.</p>
+                        <h4 class="lang" data-key="bovineRespiratory">Bovine Respiratory Disease</h4>
+                        <p class="lang" data-key="bovineRespiratoryDesc">Common respiratory infection affecting cattle. Symptoms include coughing, nasal discharge, and fever. Early treatment with antibiotics is crucial for recovery and preventing spread to other animals.</p>
                         <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
-                            <strong>Prevention:</strong> Proper ventilation, vaccination, quarantine of new animals
+                            <strong class="lang" data-key="prevention">Prevention:</strong> <span class="lang" data-key="bovinePrevention">Proper ventilation, vaccination, quarantine of new animals</span>
                         </div>
                     </div>
                 </div>
@@ -1550,10 +2040,10 @@
                         <i class="fas fa-virus" style="color: #e74c3c;"></i>
                     </div>
                     <div class="disease-info">
-                        <h4>Foot and Mouth Disease</h4>
-                        <p>Highly contagious viral disease affecting cloven-hoofed animals. Causes fever, blisters in mouth and on feet. Requires immediate isolation and veterinary intervention.</p>
+                        <h4 class="lang" data-key="footMouth">Foot and Mouth Disease</h4>
+                        <p class="lang" data-key="footMouthDesc">Highly contagious viral disease affecting cloven-hoofed animals. Causes fever, blisters in mouth and on feet. Requires immediate isolation and veterinary intervention.</p>
                         <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
-                            <strong>Prevention:</strong> Vaccination, biosecurity measures, movement restrictions
+                            <strong class="lang" data-key="prevention">Prevention:</strong> <span class="lang" data-key="footMouthPrevention">Vaccination, biosecurity measures, movement restrictions</span>
                         </div>
                     </div>
                 </div>
@@ -1562,10 +2052,10 @@
                         <i class="fas fa-heart" style="color: #e91e63;"></i>
                     </div>
                     <div class="disease-info">
-                        <h4>Mastitis</h4>
-                        <p>Inflammation of mammary gland, common in dairy cows. Causes swelling, heat, and changes in milk quality. Significantly affects milk production and animal welfare.</p>
+                        <h4 class="lang" data-key="mastitis">Mastitis</h4>
+                        <p class="lang" data-key="mastitisDesc">Inflammation of mammary gland, common in dairy cows. Causes swelling, heat, and changes in milk quality. Significantly affects milk production and animal welfare.</p>
                         <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
-                            <strong>Prevention:</strong> Proper milking hygiene, teat dipping, dry cow therapy
+                            <strong class="lang" data-key="prevention">Prevention:</strong> <span class="lang" data-key="mastitisPrevention">Proper milking hygiene, teat dipping, dry cow therapy</span>
                         </div>
                     </div>
                 </div>
@@ -1574,10 +2064,10 @@
                         <i class="fas fa-skull-crossbones" style="color: #6c757d;"></i>
                     </div>
                     <div class="disease-info">
-                        <h4>Anthrax</h4>
-                        <p>Serious bacterial infection affecting all warm-blooded animals. Can cause sudden death without warning signs. Vaccination is the most effective prevention method.</p>
+                        <h4 class="lang" data-key="anthrax">Anthrax</h4>
+                        <p class="lang" data-key="anthraxDesc">Serious bacterial infection affecting all warm-blooded animals. Can cause sudden death without warning signs. Vaccination is the most effective prevention method.</p>
                         <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
-                            <strong>Prevention:</strong> Annual vaccination, proper carcass disposal, quarantine
+                            <strong class="lang" data-key="prevention">Prevention:</strong> <span class="lang" data-key="anthraxPrevention">Annual vaccination, proper carcass disposal, quarantine</span>
                         </div>
                     </div>
                 </div>
@@ -1586,10 +2076,10 @@
                         <i class="fas fa-baby" style="color: #795548;"></i>
                     </div>
                     <div class="disease-info">
-                        <h4>Brucellosis</h4>
-                        <p>Bacterial infection causing reproductive problems in cattle. Can cause abortions and infertility. Also zoonotic, meaning it can transfer to humans through contact.</p>
+                        <h4 class="lang" data-key="brucellosis">Brucellosis</h4>
+                        <p class="lang" data-key="brucellosisDesc">Bacterial infection causing reproductive problems in cattle. Can cause abortions and infertility. Also zoonotic, meaning it can transfer to humans through contact.</p>
                         <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
-                            <strong>Prevention:</strong> Vaccination, testing, culling infected animals
+                            <strong class="lang" data-key="prevention">Prevention:</strong> <span class="lang" data-key="brucellosisPrevention">Vaccination, testing, culling infected animals</span>
                         </div>
                     </div>
                 </div>
@@ -1598,10 +2088,10 @@
                         <i class="fas fa-bone" style="color: #607d8b;"></i>
                     </div>
                     <div class="disease-info">
-                        <h4>Milk Fever (Hypocalcemia)</h4>
-                        <p>Calcium deficiency in dairy cows around calving time. Causes weakness, inability to stand, and can be life-threatening. Requires immediate calcium supplementation.</p>
+                        <h4 class="lang" data-key="milkFever">Milk Fever (Hypocalcemia)</h4>
+                        <p class="lang" data-key="milkFeverDesc">Calcium deficiency in dairy cows around calving time. Causes weakness, inability to stand, and can be life-threatening. Requires immediate calcium supplementation.</p>
                         <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 5px; font-size: 0.9rem; color: #666;">
-                            <strong>Prevention:</strong> Proper nutrition, calcium supplementation, monitoring
+                            <strong class="lang" data-key="prevention">Prevention:</strong> <span class="lang" data-key="milkFeverPrevention">Proper nutrition, calcium supplementation, monitoring</span>
                         </div>
                     </div>
                 </div>
@@ -1612,18 +2102,18 @@
     <!-- Veterinarian Directory Page -->
     <div id="vets" class="page-section">
         <div class="container">
-            <h2 class="section-title">Veterinarian Directory</h2>
+            <h2 class="section-title lang" data-key="vetDirectory">Veterinarian Directory</h2>
             
             <div class="table-container">
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Veterinarian</th>
-                            <th>Specialization</th>
-                            <th>Location</th>
-                            <th>Contact</th>
-                            <th>Distance</th>
-                            <th>Actions</th>
+                            <th class="lang" data-key="veterinarian">Veterinarian</th>
+                            <th class="lang" data-key="specialization">Specialization</th>
+                            <th class="lang" data-key="location">Location</th>
+                            <th class="lang" data-key="contact">Contact</th>
+                            <th class="lang" data-key="distance">Distance</th>
+                            <th class="lang" data-key="actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1631,11 +2121,11 @@
                             <td>
                                 <div>
                                     <strong style="color: #2d5a27;">Dr. Rajesh Sharma</strong><br>
-                                    <small style="color: #666;">15 years experience</small>
+                                    <small style="color: #666;" class="lang" data-key="yearsExperience">15 years experience</small>
                                 </div>
                             </td>
-                            <td>Large Animal Medicine</td>
-                            <td>Village Center, Pune</td>
+                            <td class="lang" data-key="largeAnimal">Large Animal Medicine</td>
+                            <td class="lang" data-key="villageCenter">Village Center, Pune</td>
                             <td>+91 98765 43210</td>
                             <td>
                                 <span style="color: #28a745; font-weight: bold;">2.5 km</span>
@@ -1653,11 +2143,11 @@
                             <td>
                                 <div>
                                     <strong style="color: #2d5a27;">Dr. Priya Patel</strong><br>
-                                    <small style="color: #666;">12 years experience</small>
+                                    <small style="color: #666;" class="lang" data-key="yearsExperience">12 years experience</small>
                                 </div>
                             </td>
-                            <td>Dairy Cattle Specialist</td>
-                            <td>Market Road, Pune</td>
+                            <td class="lang" data-key="dairySpecialist">Dairy Cattle Specialist</td>
+                            <td class="lang" data-key="marketRoad">Market Road, Pune</td>
                             <td>+91 87654 32109</td>
                             <td>
                                 <span style="color: #ffc107; font-weight: bold;">4.2 km</span>
@@ -1675,11 +2165,11 @@
                             <td>
                                 <div>
                                     <strong style="color: #2d5a27;">Dr. Amit Kumar</strong><br>
-                                    <small style="color: #666;">8 years experience</small>
+                                    <small style="color: #666;" class="lang" data-key="yearsExperience">8 years experience</small>
                                 </div>
                             </td>
-                            <td>Poultry & Small Animals</td>
-                            <td>Hospital Road, Pune</td>
+                            <td class="lang" data-key="poultrySpecialist">Poultry & Small Animals</td>
+                            <td class="lang" data-key="hospitalRoad">Hospital Road, Pune</td>
                             <td>+91 76543 21098</td>
                             <td>
                                 <span style="color: #fd7e14; font-weight: bold;">6.8 km</span>
@@ -1697,11 +2187,11 @@
                             <td>
                                 <div>
                                     <strong style="color: #2d5a27;">Dr. Sunita Desai</strong><br>
-                                    <small style="color: #666;">20 years experience</small>
+                                    <small style="color: #666;" class="lang" data-key="yearsExperience">20 years experience</small>
                                 </div>
                             </td>
-                            <td>Emergency & Critical Care</td>
-                            <td>Main Street, Pune</td>
+                            <td class="lang" data-key="emergencyCare">Emergency & Critical Care</td>
+                            <td class="lang" data-key="mainStreet">Main Street, Pune</td>
                             <td>+91 65432 10987</td>
                             <td>
                                 <span style="color: #dc3545; font-weight: bold;">8.1 km</span>
@@ -1724,16 +2214,16 @@
     <!-- Reports Page -->
     <div id="reports" class="page-section">
         <div class="container">
-            <h2 class="section-title">Farm Analytics & Reports</h2>
+            <h2 class="section-title lang" data-key="farmAnalytics">Farm Analytics & Reports</h2>
             
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(500px, 1fr)); gap: 40px;">
                 <div class="chart-container">
-                    <h3>Animal Health Trends</h3>
+                    <h3 class="lang" data-key="animalHealthTrends">Animal Health Trends</h3>
                     <canvas id="healthChart" width="400" height="200"></canvas>
                 </div>
                 
                 <div class="chart-container">
-                    <h3>Livestock Population Distribution</h3>
+                    <h3 class="lang" data-key="livestockPopulation">Livestock Population Distribution</h3>
                     <canvas id="populationChart" width="400" height="200"></canvas>
                 </div>
             </div>
@@ -1742,18 +2232,18 @@
                 <div style="padding: 25px 30px; background: #f8f9fa; border-bottom: 1px solid #e9ecef;">
                     <h3 style="color: #2d5a27; margin: 0;">
                         <i class="fas fa-syringe"></i>
-                        Vaccination Schedule & Reminders
+                        <span class="lang" data-key="vaccinationSchedule">Vaccination Schedule & Reminders</span>
                     </h3>
                 </div>
                 <table class="table">
                     <thead>
                         <tr>
-                            <th>Animal ID</th>
-                            <th>Type & Breed</th>
-                            <th>Vaccination</th>
-                            <th>Due Date</th>
-                            <th>Status</th>
-                            <th>Actions</th>
+                            <th class="lang" data-key="animalId">Animal ID</th>
+                            <th class="lang" data-key="typeBreed">Type & Breed</th>
+                            <th class="lang" data-key="vaccination">Vaccination</th>
+                            <th class="lang" data-key="dueDate">Due Date</th>
+                            <th class="lang" data-key="status">Status</th>
+                            <th class="lang" data-key="actions">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -1761,20 +2251,20 @@
                             <td><strong>C127</strong></td>
                             <td>
                                 <div>
-                                    <strong>Holstein Cow</strong><br>
-                                    <small style="color: #666;">Age: 36 months</small>
+                                    <strong class="lang" data-key="holsteinCow">Holstein Cow</strong><br>
+                                    <small style="color: #666;" class="lang" data-key="ageMonths">Age: 36 months</small>
                                 </div>
                             </td>
-                            <td>FMD Vaccine</td>
+                            <td class="lang" data-key="fmdVaccine">FMD Vaccine</td>
                             <td>2024-02-15</td>
                             <td>
                                 <span style="background: #dc3545; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
-                                    <i class="fas fa-exclamation-circle"></i> Overdue
+                                    <i class="fas fa-exclamation-circle"></i> <span class="lang" data-key="overdue">Overdue</span>
                                 </span>
                             </td>
                             <td>
                                 <button class="btn" style="background: #dc3545; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-bell"></i> Urgent
+                                    <i class="fas fa-bell"></i> <span class="lang" data-key="urgent">Urgent</span>
                                 </button>
                             </td>
                         </tr>
@@ -1782,20 +2272,20 @@
                             <td><strong>B045</strong></td>
                             <td>
                                 <div>
-                                    <strong>Murrah Buffalo</strong><br>
-                                    <small style="color: #666;">Age: 48 months</small>
+                                    <strong class="lang" data-key="murrahBuffalo">Murrah Buffalo</strong><br>
+                                    <small style="color: #666;" class="lang" data-key="ageMonths">Age: 48 months</small>
                                 </div>
                             </td>
-                            <td>Anthrax Vaccine</td>
+                            <td class="lang" data-key="anthraxVaccine">Anthrax Vaccine</td>
                             <td>2024-02-18</td>
                             <td>
                                 <span style="background: #ffc107; color: #000; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
-                                    <i class="fas fa-clock"></i> Due Soon
+                                    <i class="fas fa-clock"></i> <span class="lang" data-key="dueSoon">Due Soon</span>
                                 </span>
                             </td>
                             <td>
                                 <button class="btn" style="background: #ffc107; color: #000; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-calendar"></i> Schedule
+                                    <i class="fas fa-calendar"></i> <span class="lang" data-key="schedule">Schedule</span>
                                 </button>
                             </td>
                         </tr>
@@ -1803,20 +2293,20 @@
                             <td><strong>G089</strong></td>
                             <td>
                                 <div>
-                                    <strong>Boer Goat</strong><br>
-                                    <small style="color: #666;">Age: 24 months</small>
+                                    <strong class="lang" data-key="boerGoat">Boer Goat</strong><br>
+                                    <small style="color: #666;" class="lang" data-key="ageMonths">Age: 24 months</small>
                                 </div>
                             </td>
-                            <td>PPR Vaccine</td>
+                            <td class="lang" data-key="pprVaccine">PPR Vaccine</td>
                             <td>2024-02-25</td>
                             <td>
                                 <span style="background: #28a745; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
-                                    <i class="fas fa-check"></i> Scheduled
+                                    <i class="fas fa-check"></i> <span class="lang" data-key="scheduled">Scheduled</span>
                                 </span>
                             </td>
                             <td>
                                 <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-eye"></i> View
+                                    <i class="fas fa-eye"></i> <span class="lang" data-key="view">View</span>
                                 </button>
                             </td>
                         </tr>
@@ -1824,20 +2314,20 @@
                             <td><strong>S156</strong></td>
                             <td>
                                 <div>
-                                    <strong>Dorper Sheep</strong><br>
-                                    <small style="color: #666;">Age: 18 months</small>
+                                    <strong class="lang" data-key="dorperSheep">Dorper Sheep</strong><br>
+                                    <small style="color: #666;" class="lang" data-key="ageMonths">Age: 18 months</small>
                                 </div>
                             </td>
-                            <td>Clostridial Vaccine</td>
+                            <td class="lang" data-key="clostridialVaccine">Clostridial Vaccine</td>
                             <td>2024-03-05</td>
                             <td>
                                 <span style="background: #6c757d; color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: bold;">
-                                    <i class="fas fa-calendar-alt"></i> Upcoming
+                                    <i class="fas fa-calendar-alt"></i> <span class="lang" data-key="upcoming">Upcoming</span>
                                 </span>
                             </td>
                             <td>
                                 <button class="btn" style="background: #28a745; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
-                                    <i class="fas fa-plus"></i> Add
+                                    <i class="fas fa-plus"></i> <span class="lang" data-key="add">Add</span>
                                 </button>
                             </td>
                         </tr>
@@ -1848,32 +2338,666 @@
             <!-- Health Summary Cards -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; margin-top: 40px;">
                 <div class="overview-card">
-                    <h3>Health Score</h3>
+                    <h3 class="lang" data-key="healthScore">Health Score</h3>
                     <div class="number" style="color: #28a745;">92%</div>
-                    <div class="change">Overall farm health rating</div>
+                    <div class="change lang" data-key="overallHealth">Overall farm health rating</div>
                 </div>
                 <div class="overview-card">
-                    <h3>Treatments This Month</h3>
+                    <h3 class="lang" data-key="treatmentsThisMonth">Treatments This Month</h3>
                     <div class="number" style="color: #17a2b8;">7</div>
-                    <div class="change">-3 from last month</div>
+                    <div class="change lang" data-key="fromLastMonth">-3 from last month</div>
                 </div>
                 <div class="overview-card">
-                    <h3>Vaccination Coverage</h3>
+                    <h3 class="lang" data-key="vaccinationCoverage">Vaccination Coverage</h3>
                     <div class="number" style="color: #ffc107;">85%</div>
-                    <div class="change">15 animals pending</div>
+                    <div class="change lang" data-key="animalsPending">15 animals pending</div>
                 </div>
                 <div class="overview-card">
-                    <h3>Avg Recovery Time</h3>
+                    <h3 class="lang" data-key="avgRecoveryTime">Avg Recovery Time</h3>
                     <div class="number" style="color: #6f42c1;">4.2</div>
-                    <div class="change">days (improved)</div>
+                    <div class="change lang" data-key="daysImproved">days (improved)</div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Voice Prediction Modal -->
+    <div class="modal-overlay" id="voicePredictionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="lang" data-key="voicePrediction">Voice Prediction</h3>
+                <button class="close-modal" onclick="closeVoicePrediction()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label class="lang" data-key="selectAnimal">Select Animal</label>
+                <select class="form-control" id="voiceAnimalSelect" required>
+                    <option value="" class="lang" data-key="chooseAnimal">Choose animal to analyze</option>
+                    <!-- Animals will be loaded here -->
+                </select>
+            </div>
+            
+            <div class="voice-recorder" id="voiceRecorder">
+                <i class="fas fa-microphone"></i>
+                <h3 class="lang" data-key="recordVoice">Record Voice Description</h3>
+                <p class="lang" data-key="recordInstructions">Click the button below and describe the animal's symptoms, behavior, and any other relevant information.</p>
+                <button class="record-btn" id="recordButton">
+                    <i class="fas fa-microphone"></i>
+                    <span class="lang" data-key="startRecording">Start Recording</span>
+                </button>
+            </div>
+            
+            <div class="transcript" id="transcript">
+                <p class="lang" data-key="transcriptPlaceholder">Your voice recording transcript will appear here...</p>
+            </div>
+            
+            <h4 class="lang" data-key="additionalSymptoms">Additional Symptoms</h4>
+            <div class="symptom-selector" id="symptomSelector">
+                <!-- Symptom groups will be loaded here -->
+            </div>
+            
+            <button class="btn btn-primary" onclick="analyzeVoicePrediction()" style="width: 100%; margin-top: 20px;">
+                <i class="fas fa-robot"></i>
+                <span class="lang" data-key="analyzePrediction">Analyze Prediction</span>
+            </button>
+        </div>
+    </div>
+
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDIetHVh-n1MV_wVMRCyYFxKl1yIkvjKwM",
+            authDomain: "edi1-25ce5.firebaseapp.com",
+            projectId: "edi1-25ce5",
+            storageBucket: "edi1-25ce5.firebasestorage.app",
+            messagingSenderId: "427100409832",
+            appId: "1:427100409832:web:7b923914f79e559aee5e5d",
+            measurementId: "G-JMTT2KG1QG"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        const storage = firebase.storage();
+
+        // Language data
+        const languageData = {
+            'en': {
+                'appName': 'FarmCare Pro',
+                'home': 'Home',
+                'dashboard': 'Dashboard',
+                'login': 'Login',
+                'logout': 'Logout',
+                'heroTitle': 'Smart Livestock Management',
+                'heroSubtitle': 'AI-powered illness detection, comprehensive farm management, and veterinary support - all in one professional platform designed for modern farmers',
+                'getStarted': 'Get Started',
+                'loginRegister': 'Login / Register',
+                'comprehensiveCare': 'Comprehensive Livestock Care',
+                'aiDetection': 'AI-Powered Detection',
+                'aiDetectionDesc': 'Advanced machine learning algorithms analyze photos and audio recordings to detect potential illnesses with high accuracy, enabling early intervention and better outcomes.',
+                'farmManagement': 'Farm Management',
+                'farmManagementDesc': 'Comprehensive tracking of your livestock, farm lands, health records, vaccination schedules, and productivity metrics in one integrated platform.',
+                'vetNetwork': 'Veterinary Network',
+                'vetNetworkDesc': 'Connect directly with qualified veterinarians in your area. Get professional consultations, emergency support, and expert advice when you need it most.',
+                'dashboardFeatures': 'Dashboard Features',
+                'predictDisease': 'Predict Disease',
+                'predictDiseaseDesc': 'Use AI to detect potential illnesses in your livestock through image and audio analysis.',
+                'tryNow': 'Try Now',
+                'symptomChecker': 'Symptom Checker',
+                'symptomCheckerDesc': 'Identify potential health issues by selecting observed symptoms in your animals.',
+                'checkNow': 'Check Now',
+                'knowledgeBase': 'Knowledge Base',
+                'knowledgeBaseDesc': 'Access comprehensive information about common livestock diseases and treatments.',
+                'explore': 'Explore',
+                'findVet': 'Find Veterinarian',
+                'findVetDesc': 'Connect with qualified veterinarians in your area for professional consultations.',
+                'findNow': 'Find Now',
+                'manageAnimals': 'Manage Animals',
+                'manageAnimalsDesc': 'Add and track your livestock with detailed health records and management tools.',
+                'manage': 'Manage',
+                'reportsAnalytics': 'Reports & Analytics',
+                'reportsAnalyticsDesc': 'View detailed reports and analytics about your farm\'s health and productivity.',
+                'viewReports': 'View Reports',
+                'subsidies': 'Subsidies & Schemes',
+                'subsidiesDesc': 'Explore government subsidies and schemes available for livestock farmers.',
+                'overview': 'Overview',
+                'symptoms': 'Symptoms',
+                'knowledge': 'Knowledge',
+                'vets': 'Vets',
+                'reports': 'Reports',
+                'addFarmLand': 'Add Farm Land',
+                'addAnimal': 'Add Animal',
+                'farmDashboard': 'Farm Dashboard',
+                'totalFarmLand': 'Total Farm Land',
+                'acres': 'acres',
+                'totalAnimals': 'Total Animals',
+                'thisMonth': '+5 this month',
+                'sickAnimals': 'Sick Animals',
+                'lastWeek': '-2 from last week',
+                'reminders': 'Reminders',
+                'pendingActions': 'pending actions',
+                'quickActions': 'Quick Actions',
+                'recentActivity': 'Recent Activity',
+                'healthCheckCompleted': 'Health check completed',
+                'cowC127': 'Cow #C127 - 2 hours ago',
+                'vaccinationReminder': 'Vaccination reminder sent',
+                'buffaloB045': 'Buffalo #B045 - 5 hours ago',
+                'newFarmLand': 'New farm land registered',
+                'northField': 'North Field - 1 day ago',
+                'welcomeBack': 'Welcome Back',
+                'signInToAccess': 'Sign in to access your farm management dashboard',
+                'email': 'Email',
+                'password': 'Password',
+                'or': 'Or',
+                'createAccount': 'Create Account',
+                'dontHaveAccount': 'Don\'t have an account?',
+                'registerHere': 'Register here',
+                'joinFarmCare': 'Join FarmCare Pro to manage your livestock efficiently',
+                'fullName': 'Full Name',
+                'confirmPassword': 'Confirm Password',
+                'alreadyHaveAccount': 'Already have an account?',
+                'loginHere': 'Login here',
+                'userProfile': 'User Profile',
+                'farmDetails': 'Farm Details',
+                'farmName': 'Farm Name',
+                'farmLocation': 'Farm Location',
+                'farmDescription': 'Farm Description',
+                'saveProfile': 'Save Profile',
+                'landName': 'Land Name',
+                'landSize': 'Land Size (acres)',
+                'location': 'Location',
+                'soilType': 'Soil Type',
+                'selectSoilType': 'Select Soil Type',
+                'loamy': 'Loamy',
+                'clay': 'Clay',
+                'sandy': 'Sandy',
+                'silt': 'Silt',
+                'cropsGrown': 'Crops Grown',
+                'landId': 'Land ID',
+                'size': 'Size (acres)',
+                'crops': 'Crops',
+                'addedDate': 'Added Date',
+                'actions': 'Actions',
+                'southValley': 'South Valley',
+                'riceSugarcane': 'Rice, Sugarcane',
+                'eastHills': 'East Hills',
+                'cottonJowar': 'Cotton, Jowar',
+                'animalType': 'Animal Type',
+                'selectType': 'Select Type',
+                'cow': 'Cow',
+                'buffalo': 'Buffalo',
+                'goat': 'Goat',
+                'sheep': 'Sheep',
+                'chicken': 'Chicken',
+                'pig': 'Pig',
+                'breed': 'Breed',
+                'animalName': 'Animal Name/ID',
+                'age': 'Age (months)',
+                'weight': 'Weight (kg)',
+                'healthStatus': 'Health Status',
+                'recovering': 'Recovering',
+                'animalId': 'Animal ID',
+                'type': 'Type',
+                'holstein': 'Holstein',
+                'healthy': 'Healthy',
+                'murrah': 'Murrah',
+                'boer': 'Boer',
+                'sick': 'Sick',
+                'aiIllnessDetection': 'AI Illness Detection',
+                'selectAnimal': 'Select Animal',
+                'chooseAnimal': 'Choose animal to analyze',
+                'buffaloB045': 'Buffalo #B045 - Murrah',
+                'goatG089': 'Goat #G089 - Boer',
+                'sheepS156': 'Sheep #S156 - Dorper',
+                'uploadImageAudio': 'Upload Image or Audio File',
+                'clickToBrowse': 'Click to browse or drag and drop files here',
+                'supportedFormats': 'Supported formats: JPG, PNG, MP3, WAV (Max 10MB)',
+                'runAiAnalysis': 'Run AI Analysis',
+                'potentialHealthIssue': 'Potential Health Issue Detected',
+                'disease': 'Disease',
+                'bovineRespiratory': 'Bovine Respiratory Disease',
+                'confidenceLevel': 'Confidence Level',
+                'severity': 'Severity',
+                'moderate': 'Moderate',
+                'recommendedActions': 'Recommended Actions',
+                'action1': 'Isolate the animal immediately to prevent spread',
+                'action2': 'Contact veterinarian within 24 hours',
+                'action3': 'Monitor temperature and appetite closely',
+                'action4': 'Ensure proper ventilation in housing area',
+                'action5': 'Document symptoms and recovery progress',
+                'symptomChecker': 'Symptom Checker',
+                'selectSymptoms': 'Select Observed Symptoms',
+                'fever': 'Fever',
+                'coughing': 'Coughing',
+                'wounds': 'Wounds/Cuts',
+                'diarrhea': 'Diarrhea',
+                'lossAppetite': 'Loss of Appetite',
+                'nasalDischarge': 'Nasal Discharge',
+                'lameness': 'Lameness',
+                'swelling': 'Swelling',
+                'analyzeSymptoms': 'Analyze Symptoms',
+                'symptomAnalysis': 'Symptom Analysis Results',
+                'possibleCondition': 'Possible Condition',
+                'respiratoryInfection': 'Respiratory Infection',
+                'matchProbability': 'Match Probability',
+                'urgencyLevel': 'Urgency Level',
+                'medium': 'Medium',
+                'recommendations': 'Recommendations',
+                'recommendation1': 'Schedule veterinary examination as soon as possible',
+                'recommendation2': 'Keep animal warm and comfortable',
+                'recommendation3': 'Monitor symptoms closely and document changes',
+                'recommendation4': 'Consider antibiotics if prescribed by veterinarian',
+                'recommendation5': 'Separate from healthy animals if contagious',
+                'diseaseKnowledge': 'Disease Knowledge Base',
+                'bovineRespiratoryDesc': 'Common respiratory infection affecting cattle. Symptoms include coughing, nasal discharge, and fever. Early treatment with antibiotics is crucial for recovery and preventing spread to other animals.',
+                'prevention': 'Prevention',
+                'bovinePrevention': 'Proper ventilation, vaccination, quarantine of new animals',
+                'footMouth': 'Foot and Mouth Disease',
+                'footMouthDesc': 'Highly contagious viral disease affecting cloven-hoofed animals. Causes fever, blisters in mouth and on feet. Requires immediate isolation and veterinary intervention.',
+                'footMouthPrevention': 'Vaccination, biosecurity measures, movement restrictions',
+                'mastitis': 'Mastitis',
+                'mastitisDesc': 'Inflammation of mammary gland, common in dairy cows. Causes swelling, heat, and changes in milk quality. Significantly affects milk production and animal welfare.',
+                'mastitisPrevention': 'Proper milking hygiene, teat dipping, dry cow therapy',
+                'anthrax': 'Anthrax',
+                'anthraxDesc': 'Serious bacterial infection affecting all warm-blooded animals. Can cause sudden death without warning signs. Vaccination is the most effective prevention method.',
+                'anthraxPrevention': 'Annual vaccination, proper carcass disposal, quarantine',
+                'brucellosis': 'Brucellosis',
+                'brucellosisDesc': 'Bacterial infection causing reproductive problems in cattle. Can cause abortions and infertility. Also zoonotic, meaning it can transfer to humans through contact.',
+                'brucellosisPrevention': 'Vaccination, testing, culling infected animals',
+                'milkFever': 'Milk Fever (Hypocalcemia)',
+                'milkFeverDesc': 'Calcium deficiency in dairy cows around calving time. Causes weakness, inability to stand, and can be life-threatening. Requires immediate calcium supplementation.',
+                'milkFeverPrevention': 'Proper nutrition, calcium supplementation, monitoring',
+                'vetDirectory': 'Veterinarian Directory',
+                'veterinarian': 'Veterinarian',
+                'specialization': 'Specialization',
+                'contact': 'Contact',
+                'distance': 'Distance',
+                'yearsExperience': '15 years experience',
+                'largeAnimal': 'Large Animal Medicine',
+                'villageCenter': 'Village Center, Pune',
+                'dairySpecialist': 'Dairy Cattle Specialist',
+                'marketRoad': 'Market Road, Pune',
+                'poultrySpecialist': 'Poultry & Small Animals',
+                'hospitalRoad': 'Hospital Road, Pune',
+                'emergencyCare': 'Emergency & Critical Care',
+                'mainStreet': 'Main Street, Pune',
+                'farmAnalytics': 'Farm Analytics & Reports',
+                'animalHealthTrends': 'Animal Health Trends',
+                'livestockPopulation': 'Livestock Population Distribution',
+                'vaccinationSchedule': 'Vaccination Schedule & Reminders',
+                'typeBreed': 'Type & Breed',
+                'vaccination': 'Vaccination',
+                'dueDate': 'Due Date',
+                'status': 'Status',
+                'holsteinCow': 'Holstein Cow',
+                'ageMonths': 'Age: 36 months',
+                'fmdVaccine': 'FMD Vaccine',
+                'overdue': 'Overdue',
+                'urgent': 'Urgent',
+                'murrahBuffalo': 'Murrah Buffalo',
+                'anthraxVaccine': 'Anthrax Vaccine',
+                'dueSoon': 'Due Soon',
+                'schedule': 'Schedule',
+                'boerGoat': 'Boer Goat',
+                'pprVaccine': 'PPR Vaccine',
+                'scheduled': 'Scheduled',
+                'view': 'View',
+                'dorperSheep': 'Dorper Sheep',
+                'clostridialVaccine': 'Clostridial Vaccine',
+                'upcoming': 'Upcoming',
+                'add': 'Add',
+                'healthScore': 'Health Score',
+                'overallHealth': 'Overall farm health rating',
+                'treatmentsThisMonth': 'Treatments This Month',
+                'fromLastMonth': '-3 from last month',
+                'vaccinationCoverage': 'Vaccination Coverage',
+                'animalsPending': '15 animals pending',
+                'avgRecoveryTime': 'Avg Recovery Time',
+                'daysImproved': 'days (improved)',
+                'subsidiesSchemes': 'Subsidies & Schemes',
+                'filterSubsidies': 'Filter Subsidies',
+                'schemeType': 'Scheme Type',
+                'allTypes': 'All Types',
+                'livestock': 'Livestock',
+                'dairy': 'Dairy',
+                'poultry': 'Poultry',
+                'fisheries': 'Fisheries',
+                'state': 'State',
+                'allStates': 'All States',
+                'maharashtra': 'Maharashtra',
+                'karnataka': 'Karnataka',
+                'tamilnadu': 'Tamil Nadu',
+                'andhra': 'Andhra Pradesh',
+                'search': 'Search',
+                'applyFilters': 'Apply Filters',
+                'subsidyAmount': 'Subsidy Amount',
+                'eligibility': 'Eligibility',
+                'applicationDeadline': 'Application Deadline',
+                'viewDetails': 'View Details',
+                'applyNow': 'Apply Now',
+                'voicePrediction': 'Voice Prediction',
+                'recordVoice': 'Record Voice Description',
+                'recordInstructions': 'Click the button below and describe the animal\'s symptoms, behavior, and any other relevant information.',
+                'startRecording': 'Start Recording',
+                'stopRecording': 'Stop Recording',
+                'transcriptPlaceholder': 'Your voice recording transcript will appear here...',
+                'additionalSymptoms': 'Additional Symptoms',
+                'analyzePrediction': 'Analyze Prediction',
+                'animalType': 'Animal Type',
+                'breed': 'Breed',
+                'age': 'Age',
+                'gender': 'Gender',
+                'weight': 'Weight',
+                'symptom1': 'Primary Symptom',
+                'symptom2': 'Secondary Symptom',
+                'symptom3': 'Tertiary Symptom',
+                'symptom4': 'Quaternary Symptom',
+                'duration': 'Duration',
+                'appetiteLoss': 'Appetite Loss',
+                'vomiting': 'Vomiting',
+                'diarrhea': 'Diarrhea',
+                'coughing': 'Coughing',
+                'laboredBreathing': 'Labored Breathing',
+                'lameness': 'Lameness',
+                'skinLesions': 'Skin Lesions',
+                'nasalDischarge': 'Nasal Discharge',
+                'eyeDischarge': 'Eye Discharge',
+                'bodyTemperature': 'Body Temperature',
+                'heartRate': 'Heart Rate',
+                'diseasePrediction': 'Disease Prediction'
+            },
+            'mr': {
+                'appName': 'फार्मकेअर प्रो',
+                'home': 'मुख्यपृष्ठ',
+                'dashboard': 'डॅशबोर्ड',
+                'login': 'लॉगिन',
+                'logout': 'लॉगआउट',
+                'heroTitle': 'स्मार्ट लाइव्हस्टॉक व्यवस्थापन',
+                'heroSubtitle': 'AI-पॉवर्ड आजार शोध, व्यापक शेत व्यवस्थापन, आणि पशुवैद्यकीय सहाय्य - आधुनिक शेतकऱ्यांसाठी डिझाइन केलेल्या एका व्यावसायिक प्लॅटफॉर्ममध्ये',
+                'getStarted': 'सुरू करा',
+                'loginRegister': 'लॉगिन / नोंदणी',
+                'comprehensiveCare': 'व्यापक लाइव्हस्टॉक काळजी',
+                'aiDetection': 'AI-पॉवर्ड शोध',
+                'aiDetectionDesc': 'प्रगत मशीन लर्निंग अल्गोरिदम फोटो आणि ऑडिओ रेकॉर्डिंगचे विश्लेषण करतात, उच्च अचूकतेसह संभाव्य आजार शोधतात, लवकर हस्तक्षेप आणि चांगले परिणाम सक्षम करतात.',
+                'farmManagement': 'शेत व्यवस्थापन',
+                'farmManagementDesc': 'आपल्या लाइव्हस्टॉक, शेत जमिनी, आरोग्य नोंदी, लसीकरण वेळापत्रक, आणि उत्पादकता मेट्रिक्सचे एकात्मिक प्लॅटफॉर्ममध्ये व्यापक ट्रॅकिंग.',
+                'vetNetwork': 'पशुवैद्यकीय नेटवर्क',
+                'vetNetworkDesc': 'आपल्या क्षेत्रातील पात्र पशुवैद्यकांशी थेट कनेक्ट व्हा. व्यावसायिक सल्लामसलत, आणीबाणीचे समर्थन, आणि तज्ञ सल्ला मिळवा जेव्हा आपल्याला सर्वात जास्त गरज असते.',
+                'dashboardFeatures': 'डॅशबोर्ड वैशिष्ट्ये',
+                'predictDisease': 'आजाराचा अंदाज लावा',
+                'predictDiseaseDesc': 'आपल्या लाइव्हस्टॉकमधील संभाव्य आजार शोधण्यासाठी AI वापरा प्रतिमा आणि ऑडिओ विश्लेषणाद्वारे.',
+                'tryNow': 'आता वापरा',
+                'symptomChecker': 'लक्षण तपासक',
+                'symptomCheckerDesc': 'आपल्या प्राण्यांमध्ये निरीक्षण केलेल्या लक्षणांची निवड करून संभाव्य आरोग्य समस्या ओळखा.',
+                'checkNow': 'आता तपासा',
+                'knowledgeBase': 'ज्ञान आधार',
+                'knowledgeBaseDesc': 'सामान्य लाइव्हस्टॉक रोग आणि उपचारांबद्दल व्यापक माहिती मिळवा.',
+                'explore': 'अन्वेषण करा',
+                'findVet': 'पशुवैद्यक शोधा',
+                'findVetDesc': 'व्यावसायिक सल्लामसलतीसाठी आपल्या क्षेत्रातील पात्र पशुवैद्यकांशी कनेक्ट व्हा.',
+                'findNow': 'आता शोधा',
+                'manageAnimals': 'प्राणी व्यवस्थापित करा',
+                'manageAnimalsDesc': 'तपशीलवार आरोग्य नोंदी आणि व्यवस्थापन साधनांसह आपला लाइव्हस्टॉक जोडा आणि ट्रॅक करा.',
+                'manage': 'व्यवस्थापित करा',
+                'reportsAnalytics': 'अहवाल आणि विश्लेषण',
+                'reportsAnalyticsDesc': 'आपल्या शेताच्या आरोग्य आणि उत्पादकतेबद्दल तपशीलवार अहवाल आणि विश्लेषण पहा.',
+                'viewReports': 'अहवाल पहा',
+                'subsidies': 'सबसिडी आणि योजना',
+                'subsidiesDesc': 'लाइव्हस्टॉक शेतकऱ्यांसाठी उपलब्ध सरकारी सबसिडी आणि योजना एक्सप्लोर करा.',
+                'overview': 'आढावा',
+                'symptoms': 'लक्षणे',
+                'knowledge': 'ज्ञान',
+                'vets': 'पशुवैद्यक',
+                'reports': 'अहवाल',
+                'addFarmLand': 'शेत जमीन जोडा',
+                'addAnimal': 'प्राणी जोडा',
+                'farmDashboard': 'शेत डॅशबोर्ड',
+                'totalFarmLand': 'एकूण शेत जमीन',
+                'acres': 'एकर',
+                'totalAnimals': 'एकूण प्राणी',
+                'thisMonth': 'या महिन्यात +5',
+                'sickAnimals': 'आजारी प्राणी',
+                'lastWeek': 'मागील आठवड्यापासून -2',
+                'reminders': 'स्मरणपत्रे',
+                'pendingActions': 'प्रलंबित क्रिया',
+                'quickActions': 'द्रुत क्रिया',
+                'recentActivity': 'अलीकडील क्रियाकलाप',
+                'healthCheckCompleted': 'आरोग्य तपासणी पूर्ण झाली',
+                'cowC127': 'गाय #C127 - 2 तासांपूर्वी',
+                'vaccinationReminder': 'लसीकरण स्मरणपत्र पाठवले',
+                'buffaloB045': 'म्हैस #B045 - 5 तासांपूर्वी',
+                'newFarmLand': 'नवीन शेत जमीन नोंदवली',
+                'northField': 'उत्तर शेत - 1 दिवसापूर्वी',
+                'welcomeBack': 'पुन्हा स्वागत आहे',
+                'signInToAccess': 'आपल्या शेत व्यवस्थापन डॅशबोर्डमध्ये प्रवेश करण्यासाठी साइन इन करा',
+                'email': 'ईमेल',
+                'password': 'पासवर्ड',
+                'or': 'किंवा',
+                'createAccount': 'खाते तयार करा',
+                'dontHaveAccount': 'खाते नाही?',
+                'registerHere': 'येथे नोंदणी करा',
+                'joinFarmCare': 'आपला लाइव्हस्टॉक कार्यक्षमतेने व्यवस्थापित करण्यासाठी फार्मकेअर प्रो मध्ये सामील व्हा',
+                'fullName': 'पूर्ण नाव',
+                'confirmPassword': 'पासवर्डची पुष्टी करा',
+                'alreadyHaveAccount': 'आधीपासूनच खाते आहे?',
+                'loginHere': 'येथे लॉगिन करा',
+                'userProfile': 'वापरकर्ता प्रोफाइल',
+                'farmDetails': 'शेत तपशील',
+                'farmName': 'शेताचे नाव',
+                'farmLocation': 'शेत स्थान',
+                'farmDescription': 'शेत वर्णन',
+                'saveProfile': 'प्रोफाइल जतन करा',
+                'landName': 'जमीन नाव',
+                'landSize': 'जमीन आकार (एकर)',
+                'location': 'स्थान',
+                'soilType': 'मातीचा प्रकार',
+                'selectSoilType': 'मातीचा प्रकार निवडा',
+                'loamy': 'चिकणमाती',
+                'clay': 'चिकण',
+                'sandy': 'वाळूची',
+                'silt': 'गाळ',
+                'cropsGrown': 'पिके घेतली',
+                'landId': 'जमीन आयडी',
+                'size': 'आकार (एकर)',
+                'crops': 'पिके',
+                'addedDate': 'जोडलेली तारीख',
+                'actions': 'क्रिया',
+                'southValley': 'दक्षिण व्हॅली',
+                'riceSugarcane': 'तांदूळ, ऊस',
+                'eastHills': 'पूर्व डोंगर',
+                'cottonJowar': 'कापूस, ज्वारी',
+                'animalType': 'प्राणी प्रकार',
+                'selectType': 'प्रकार निवडा',
+                'cow': 'गाय',
+                'buffalo': 'म्हैस',
+                'goat': 'बकरी',
+                'sheep': ' मेंढी',
+                'chicken': 'कोंबडी',
+                'pig': 'डुक्कर',
+                'breed': 'जात',
+                'animalName': 'प्राणी नाव/आयडी',
+                'age': 'वय (महिने)',
+                'weight': 'वजन (किलो)',
+                'healthStatus': 'आरोग्य स्थिती',
+                'recovering': 'बरे होत आहे',
+                'animalId': 'प्राणी आयडी',
+                'type': 'प्रकार',
+                'holstein': 'होल्स्टीन',
+                'healthy': 'निरोगी',
+                'murrah': 'मुर्रा',
+                'boer': 'बोअर',
+                'sick': 'आजारी',
+                'aiIllnessDetection': 'AI आजार शोध',
+                'selectAnimal': 'प्राणी निवडा',
+                'chooseAnimal': 'विश्लेषणासाठी प्राणी निवडा',
+                'buffaloB045': 'म्हैस #B045 - मुर्रा',
+                'goatG089': 'बकरी #G089 - बोअर',
+                'sheepS156': 'मेंढी #S156 - डॉर्पर',
+                'uploadImageAudio': 'प्रतिमा किंवा ऑडिओ फाइल अपलोड करा',
+                'clickToBrowse': 'ब्राउझ करण्यासाठी क्लिक करा किंवा फाइल्स येथे ड्रॅग आणि ड्रॉप करा',
+                'supportedFormats': 'समर्थित स्वरूप: JPG, PNG, MP3, WAV (कमाल 10MB)',
+                'runAiAnalysis': 'AI विश्लेषण चालवा',
+                'potentialHealthIssue': 'संभाव्य आरोग्य समस्या आढळली',
+                'disease': 'आजार',
+                'bovineRespiratory': 'बोवाईन श्वसन रोग',
+                'confidenceLevel': 'आत्मविश्वास स्तर',
+                'severity': 'गंभीरता',
+                'moderate': 'मध्यम',
+                'recommendedActions': 'शिफारस केलेल्या क्रिया',
+                'action1': 'प्रसार रोखण्यासाठी प्राणी ताबडतोब वेगळा करा',
+                'action2': '24 तासांच्या आत पशुवैद्यकाशी संपर्क साधा',
+                'action3': 'तापमान आणि भूक जवळून लक्षात ठेवा',
+                'action4': 'राहण्याच्या क्षेत्रात योग्य वायुवीजन सुनिश्चित करा',
+                'action5': 'लक्षणे आणि बरे होण्याची प्रगती दस्तऐवजीकरण करा',
+                'symptomChecker': 'लक्षण तपासक',
+                'selectSymptoms': 'निरीक्षण केलेली लक्षणे निवडा',
+                'fever': 'ताप',
+                'coughing': 'खोकला',
+                'wounds': 'जखमा/कट',
+                'diarrhea': 'अतिसार',
+                'lossAppetite': 'भूक कमी होणे',
+                'nasalDischarge': 'नाकातून स्त्राव',
+                'lameness': 'लंगडेपणा',
+                'swelling': 'सूज',
+                'analyzeSymptoms': 'लक्षणांचे विश्लेषण करा',
+                'symptomAnalysis': 'लक्षण विश्लेषण परिणाम',
+                'possibleCondition': 'संभाव्य स्थिती',
+                'respiratoryInfection': 'श्वसन संसर्ग',
+                'matchProbability': 'जुळण्याची संभाव्यता',
+                'urgencyLevel': 'गतिमानता स्तर',
+                'medium': 'मध्यम',
+                'recommendations': 'शिफारसी',
+                'recommendation1': 'शक्य तितक्या लवकर पशुवैद्यकीय तपासणीचे वेळापत्रक करा',
+                'recommendation2': 'प्राणी उबदार आणि आरामदायक ठेवा',
+                'recommendation3': 'लक्षणे जवळून लक्षात ठेवा आणि बदल दस्तऐवजीकरण करा',
+                'recommendation4': 'पशुवैद्यकाने सांगितल्यास प्रतिजैविकांचा विचार करा',
+                'recommendation5': 'संसर्गजन्य असल्यास निरोगी प्राण्यांपासून वेगळे करा',
+                'diseaseKnowledge': 'रोग ज्ञान आधार',
+                'bovineRespiratoryDesc': 'गुरेढोरे प्रभावित करणारा सामान्य श्वसन संसर्ग. लक्षणांमध्ये खोकला, नाकातून स्त्राव, आणि ताप यांचा समावेश होतो. बरे होणे आणि इतर प्राण्यांमध्ये प्रसार रोखण्यासाठी प्रतिजैविकांसह लवकर उपचार महत्वाचे आहेत.',
+                'prevention': 'प्रतिबंध',
+                'bovinePrevention': 'योग्य वायुवीजन, लसीकरण, नवीन प्राण्यांचे संगरोध',
+                'footMouth': 'पाय आणि तोंड रोग',
+                'footMouthDesc': 'खुर असलेले प्राणी प्रभावित करणारा अत्यंत संसर्गजन्य विषाणूजन्य रोग. ताप, तोंडात आणि पायांवर फोड यांची कारणीभूत ठरतो. ताबडतोब वेगळे करणे आणि पशुवैद्यकीय हस्तक्षेप आवश्यक आहे.',
+                'footMouthPrevention': 'लसीकरण, जैविक सुरक्षा उपाय, हालचालीवरील निर्बंध',
+                'mastitis': 'स्तनदाह',
+                'mastitisDesc': 'दुग्ध व्यवसायातील गायींमध्ये सामान्य असलेला स्तन ग्रंथीचा दाह. सूज, उष्णता, आणि दुधाच्या गुणवत्तेत बदल यांची कारणीभूत ठरतो. दुधाच्या उत्पादनावर आणि प्राण्यांच्या कल्याणावर लक्षणीय परिणाम करतो.',
+                'mastitisPrevention': 'योग्य दुहन स्वच्छता, टीट डिपिंग, कोरड्या गायीचे उपचार',
+                'anthrax': 'अँथ्रॅक्स',
+                'anthraxDesc': 'सर्व उबदार रक्ताचे प्राणी प्रभावित करणारा गंभीर जीवाणूजन्य संसर्ग. इशारा न देता अचानक मृत्यू होऊ शकतो. लसीकरण हा सर्वात प्रभावी प्रतिबंधक पद्धत आहे.',
+                'anthraxPrevention': 'वार्षिक लसीकरण, योग्य मृतदेह विल्हेवाट, संगरोध',
+                'brucellosis': 'ब्रुसेलोसिस',
+                'brucellosisDesc': 'गुरेढोरांमध्ये प्रजनन समस्या निर्माण करणारा जीवाणूजन्य संसर्ग. गर्भपात आणि वंध्यत्व यांची कारणीभूत ठरू शकतो. झूनोटिक देखील आहे, म्हणजे संपर्काद्वारे मानवांमध्ये हस्तांतरित होऊ शकतो.',
+                'brucellosisPrevention': 'लसीकरण, चाचणी, संक्रमित प्राण्यांचे निर्मूलन',
+                'milkFever': 'दुधाचा ताप (हायपोकॅल्सेमिया)',
+                'milkFeverDesc': 'बाळंतपणाच्या वेळी दुग्ध व्यवसायातील गायींमध्ये कॅल्शियमची कमतरता. अशक्तपणा, उभे राहण्यास असमर्थता, आणि जीवाला धोका निर्माण करू शकतो. ताबडतोब कॅल्शियम पूरक आवश्यक आहे.',
+                'milkFeverPrevention': 'योग्य पोषण, कॅल्शियम पूरक, निरीक्षण',
+                'vetDirectory': 'पशुवैद्यक निर्देशिका',
+                'veterinarian': 'पशुवैद्यक',
+                'specialization': 'विशेषीकरण',
+                'contact': 'संपर्क',
+                'distance': 'अंतर',
+                'yearsExperience': '15 वर्षांचा अनुभव',
+                'largeAnimal': 'मोठे प्राणी वैद्यकशास्त्र',
+                'villageCenter': 'गाव केंद्र, पुणे',
+                'dairySpecialist': 'दुग्ध व्यवसाय गुरे तज्ज्ञ',
+                'marketRoad': 'मार्केट रोड, पुणे',
+                'poultrySpecialist': 'पोल्ट्री आणि लहान प्राणी',
+                'hospitalRoad': 'हॉस्पिटल रोड, पुणे',
+                'emergencyCare': 'आणीबाणी आणि गंभीर काळजी',
+                'mainStreet': 'मेन स्ट्रीट, पुणे',
+                'farmAnalytics': 'शेत विश्लेषण आणि अहवाल',
+                'animalHealthTrends': 'प्राणी आरोग्य कल',
+                'livestockPopulation': 'लाइव्हस्टॉक लोकसंख्या वितरण',
+                'vaccinationSchedule': 'लसीकरण वेळापत्रक आणि स्मरणपत्रे',
+                'typeBreed': 'प्रकार आणि जात',
+                'vaccination': 'लसीकरण',
+                'dueDate': 'नियत तारीख',
+                'status': 'स्थिती',
+                'holsteinCow': 'होल्स्टीन गाय',
+                'ageMonths': 'वय: 36 महिने',
+                'fmdVaccine': 'FMD लस',
+                'overdue': 'ओव्हरड्यू',
+                'urgent': 'अत्यावश्यक',
+                'murrahBuffalo': 'मुर्रा म्हैस',
+                'anthraxVaccine': 'अँथ्रॅक्स लस',
+                'dueSoon': 'लवकरच देय',
+                'schedule': 'वेळापत्रक',
+                'boerGoat': 'बोअर बकरी',
+                'pprVaccine': 'PPR लस',
+                'scheduled': 'शेड्यूल केलेले',
+                'view': 'पहा',
+                'dorperSheep': 'डॉर्पर मेंढी',
+                'clostridialVaccine': 'क्लोस्ट्रिडियल लस',
+                'upcoming': 'आगामी',
+                'add': 'जोडा',
+                'healthScore': 'आरोग्य स्कोअर',
+                'overallHealth': 'एकूण शेत आरोग्य रेटिंग',
+                'treatmentsThisMonth': 'या महिन्यातील उपचार',
+                'fromLastMonth': 'मागील महिन्यापासून -3',
+                'vaccinationCoverage': 'लसीकरण कव्हरेज',
+                'animalsPending': '15 प्राणी प्रलंबित',
+                'avgRecoveryTime': 'सरासरी बरे होण्याची वेळ',
+                'daysImproved': 'दिवस (सुधारित)',
+                'subsidiesSchemes': 'सबसिडी आणि योजना',
+                'filterSubsidies': 'सबसिडी फिल्टर करा',
+                'schemeType': 'योजना प्रकार',
+                'allTypes': 'सर्व प्रकार',
+                'livestock': 'लाइव्हस्टॉक',
+                'dairy': 'दुग्ध व्यवसाय',
+                'poultry': 'पोल्ट्री',
+                'fisheries': 'मत्स्य व्यवसाय',
+                'state': 'राज्य',
+                'allStates': 'सर्व राज्ये',
+                'maharashtra': 'महाराष्ट्र',
+                'karnataka': 'कर्नाटक',
+                'tamilnadu': 'तमिळनाडू',
+                'andhra': 'आंध्र प्रदेश',
+                'search': 'शोध',
+                'applyFilters': 'फिल्टर लागू करा',
+                'subsidyAmount': 'सबसिडी रक्कम',
+                'eligibility': 'पात्रता',
+                'applicationDeadline': 'अर्ज मुदत',
+                'viewDetails': 'तपशील पहा',
+                'applyNow': 'आता अर्ज करा',
+                'voicePrediction': 'व्हॉईस प्रिडिक्शन',
+                'recordVoice': 'व्हॉईस वर्णन रेकॉर्ड करा',
+                'recordInstructions': 'खालील बटणावर क्लिक करा आणि प्राण्याची लक्षणे, वर्तन आणि इतर संबंधित माहिती वर्णन करा.',
+                'startRecording': 'रेकॉर्डिंग सुरू करा',
+                'stopRecording': 'रेकॉर्डिंग थांबवा',
+                'transcriptPlaceholder': 'आपले व्हॉईस रेकॉर्डिंग ट्रान्सक्रिप्ट येथे दिसेल...',
+                'additionalSymptoms': 'अतिरिक्त लक्षणे',
+                'analyzePrediction': 'प्रिडिक्शन विश्लेषित करा',
+                'animalType': 'प्राणी प्रकार',
+                'breed': 'जात',
+                'age': 'वय',
+                'gender': 'लिंग',
+                'weight': 'वजन',
+                'symptom1': 'प्राथमिक लक्षण',
+                'symptom2': 'दुय्यम लक्षण',
+                'symptom3': 'तृतीय लक्षण',
+                'symptom4': 'चतुर्थ लक्षण',
+                'duration': 'कालावधी',
+                'appetiteLoss': 'भूक कमी होणे',
+                'vomiting': 'उलट्या',
+                'diarrhea': 'अतिसार',
+                'coughing': 'खोकला',
+                'laboredBreathing': 'श्वासोच्छवासात त्रास',
+                'lameness': 'लंगडेपणा',
+                'skinLesions': 'त्वचेवरील घाव',
+                'nasalDischarge': 'नाकातून स्त्राव',
+                'eyeDischarge': 'डोळ्यातून स्त्राव',
+                'bodyTemperature': 'शरीराचे तापमान',
+                'heartRate': 'हृदय गती',
+                'diseasePrediction': 'रोग अंदाज'
+            }
+        };
+
         // Global variables
         let currentPage = 'home';
+        let currentLanguage = 'en';
+        let currentUser = null;
+        let userData = {};
         let searchData = [
             { type: 'animal', name: 'Cow #C127 - Holstein', page: 'detection', icon: 'fas fa-cow' },
             { type: 'animal', name: 'Buffalo #B045 - Murrah', page: 'detection', icon: 'fas fa-hippo' },
@@ -1887,6 +3011,105 @@
             { type: 'farm', name: 'North Field', page: 'add-land', icon: 'fas fa-tractor' },
             { type: 'farm', name: 'South Valley', page: 'add-land', icon: 'fas fa-tractor' }
         ];
+
+        // Subsidies data
+        const subsidiesData = [
+            {
+                id: 1,
+                name: 'National Livestock Mission',
+                type: 'livestock',
+                state: 'maharashtra',
+                amount: '₹50,000 - ₹5,00,000',
+                eligibility: 'Small and marginal farmers',
+                deadline: '2024-03-31',
+                description: 'Financial assistance for establishment of livestock farms, purchase of animals, and infrastructure development.'
+            },
+            {
+                id: 2,
+                name: 'Dairy Entrepreneurship Development Scheme',
+                type: 'dairy',
+                state: 'karnataka',
+                amount: '₹1,00,000 - ₹10,00,000',
+                eligibility: 'Dairy farmers and entrepreneurs',
+                deadline: '2024-04-15',
+                description: 'Support for establishment of small dairy farms, procurement of milking machines, and cold storage facilities.'
+            },
+            {
+                id: 3,
+                name: 'Poultry Venture Capital Fund',
+                type: 'poultry',
+                state: 'tamilnadu',
+                amount: '₹25,000 - ₹15,00,000',
+                eligibility: 'Poultry farmers and entrepreneurs',
+                deadline: '2024-05-20',
+                description: 'Capital investment support for poultry farming including construction of sheds and purchase of equipment.'
+            },
+            {
+                id: 4,
+                name: 'Fisheries and Aquaculture Infrastructure Development Fund',
+                type: 'fisheries',
+                state: 'andhra',
+                amount: '₹2,00,000 - ₹20,00,000',
+                eligibility: 'Fish farmers and entrepreneurs',
+                deadline: '2024-06-30',
+                description: 'Financial assistance for creation of fisheries infrastructure including ponds, hatcheries, and processing units.'
+            },
+            {
+                id: 5,
+                name: 'Animal Husbandry Infrastructure Development Fund',
+                type: 'livestock',
+                state: 'maharashtra',
+                amount: '₹10,00,000 - ₹50,00,000',
+                eligibility: 'Farmer Producer Organizations and private entrepreneurs',
+                deadline: '2024-07-15',
+                description: 'Support for establishment of animal feed plants, breed multiplication farms, and waste management systems.'
+            }
+        ];
+
+        // Symptom data for voice prediction
+        const symptomData = {
+            'animalType': ['Cow', 'Buffalo', 'Goat', 'Sheep', 'Chicken', 'Pig'],
+            'breed': ['Holstein', 'Jersey', 'Murrah', 'Surti', 'Boer', 'Saanen', 'Dorper', 'Merino', 'Broiler', 'Layer', 'Large White', 'Duroc'],
+            'age': ['0-6 months', '6-12 months', '1-2 years', '2-5 years', '5+ years'],
+            'gender': ['Male', 'Female'],
+            'weight': ['Underweight', 'Normal', 'Overweight'],
+            'symptom1': ['Fever', 'Coughing', 'Diarrhea', 'Loss of appetite', 'Lethargy', 'Swelling', 'Lameness'],
+            'symptom2': ['Nasal discharge', 'Eye discharge', 'Vomiting', 'Skin lesions', 'Labored breathing', 'Weight loss', 'Dehydration'],
+            'symptom3': ['Abnormal posture', 'Difficulty standing', 'Reduced milk production', 'Behavior changes', 'Isolation', 'Excessive thirst'],
+            'symptom4': ['Rapid breathing', 'Pale gums', 'Bloating', 'Constipation', 'Blood in stool', 'Drooling'],
+            'duration': ['Less than 24 hours', '1-3 days', '3-7 days', '1-2 weeks', 'More than 2 weeks'],
+            'appetiteLoss': ['None', 'Mild', 'Moderate', 'Severe', 'Complete loss'],
+            'vomiting': ['None', 'Occasional', 'Frequent', 'Projectile'],
+            'diarrhea': ['None', 'Mild', 'Moderate', 'Severe', 'Bloody'],
+            'coughing': ['None', 'Occasional', 'Frequent', 'Severe'],
+            'laboredBreathing': ['None', 'Mild', 'Moderate', 'Severe'],
+            'lameness': ['None', 'Mild', 'Moderate', 'Severe', 'Cannot bear weight'],
+            'skinLesions': ['None', 'Localized', 'Widespread', 'Ulcerated'],
+            'nasalDischarge': ['None', 'Clear', 'Mucous', 'Purulent', 'Bloody'],
+            'eyeDischarge': ['None', 'Clear', 'Mucous', 'Purulent'],
+            'bodyTemperature': ['Normal', 'Slightly elevated', 'High fever', 'Hypothermic'],
+            'heartRate': ['Normal', 'Slightly elevated', 'Tachycardic', 'Bradycardic']
+        };
+
+        // Language Toggle Function
+        function toggleLanguage() {
+            currentLanguage = currentLanguage === 'en' ? 'mr' : 'en';
+            updateLanguage();
+        }
+
+        // Update Language Function
+        function updateLanguage() {
+            const elements = document.querySelectorAll('.lang');
+            elements.forEach(element => {
+                const key = element.getAttribute('data-key');
+                if (languageData[currentLanguage][key]) {
+                    element.textContent = languageData[currentLanguage][key];
+                }
+            });
+            
+            // Update language button text
+            document.getElementById('languageText').textContent = currentLanguage === 'en' ? 'मराठी' : 'English';
+        }
 
         // Page Navigation System
         function showPage(pageId) {
@@ -1910,6 +3133,21 @@
             if (targetPage) {
                 targetPage.classList.add('active');
                 currentPage = pageId;
+                
+                // Load data for specific pages
+                if (pageId === 'dashboard') {
+                    loadDashboardData();
+                } else if (pageId === 'add-land') {
+                    loadLandsData();
+                } else if (pageId === 'add-animal') {
+                    loadAnimalsData();
+                } else if (pageId === 'subsidies') {
+                    loadSubsidiesData();
+                } else if (pageId === 'detection') {
+                    loadAnimalsForDetection();
+                } else if (pageId === 'profile') {
+                    loadProfileData();
+                }
             }
             
             // Add active class to corresponding nav link
@@ -1925,6 +3163,664 @@
 
             // Smooth scroll to top
             window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Firebase Authentication Functions
+        function registerUser(email, password, name) {
+            auth.createUserWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    const user = userCredential.user;
+                    
+                    // Save user data to Firestore
+                    return db.collection('users').doc(user.uid).set({
+                        name: name,
+                        email: email,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                })
+                .then(() => {
+                    showNotification('Registration successful!', 'success');
+                    showPage('dashboard');
+                })
+                .catch((error) => {
+                    console.error('Error registering user:', error);
+                    showNotification('Registration failed: ' + error.message, 'error');
+                });
+        }
+
+        function loginUser(email, password) {
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    showNotification('Login successful!', 'success');
+                    showPage('dashboard');
+                })
+                .catch((error) => {
+                    console.error('Error logging in:', error);
+                    showNotification('Login failed: ' + error.message, 'error');
+                });
+        }
+
+        function logout() {
+            auth.signOut()
+                .then(() => {
+                    showNotification('Logged out successfully', 'info');
+                    showPage('home');
+                })
+                .catch((error) => {
+                    console.error('Error logging out:', error);
+                });
+        }
+
+        // Load user data from Firestore
+        function loadUserData(userId) {
+            db.collection('users').doc(userId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        userData = doc.data();
+                        updateUIWithUserData();
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading user data:', error);
+                });
+        }
+
+        // Update UI with user data
+        function updateUIWithUserData() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = userData.name || currentUser.email;
+                document.getElementById('profileName').textContent = userData.name || currentUser.email;
+                document.getElementById('profileEmail').textContent = currentUser.email;
+                
+                if (userData.farmName) {
+                    document.getElementById('farmName').value = userData.farmName;
+                }
+                if (userData.farmLocation) {
+                    document.getElementById('farmLocation').value = userData.farmLocation;
+                }
+                if (userData.farmDescription) {
+                    document.getElementById('farmDescription').value = userData.farmDescription;
+                }
+                
+                // Show user menu and hide login link
+                document.getElementById('userMenu').style.display = 'block';
+                document.getElementById('authLink').style.display = 'none';
+            } else {
+                // Show login link and hide user menu
+                document.getElementById('userMenu').style.display = 'none';
+                document.getElementById('authLink').style.display = 'block';
+            }
+        }
+
+        // Save profile data
+        function saveProfile() {
+            if (!currentUser) return;
+            
+            const farmName = document.getElementById('farmName').value;
+            const farmLocation = document.getElementById('farmLocation').value;
+            const farmDescription = document.getElementById('farmDescription').value;
+            
+            db.collection('users').doc(currentUser.uid).update({
+                farmName: farmName,
+                farmLocation: farmLocation,
+                farmDescription: farmDescription,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                showNotification('Profile saved successfully!', 'success');
+                userData.farmName = farmName;
+                userData.farmLocation = farmLocation;
+                userData.farmDescription = farmDescription;
+            })
+            .catch((error) => {
+                console.error('Error saving profile:', error);
+                showNotification('Error saving profile: ' + error.message, 'error');
+            });
+        }
+
+        // Load profile data
+        function loadProfileData() {
+            if (currentUser && userData) {
+                document.getElementById('farmName').value = userData.farmName || '';
+                document.getElementById('farmLocation').value = userData.farmLocation || '';
+                document.getElementById('farmDescription').value = userData.farmDescription || '';
+            }
+        }
+
+        // Add farm land
+        function addLand(landData) {
+            if (!currentUser) return;
+            
+            db.collection('lands').add({
+                userId: currentUser.uid,
+                name: landData.name,
+                size: landData.size,
+                location: landData.location,
+                soilType: landData.soilType,
+                crops: landData.crops,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                showNotification('Farm land added successfully!', 'success');
+                loadLandsData();
+            })
+            .catch((error) => {
+                console.error('Error adding land:', error);
+                showNotification('Error adding land: ' + error.message, 'error');
+            });
+        }
+
+        // Load lands data
+        function loadLandsData() {
+            if (!currentUser) return;
+            
+            const landsTableBody = document.getElementById('landsTableBody');
+            landsTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">Loading...</td></tr>';
+            
+            db.collection('lands')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    landsTableBody.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        landsTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No farm lands added yet</td></tr>';
+                        return;
+                    }
+                    
+                    let totalLand = 0;
+                    querySnapshot.forEach((doc) => {
+                        const land = doc.data();
+                        totalLand += parseFloat(land.size) || 0;
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><strong>${land.name}</strong></td>
+                            <td>${land.size}</td>
+                            <td>${land.location}</td>
+                            <td>${land.soilType}</td>
+                            <td>${land.crops}</td>
+                            <td>${land.createdAt ? land.createdAt.toDate().toLocaleDateString() : 'N/A'}</td>
+                            <td>
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                            </td>
+                        `;
+                        landsTableBody.appendChild(row);
+                    });
+                    
+                    // Update dashboard
+                    document.getElementById('totalLand').textContent = totalLand.toFixed(1);
+                })
+                .catch((error) => {
+                    console.error('Error loading lands:', error);
+                    landsTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #dc3545;">Error loading data</td></tr>';
+                });
+        }
+
+        // Add animal
+        function addAnimal(animalData) {
+            if (!currentUser) return;
+            
+            db.collection('animals').add({
+                userId: currentUser.uid,
+                type: animalData.type,
+                breed: animalData.breed,
+                name: animalData.name,
+                age: animalData.age,
+                weight: animalData.weight,
+                health: animalData.health,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp()
+            })
+            .then(() => {
+                showNotification('Animal added successfully!', 'success');
+                loadAnimalsData();
+            })
+            .catch((error) => {
+                console.error('Error adding animal:', error);
+                showNotification('Error adding animal: ' + error.message, 'error');
+            });
+        }
+
+        // Load animals data
+        function loadAnimalsData() {
+            if (!currentUser) return;
+            
+            const animalsTableBody = document.getElementById('animalsTableBody');
+            animalsTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">Loading...</td></tr>';
+            
+            db.collection('animals')
+                .where('userId', '==', currentUser.uid)
+                .orderBy('createdAt', 'desc')
+                .get()
+                .then((querySnapshot) => {
+                    animalsTableBody.innerHTML = '';
+                    
+                    if (querySnapshot.empty) {
+                        animalsTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px;">No animals added yet</td></tr>';
+                        return;
+                    }
+                    
+                    let totalAnimals = 0;
+                    let sickAnimals = 0;
+                    
+                    querySnapshot.forEach((doc) => {
+                        const animal = doc.data();
+                        totalAnimals++;
+                        
+                        if (animal.health === 'sick') {
+                            sickAnimals++;
+                        }
+                        
+                        const healthStatus = animal.health === 'healthy' ? 
+                            '<span style="color: #28a745; font-weight: bold;" class="lang" data-key="healthy">Healthy</span>' :
+                            animal.health === 'sick' ?
+                            '<span style="color: #dc3545; font-weight: bold;" class="lang" data-key="sick">Sick</span>' :
+                            '<span style="color: #ffc107; font-weight: bold;" class="lang" data-key="recovering">Recovering</span>';
+                        
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><strong>${animal.name}</strong></td>
+                            <td class="lang" data-key="${animal.type}">${animal.type}</td>
+                            <td>${animal.breed}</td>
+                            <td>${animal.age} months</td>
+                            <td>${animal.weight} kg</td>
+                            <td>${healthStatus}</td>
+                            <td>
+                                <button class="btn" style="background: #17a2b8; color: white; padding: 8px 15px; border-radius: 5px; border: none; cursor: pointer;">
+                                    <i class="fas fa-stethoscope"></i>
+                                </button>
+                            </td>
+                        `;
+                        animalsTableBody.appendChild(row);
+                    });
+                    
+                    // Update dashboard
+                    document.getElementById('totalAnimals').textContent = totalAnimals;
+                    document.getElementById('sickAnimals').textContent = sickAnimals;
+                })
+                .catch((error) => {
+                    console.error('Error loading animals:', error);
+                    animalsTableBody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 20px; color: #dc3545;">Error loading data</td></tr>';
+                });
+        }
+
+        // Load animals for detection
+        function loadAnimalsForDetection() {
+            if (!currentUser) return;
+            
+            const animalSelect = document.getElementById('animalSelect');
+            animalSelect.innerHTML = '<option value="" class="lang" data-key="chooseAnimal">Choose animal to analyze</option>';
+            
+            db.collection('animals')
+                .where('userId', '==', currentUser.uid)
+                .get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const animal = doc.data();
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = `${animal.name} - ${animal.breed} ${animal.type}`;
+                        animalSelect.appendChild(option);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error loading animals for detection:', error);
+                });
+        }
+
+        // Load dashboard data
+        function loadDashboardData() {
+            if (!currentUser) return;
+            
+            // Load recent activities
+            const recentActivities = document.getElementById('recentActivities');
+            recentActivities.innerHTML = '';
+            
+            // Add sample activities (in a real app, these would come from the database)
+            const activities = [
+                { icon: 'fas fa-stethoscope', title: 'Health check completed', details: 'Cow #C127 - 2 hours ago' },
+                { icon: 'fas fa-syringe', title: 'Vaccination reminder sent', details: 'Buffalo #B045 - 5 hours ago' },
+                { icon: 'fas fa-seedling', title: 'New farm land registered', details: 'North Field - 1 day ago' }
+            ];
+            
+            activities.forEach(activity => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'activity-item';
+                activityItem.innerHTML = `
+                    <div class="activity-icon">
+                        <i class="${activity.icon}"></i>
+                    </div>
+                    <div>
+                        <strong>${activity.title}</strong>
+                        <br><small style="color: #666;">${activity.details}</small>
+                    </div>
+                `;
+                recentActivities.appendChild(activityItem);
+            });
+            
+            // Update reminders count
+            document.getElementById('totalReminders').textContent = '3';
+            
+            // Load lands and animals data will update the other counts
+            loadLandsData();
+            loadAnimalsData();
+        }
+
+        // Load subsidies data
+        function loadSubsidiesData() {
+            const subsidiesGrid = document.getElementById('subsidiesGrid');
+            subsidiesGrid.innerHTML = '';
+            
+            subsidiesData.forEach(subsidy => {
+                const subsidyCard = document.createElement('div');
+                subsidyCard.className = 'subsidy-card';
+                subsidyCard.innerHTML = `
+                    <div class="subsidy-header">
+                        <h4>${subsidy.name}</h4>
+                        <p>${subsidy.type.charAt(0).toUpperCase() + subsidy.type.slice(1)} • ${subsidy.state.charAt(0).toUpperCase() + subsidy.state.slice(1)}</p>
+                    </div>
+                    <div class="subsidy-body">
+                        <div class="subsidy-info">
+                            <div class="info-item">
+                                <span class="info-label lang" data-key="subsidyAmount">Subsidy Amount</span>
+                                <span class="info-value">${subsidy.amount}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label lang" data-key="eligibility">Eligibility</span>
+                                <span class="info-value">${subsidy.eligibility}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label lang" data-key="applicationDeadline">Application Deadline</span>
+                                <span class="info-value">${subsidy.deadline}</span>
+                            </div>
+                        </div>
+                        <p>${subsidy.description}</p>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button class="btn btn-primary" style="flex: 1;">
+                                <i class="fas fa-eye"></i>
+                                <span class="lang" data-key="viewDetails">View Details</span>
+                            </button>
+                            <button class="btn btn-secondary" style="flex: 1;">
+                                <i class="fas fa-file-alt"></i>
+                                <span class="lang" data-key="applyNow">Apply Now</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                subsidiesGrid.appendChild(subsidyCard);
+            });
+            
+            updateLanguage();
+        }
+
+        // Filter subsidies
+        function filterSubsidies() {
+            const schemeType = document.getElementById('schemeType').value;
+            const stateFilter = document.getElementById('stateFilter').value;
+            const searchQuery = document.getElementById('subsidySearch').value.toLowerCase();
+            
+            const filteredSubsidies = subsidiesData.filter(subsidy => {
+                const matchesType = !schemeType || subsidy.type === schemeType;
+                const matchesState = !stateFilter || subsidy.state === stateFilter;
+                const matchesSearch = !searchQuery || 
+                    subsidy.name.toLowerCase().includes(searchQuery) ||
+                    subsidy.description.toLowerCase().includes(searchQuery);
+                
+                return matchesType && matchesState && matchesSearch;
+            });
+            
+            const subsidiesGrid = document.getElementById('subsidiesGrid');
+            subsidiesGrid.innerHTML = '';
+            
+            if (filteredSubsidies.length === 0) {
+                subsidiesGrid.innerHTML = '<div style="text-align: center; padding: 40px; color: #666;">No subsidies match your filters</div>';
+                return;
+            }
+            
+            filteredSubsidies.forEach(subsidy => {
+                const subsidyCard = document.createElement('div');
+                subsidyCard.className = 'subsidy-card';
+                subsidyCard.innerHTML = `
+                    <div class="subsidy-header">
+                        <h4>${subsidy.name}</h4>
+                        <p>${subsidy.type.charAt(0).toUpperCase() + subsidy.type.slice(1)} • ${subsidy.state.charAt(0).toUpperCase() + subsidy.state.slice(1)}</p>
+                    </div>
+                    <div class="subsidy-body">
+                        <div class="subsidy-info">
+                            <div class="info-item">
+                                <span class="info-label lang" data-key="subsidyAmount">Subsidy Amount</span>
+                                <span class="info-value">${subsidy.amount}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label lang" data-key="eligibility">Eligibility</span>
+                                <span class="info-value">${subsidy.eligibility}</span>
+                            </div>
+                            <div class="info-item">
+                                <span class="info-label lang" data-key="applicationDeadline">Application Deadline</span>
+                                <span class="info-value">${subsidy.deadline}</span>
+                            </div>
+                        </div>
+                        <p>${subsidy.description}</p>
+                        <div style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button class="btn btn-primary" style="flex: 1;">
+                                <i class="fas fa-eye"></i>
+                                <span class="lang" data-key="viewDetails">View Details</span>
+                            </button>
+                            <button class="btn btn-secondary" style="flex: 1;">
+                                <i class="fas fa-file-alt"></i>
+                                <span class="lang" data-key="applyNow">Apply Now</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+                subsidiesGrid.appendChild(subsidyCard);
+            });
+            
+            updateLanguage();
+        }
+
+        // Voice Prediction Functions
+        function openVoicePrediction() {
+            const modal = document.getElementById('voicePredictionModal');
+            modal.style.display = 'flex';
+            
+            // Load animals for voice prediction
+            loadAnimalsForVoicePrediction();
+            
+            // Load symptom selector
+            loadSymptomSelector();
+        }
+
+        function closeVoicePrediction() {
+            const modal = document.getElementById('voicePredictionModal');
+            modal.style.display = 'none';
+            
+            // Reset recording state
+            const recordButton = document.getElementById('recordButton');
+            recordButton.innerHTML = '<i class="fas fa-microphone"></i><span class="lang" data-key="startRecording">Start Recording</span>';
+            recordButton.classList.remove('recording');
+            
+            const voiceRecorder = document.getElementById('voiceRecorder');
+            voiceRecorder.classList.remove('active');
+            
+            const transcript = document.getElementById('transcript');
+            transcript.innerHTML = '<p class="lang" data-key="transcriptPlaceholder">Your voice recording transcript will appear here...</p>';
+        }
+
+        function loadAnimalsForVoicePrediction() {
+            if (!currentUser) return;
+            
+            const voiceAnimalSelect = document.getElementById('voiceAnimalSelect');
+            voiceAnimalSelect.innerHTML = '<option value="" class="lang" data-key="chooseAnimal">Choose animal to analyze</option>';
+            
+            db.collection('animals')
+                .where('userId', '==', currentUser.uid)
+                .get()
+                .then((querySnapshot) => {
+                    querySnapshot.forEach((doc) => {
+                        const animal = doc.data();
+                        const option = document.createElement('option');
+                        option.value = doc.id;
+                        option.textContent = `${animal.name} - ${animal.breed} ${animal.type}`;
+                        voiceAnimalSelect.appendChild(option);
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error loading animals for voice prediction:', error);
+                });
+        }
+
+        function loadSymptomSelector() {
+            const symptomSelector = document.getElementById('symptomSelector');
+            symptomSelector.innerHTML = '';
+            
+            for (const [key, values] of Object.entries(symptomData)) {
+                const symptomGroup = document.createElement('div');
+                symptomGroup.className = 'symptom-group';
+                
+                const groupTitle = document.createElement('h4');
+                groupTitle.className = 'lang';
+                groupTitle.setAttribute('data-key', key);
+                groupTitle.textContent = languageData[currentLanguage][key] || key;
+                
+                const symptomOptions = document.createElement('div');
+                symptomOptions.className = 'symptom-options';
+                
+                values.forEach(value => {
+                    const symptomOption = document.createElement('div');
+                    symptomOption.className = 'symptom-option';
+                    symptomOption.innerHTML = `
+                        <input type="checkbox" id="${key}-${value.replace(/\s+/g, '-')}">
+                        <label for="${key}-${value.replace(/\s+/g, '-')}">${value}</label>
+                    `;
+                    
+                    symptomOption.addEventListener('click', function() {
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                        this.classList.toggle('selected', checkbox.checked);
+                    });
+                    
+                    symptomOptions.appendChild(symptomOption);
+                });
+                
+                symptomGroup.appendChild(groupTitle);
+                symptomGroup.appendChild(symptomOptions);
+                symptomSelector.appendChild(symptomGroup);
+            }
+            
+            updateLanguage();
+        }
+
+        function toggleRecording() {
+            const recordButton = document.getElementById('recordButton');
+            const voiceRecorder = document.getElementById('voiceRecorder');
+            const transcript = document.getElementById('transcript');
+            
+            if (recordButton.classList.contains('recording')) {
+                // Stop recording
+                recordButton.innerHTML = '<i class="fas fa-microphone"></i><span class="lang" data-key="startRecording">Start Recording</span>';
+                recordButton.classList.remove('recording');
+                voiceRecorder.classList.remove('active');
+                
+                // Simulate transcript generation
+                transcript.innerHTML = `
+                    <p><strong>Recorded Description:</strong></p>
+                    <p>"My cow has been coughing for two days, has a runny nose, and seems lethargic. She's eating less than usual and her milk production has decreased. Her temperature feels warm to the touch."</p>
+                `;
+                
+                showNotification('Voice recording completed and transcribed', 'success');
+            } else {
+                // Start recording
+                recordButton.innerHTML = '<i class="fas fa-stop"></i><span class="lang" data-key="stopRecording">Stop Recording</span>';
+                recordButton.classList.add('recording');
+                voiceRecorder.classList.add('active');
+                
+                transcript.innerHTML = '<p><i class="fas fa-spinner fa-spin"></i> Recording in progress... Speak clearly about the animal\'s symptoms.</p>';
+                
+                showNotification('Voice recording started', 'info');
+            }
+        }
+
+        function analyzeVoicePrediction() {
+            const animalSelect = document.getElementById('voiceAnimalSelect');
+            
+            if (!animalSelect.value) {
+                showNotification('Please select an animal first.', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const button = event.target;
+            const originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing...';
+            button.disabled = true;
+            
+            // Simulate AI processing
+            setTimeout(() => {
+                button.innerHTML = originalText;
+                button.disabled = false;
+                
+                // Show results
+                showNotification('Voice analysis completed successfully!', 'success');
+                
+                // Close modal and show results on detection page
+                closeVoicePrediction();
+                showPage('detection');
+                
+                // Show detection result
+                const detectionResult = document.getElementById('detectionResult');
+                detectionResult.style.display = 'block';
+                detectionResult.scrollIntoView({ behavior: 'smooth' });
+                
+                // Update result with voice-specific information
+                detectionResult.innerHTML = `
+                    <h3 style="color: #dc3545; margin-bottom: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span class="lang" data-key="potentialHealthIssue">Potential Health Issue Detected</span>
+                    </h3>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 25px;">
+                        <div>
+                            <strong class="lang" data-key="disease">Disease:</strong><br>
+                            <span style="color: #dc3545;" class="lang" data-key="bovineRespiratory">Bovine Respiratory Disease</span>
+                        </div>
+                        <div>
+                            <strong class="lang" data-key="confidenceLevel">Confidence Level:</strong><br>
+                            <span style="color: #ffc107;">92%</span>
+                        </div>
+                        <div>
+                            <strong class="lang" data-key="severity">Severity:</strong><br>
+                            <span style="color: #fd7e14;" class="lang" data-key="moderate">Moderate</span>
+                        </div>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 25px; border-radius: 10px; border-left: 4px solid #dc3545;">
+                        <h4 style="color: #dc3545; margin-bottom: 15px;">
+                            <i class="fas fa-list-ul"></i>
+                            <span class="lang" data-key="recommendedActions">Recommended Actions</span>
+                        </h4>
+                        <ul style="margin: 0; padding-left: 20px; line-height: 1.8;">
+                            <li class="lang" data-key="action1">Isolate the animal immediately to prevent spread</li>
+                            <li class="lang" data-key="action2">Contact veterinarian within 24 hours</li>
+                            <li class="lang" data-key="action3">Monitor temperature and appetite closely</li>
+                            <li class="lang" data-key="action4">Ensure proper ventilation in housing area</li>
+                            <li class="lang" data-key="action5">Document symptoms and recovery progress</li>
+                            <li>Provide supportive care with electrolytes and nutritional supplements</li>
+                            <li>Consider antibiotic treatment as prescribed by veterinarian</li>
+                        </ul>
+                    </div>
+                    <div style="margin-top: 25px; padding: 20px; background: #e8f5e8; border-radius: 10px;">
+                        <h4 style="color: #2d5a27; margin-bottom: 15px;">
+                            <i class="fas fa-info-circle"></i>
+                            Analysis Based on Voice Input
+                        </h4>
+                        <p>Based on your voice description, the AI detected symptoms consistent with respiratory infection including coughing, nasal discharge, lethargy, decreased appetite, and elevated temperature.</p>
+                    </div>
+                `;
+                
+                updateLanguage();
+            }, 3000);
         }
 
         // Navigation Event Listeners
@@ -1947,8 +3843,120 @@
                 });
             });
 
-            // Initialize home page
+            // Language toggle
+            document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
+
+            // User dropdown
+            document.getElementById('userDropdown').addEventListener('click', function(e) {
+                e.stopPropagation();
+                const dropdown = document.getElementById('userDropdownMenu');
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function() {
+                document.getElementById('userDropdownMenu').style.display = 'none';
+            });
+
+            // Firebase auth state observer
+            auth.onAuthStateChanged((user) => {
+                currentUser = user;
+                if (user) {
+                    loadUserData(user.uid);
+                } else {
+                    userData = {};
+                    updateUIWithUserData();
+                }
+            });
+
+            // Voice recording button
+            document.getElementById('recordButton').addEventListener('click', toggleRecording);
+
+            // Initialize home page and language
             showPage('home');
+            updateLanguage();
+        });
+
+        // Form Submission Handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            // Login Form
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const email = document.getElementById('loginEmail').value;
+                    const password = document.getElementById('loginPassword').value;
+                    
+                    loginUser(email, password);
+                });
+            }
+
+            // Register Form
+            const registerForm = document.getElementById('registerForm');
+            if (registerForm) {
+                registerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const name = document.getElementById('registerName').value;
+                    const email = document.getElementById('registerEmail').value;
+                    const password = document.getElementById('registerPassword').value;
+                    const confirmPassword = document.getElementById('registerConfirmPassword').value;
+                    
+                    if (password !== confirmPassword) {
+                        showNotification('Passwords do not match. Please try again.', 'error');
+                        return;
+                    }
+                    
+                    registerUser(email, password, name);
+                });
+            }
+
+            // Add Land Form
+            const addLandForm = document.getElementById('addLandForm');
+            if (addLandForm) {
+                addLandForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const name = document.getElementById('landName').value;
+                    const size = document.getElementById('landSize').value;
+                    const location = document.getElementById('landLocation').value;
+                    const soilType = document.getElementById('soilType').value;
+                    const crops = document.getElementById('cropsGrown').value;
+                    
+                    addLand({
+                        name: name,
+                        size: size,
+                        location: location,
+                        soilType: soilType,
+                        crops: crops
+                    });
+                    
+                    addLandForm.reset();
+                });
+            }
+
+            // Add Animal Form
+            const addAnimalForm = document.getElementById('addAnimalForm');
+            if (addAnimalForm) {
+                addAnimalForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    const type = document.getElementById('animalType').value;
+                    const breed = document.getElementById('animalBreed').value;
+                    const name = document.getElementById('animalName').value;
+                    const age = document.getElementById('animalAge').value;
+                    const weight = document.getElementById('animalWeight').value;
+                    const health = document.getElementById('animalHealth').value;
+                    
+                    addAnimal({
+                        type: type,
+                        breed: breed,
+                        name: name,
+                        age: age,
+                        weight: weight,
+                        health: health
+                    });
+                    
+                    addAnimalForm.reset();
+                });
+            }
         });
 
         // Search Functionality
@@ -2033,49 +4041,6 @@
             }
         }
 
-        // Form Submission Handlers
-        document.addEventListener('DOMContentLoaded', function() {
-            // Login Form
-            const loginForm = document.getElementById('loginForm');
-            if (loginForm) {
-                loginForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    alert('Login successful! Redirecting to dashboard...');
-                    showPage('dashboard');
-                });
-            }
-
-            // Register Form
-            const registerForm = document.getElementById('registerForm');
-            if (registerForm) {
-                registerForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    alert('Registration successful! Please login to continue.');
-                    showPage('login');
-                });
-            }
-
-            // Add Land Form
-            const addLandForm = document.getElementById('addLandForm');
-            if (addLandForm) {
-                addLandForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    alert('Farm land added successfully to your records!');
-                    this.reset();
-                });
-            }
-
-            // Add Animal Form
-            const addAnimalForm = document.getElementById('addAnimalForm');
-            if (addAnimalForm) {
-                addAnimalForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    alert('Animal added successfully to your inventory!');
-                    this.reset();
-                });
-            }
-        });
-
         // File Upload Handling
         document.addEventListener('DOMContentLoaded', function() {
             const fileInput = document.getElementById('fileInput');
@@ -2137,12 +4102,12 @@
             const fileInput = document.getElementById('fileInput');
             
             if (!animalSelect.value) {
-                alert('Please select an animal first.');
+                showNotification('Please select an animal first.', 'error');
                 return;
             }
             
             if (!fileInput.files.length) {
-                alert('Please upload an image or audio file.');
+                showNotification('Please upload an image or audio file.', 'error');
                 return;
             }
             
@@ -2175,7 +4140,7 @@
             const checkboxes = document.querySelectorAll('.symptom-card input[type="checkbox"]:checked');
             
             if (checkboxes.length === 0) {
-                alert('Please select at least one symptom to analyze.');
+                showNotification('Please select at least one symptom to analyze.', 'error');
                 return;
             }
             
