@@ -1,0 +1,618 @@
+:root {
+  --material-green: #43a047;
+  --material-green-dark: #357a38;
+  --material-green-light: #e9fbe4;
+  --material-green-50: #e8f5e8;
+  --material-green-100: #c8e6c9;
+  --material-green-200: #a5d6a7;
+  --material-green-300: #81c784;
+  --material-green-400: #66bb6a;
+  --material-green-600: #388e3c;
+  --material-green-700: #2e7d32;
+  --material-green-800: #1b5e20;
+  --material-green-900: #1b5e20;
+  --white: #ffffff;
+  --grey-50: #fafafa;
+  --grey-100: #f5f5f5;
+  --grey-200: #eeeeee;
+  --grey-300: #e0e0e0;
+  --grey-400: #bdbdbd;
+  --grey-500: #9e9e9e;
+  --grey-600: #757575;
+  --grey-700: #616161;
+  --grey-800: #424242;
+  --border-radius: 16px;
+  --border-radius-sm: 8px;
+  --border-radius-md: 12px;
+  --shadow: 0 2px 12px rgba(67, 160, 71, 0.10);
+  --shadow-md: 0 4px 20px rgba(67, 160, 71, 0.15);
+  --shadow-lg: 0 8px 32px rgba(67, 160, 71, 0.18);
+  --transition: 0.18s cubic-bezier(.4,0,.2,1);
+  --transition-slow: 0.25s cubic-bezier(.4,0,.2,1);
+}
+
+/* General */
+body {
+  background: linear-gradient(120deg, #e9fbe4 0%, #e0ffe4 100%);
+  font-family: "Roboto", "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+}
+
+/* Card (Form Container) */
+.card {
+  background-color: var(--white);
+  border: none;
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow);
+  margin-top: 32px;
+  transition: box-shadow var(--transition-slow), transform var(--transition-slow);
+  overflow: hidden;
+}
+.card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+}
+
+/* Header */
+.card-header {
+  background: linear-gradient(90deg, var(--material-green), var(--material-green-dark));
+  color: var(--white);
+  border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+  font-weight: 700;
+  letter-spacing: 1px;
+  box-shadow: 0 2px 8px rgba(67,160,71,0.10);
+  border-bottom: none;
+  padding: 1.5rem 2rem;
+}
+
+/* Section Titles */
+h5.text-primary, .text-primary {
+  color: var(--material-green) !important;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Label */
+.form-label {
+  font-weight: 600;
+  color: var(--material-green-800);
+  margin-bottom: 0.75rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+/* Enhanced Form Inputs */
+.form-control, .form-select {
+  border-radius: var(--border-radius-md);
+  border: 1.5px solid var(--grey-300);
+  box-shadow: none;
+  transition: all var(--transition-slow);
+  padding: 0.875rem 1rem;
+  font-size: 1rem;
+  background-color: var(--white);
+  color: var(--grey-800);
+  height: auto;
+  min-height: 52px;
+}
+
+.form-control:focus, .form-select:focus {
+  border-color: var(--material-green);
+  box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.15);
+  background-color: var(--white);
+  transform: translateY(-1px);
+}
+
+.form-control::placeholder {
+  color: var(--grey-500);
+  opacity: 1;
+}
+
+/* Enhanced Dropdown Styling */
+.form-select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2343a047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem;
+  padding-right: 3rem;
+  cursor: pointer;
+}
+
+.form-select:hover {
+  border-color: var(--material-green-300);
+  background-color: var(--material-green-50);
+}
+
+.form-select:focus {
+  border-color: var(--material-green);
+  box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.15);
+}
+
+/* Custom Dropdown Options Styling */
+.form-select option {
+  padding: 1rem;
+  margin: 0.5rem 0;
+  border-radius: var(--border-radius-sm);
+  background-color: var(--white);
+  color: var(--grey-800);
+  font-size: 1rem;
+  transition: background-color var(--transition);
+}
+
+.form-select option:hover {
+  background-color: var(--material-green-50) !important;
+  color: var(--material-green-800);
+}
+
+.form-select option:checked {
+  background: linear-gradient(45deg, var(--material-green-50), var(--material-green-100));
+  color: var(--material-green-800);
+  font-weight: 600;
+}
+
+/* Checkboxes - Enhanced Material Design */
+.form-check {
+  margin-bottom: 0.75rem;
+  padding-left: 2.5rem;
+}
+
+.form-check-input {
+  border-radius: 4px !important;
+  border: 2px solid var(--grey-400);
+  background: var(--white);
+  cursor: pointer;
+  transition: all var(--transition);
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: -2.5rem;
+  margin-top: 0.15rem;
+  position: relative;
+}
+
+.form-check-input:checked {
+  background-color: var(--material-green);
+  border-color: var(--material-green);
+  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.3);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+}
+
+.form-check-input:focus {
+  border-color: var(--material-green);
+  box-shadow: 0 0 0 3px rgba(67, 160, 71, 0.15);
+}
+
+.form-check-label {
+  cursor: pointer;
+  color: var(--grey-700);
+  font-weight: 500;
+  padding-top: 0.1rem;
+  transition: color var(--transition);
+}
+
+.form-check:hover .form-check-label {
+  color: var(--material-green-800);
+}
+
+.form-check:hover .form-check-input:not(:checked) {
+  border-color: var(--material-green-300);
+  background-color: var(--material-green-50);
+}
+
+/* UNIVERSAL BUTTON FIX - Works for all button structures */
+.btn {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--material-green), var(--material-green-dark));
+  color: var(--white);
+  font-weight: 700;
+  font-size: 1.1rem;
+  border: none;
+  border-radius: var(--border-radius-md);
+  padding: 1rem 2.5rem;
+  box-shadow: 0 4px 16px rgba(67, 160, 71, 0.3);
+  letter-spacing: 0.5px;
+  transition: all var(--transition-slow);
+  min-width: 200px;
+  width: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+/* Horizontal Expansion Animation */
+.btn::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, var(--material-green-dark), var(--material-green-800));
+  border-radius: var(--border-radius-md);
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform var(--transition-slow) cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  z-index: 1;
+}
+
+.btn:hover::before,
+.btn:focus::before {
+  transform: scaleX(1);
+}
+
+.btn:hover, .btn:focus {
+  box-shadow: 0 6px 24px rgba(67, 160, 71, 0.4);
+  transform: translateY(-2px);
+  color: var(--white) !important;
+}
+
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(67, 160, 71, 0.3);
+  transition: all 0.1s ease;
+}
+
+/* Ensure ALL button content stays visible */
+.btn > *,
+.btn .btn-content > * {
+  position: relative;
+  z-index: 2;
+  color: inherit !important;
+}
+
+.btn:hover *,
+.btn:focus * {
+  color: var(--white) !important;
+}
+
+/* Button Content for structured buttons */
+.btn-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  transition: all var(--transition-slow);
+}
+
+.btn:hover .btn-content {
+  transform: scale(1.05);
+}
+
+/* Professional Icon Animation */
+.btn .fa-search,
+.btn .fa-redo,
+.btn .fa-print {
+  transition: all var(--transition-slow) cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  z-index: 2;
+}
+
+.btn:hover .fa-search,
+.btn:hover .fa-redo,
+.btn:hover .fa-print {
+  transform: scale(1.2);
+  color: var(--white) !important;
+}
+
+/* Outline Buttons - New Prediction & Print Report */
+.btn-outline-primary {
+  background: transparent !important;
+  color: var(--material-green) !important;
+  border: 2px solid var(--material-green) !important;
+}
+
+.btn-outline-primary::before {
+  background: linear-gradient(135deg, var(--material-green), var(--material-green-dark));
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  color: var(--white) !important;
+  border-color: var(--material-green) !important;
+  background: transparent !important;
+}
+
+.btn-outline-primary:hover *,
+.btn-outline-primary:focus * {
+  color: var(--white) !important;
+}
+
+/* Professional Progress Bars for Top 3 Predictions */
+.progress {
+  height: 8px;
+  border-radius: 10px;
+  background-color: var(--grey-200);
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.progress-bar {
+  border-radius: 10px;
+  transition: width 1s ease-in-out;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Professional color scheme for progress bars */
+.progress-bar.bg-success {
+  background: linear-gradient(90deg, var(--material-green), var(--material-green-dark)) !important;
+}
+
+.progress-bar.bg-info {
+  background: linear-gradient(90deg, var(--material-green-300), var(--material-green-400)) !important;
+}
+
+/* Professional Badge Colors */
+.badge {
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+}
+
+.badge.bg-success {
+  background: linear-gradient(135deg, var(--material-green), var(--material-green-dark)) !important;
+}
+
+.badge.bg-warning {
+  background: linear-gradient(135deg, #ffb300, #ff8f00) !important;
+  color: var(--white) !important;
+}
+
+.badge.bg-danger {
+  background: linear-gradient(135deg, #e53935, #c62828) !important;
+}
+
+.badge.bg-info {
+  background: linear-gradient(135deg, var(--material-green-300), var(--material-green-400)) !important;
+  color: var(--white) !important;
+}
+
+/* Card Headers - Professional Colors */
+.card-header.bg-success {
+  background: linear-gradient(90deg, var(--material-green), var(--material-green-dark)) !important;
+}
+
+.card-header.bg-info {
+  background: linear-gradient(90deg, var(--material-green-300), var(--material-green-400)) !important;
+}
+
+.card-header.bg-secondary {
+  background: linear-gradient(90deg, #78909c, #546e7a) !important;
+}
+
+/* Professional Border Colors */
+.border-success {
+  border-color: var(--material-green) !important;
+}
+
+/* Loading State Animation */
+.btn.loading {
+  pointer-events: none;
+}
+
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  margin: -10px 0 0 -10px;
+  border: 2px solid transparent;
+  border-top: 2px solid var(--white);
+  border-radius: 50%;
+  animation: button-spinner 0.8s linear infinite;
+  z-index: 3;
+}
+
+.btn.loading .btn-content {
+  opacity: 0;
+}
+
+@keyframes button-spinner {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Success State Animation */
+.btn.success {
+  background: linear-gradient(135deg, var(--material-green), var(--material-green-dark));
+  animation: button-success 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes button-success {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+/* Form Group Enhancements */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Row Spacing */
+.row {
+  margin-bottom: 1rem;
+}
+
+.row:last-child {
+  margin-bottom: 0;
+}
+
+/* Input Group Enhancements */
+.input-group {
+  border-radius: var(--border-radius-md);
+  overflow: hidden;
+}
+
+.input-group .form-control,
+.input-group .form-select {
+  border-radius: var(--border-radius-md);
+}
+
+/* Focus States for All Interactive Elements */
+.form-control:focus,
+.form-select:focus,
+.form-check-input:focus,
+.btn:focus {
+  outline: none;
+}
+
+/* Loading State for Dropdowns */
+.form-select:disabled {
+  background-color: var(--grey-100);
+  color: var(--grey-500);
+  cursor: not-allowed;
+}
+
+/* Success States */
+.form-control.is-valid,
+.form-select.is-valid {
+  border-color: var(--material-green);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2343a047' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M22 11.08V12a10 10 0 1 1-5.93-9.14'%3E%3C/path%3E%3Cpolyline points='22 4 12 14.01 9 11.01'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 1rem center;
+  background-size: 1.25rem;
+  padding-right: 3rem;
+}
+
+/* Error States */
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: #dc3545;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23dc3545' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='15' y1='9' x2='9' y2='15'%3E%3C/line%3E%3Cline x1='9' y1='9' x2='15' y2='15'%3E%3C/line%3E%3C/svg%3E");
+}
+
+/* Additional touch - headings/icons */
+.fa-stethoscope, .fa-info-circle, .fa-heartbeat, .fa-thermometer-half {
+  color: var(--material-green) !important;
+}
+
+/* Material Design Ripple Effect (Alternative) */
+.btn-ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0);
+  animation: ripple 0.6s linear;
+  pointer-events: none;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .form-control, .form-select {
+    padding: 0.75rem 0.875rem;
+    font-size: 16px; /* Prevent zoom on iOS */
+    min-height: 48px;
+  }
+  
+  .card-header {
+    padding: 1.25rem 1.5rem;
+  }
+  
+  .btn {
+    padding: 0.875rem 2rem;
+    font-size: 1rem;
+    min-width: 180px;
+  }
+}
+
+/* Custom Scrollbar for Webkit Browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--grey-100);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--material-green-300);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--material-green);
+}
+
+/* Print Styles */
+@media print {
+  .btn, .form-check-input, .form-select {
+    box-shadow: none !important;
+  }
+}
+
+/* D-grid container for the predict button */
+.d-grid .btn {
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+/* Button container spacing */
+.text-center .btn {
+  margin: 0 0.5rem;
+}
+
+/* Professional Alert Styling */
+.alert {
+  border: none;
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--shadow);
+}
+
+.alert-warning {
+  background: linear-gradient(135deg, #fff3e0, #ffecb3);
+  border-left: 4px solid #ffb300;
+  color: #5d4037;
+}
+
+.alert-danger {
+  background: linear-gradient(135deg, #ffebee, #ffcdd2);
+  border-left: 4px solid #e53935;
+  color: #b71c1c;
+}
+
+.alert-success {
+  background: linear-gradient(135deg, var(--material-green-50), var(--material-green-100));
+  border-left: 4px solid var(--material-green);
+  color: var(--material-green-800);
+}
+/* Consistent Progress Bar Colors for Predictions */
+.bg-prediction-1 {
+  background: linear-gradient(90deg, var(--material-green), var(--material-green-dark)) !important;
+}
+
+.bg-prediction-2 {
+  background: linear-gradient(90deg, var(--material-green-300), var(--material-green-400)) !important;
+}
+
+.bg-prediction-3 {
+  background: linear-gradient(90deg, var(--material-green-200), var(--material-green-300)) !important;
+}
+
+/* Ensure all progress bars in prediction cards use these colors */
+.card .progress-bar.bg-success,
+.card .progress-bar.bg-info {
+  background: linear-gradient(90deg, var(--material-green-200), var(--material-green-300)) !important;
+}
+
+.card .border-success .progress-bar {
+  background: linear-gradient(90deg, var(--material-green), var(--material-green-dark)) !important;
+}

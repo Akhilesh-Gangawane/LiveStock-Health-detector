@@ -1,0 +1,188 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        {% if error %}
+        <div class="alert alert-danger">
+            <h4><i class="fas fa-exclamation-triangle me-2"></i>Error</h4>
+            <p class="mb-0">{{ error }}</p>
+        </div>
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary">Try Again</a>
+        </div>
+        {% elif result %}
+        
+        {% if result.is_demo %}
+        <div class="alert alert-warning">
+            <h4><i class="fas fa-exclamation-triangle me-2"></i>Demo Mode</h4>
+            <p class="mb-0">The model is not loaded. Showing demo prediction results. Please check the model file path and try again.</p>
+        </div>
+        {% endif %}
+
+        <!-- Prediction Result -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-success text-white">
+                <h4 class="mb-0"><i class="fas fa-diagnoses me-2"></i>Prediction Result</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Animal Information</h5>
+                        <p><strong>Type:</strong> {{ result.animal_type }}</p>
+                        <p><strong>Most Likely Disease:</strong> <span class="text-danger fw-bold">{{ result.predicted_disease }}</span></p>
+                        <p><strong>Confidence:</strong> 
+                            <span class="badge bg-{% if result.confidence > 0.7 %}success{% elif result.confidence > 0.5 %}warning{% else %}danger{% endif %}">
+                                {{ "%.1f"|format(result.confidence * 100) }}%
+                            </span>
+                        </p>
+                        <p><strong>Condition Severity:</strong> 
+                            <span class="badge bg-{% if result.condition_severity == 'Acute' %}danger{% elif result.condition_severity == 'Chronic' %}warning{% else %}info{% endif %}">
+                                {{ result.condition_severity }}
+                            </span>
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Vital Signs Analysis</h5>
+                        <p><strong>Temperature:</strong> 
+                            <span class="badge bg-{% if result.vital_signs_analysis.temperature_status == 'High' %}danger{% elif result.vital_signs_analysis.temperature_status == 'Low' %}warning{% else %}success{% endif %}">
+                                {{ result.vital_signs_analysis.temperature_status }}
+                            </span>
+                        </p>
+                        <p><strong>Heart Rate:</strong> 
+                            <span class="badge bg-{% if result.vital_signs_analysis.heart_rate_status == 'High' %}danger{% elif result.vital_signs_analysis.heart_rate_status == 'Low' %}warning{% else %}success{% endif %}">
+                                {{ result.vital_signs_analysis.heart_rate_status }}
+                            </span>
+                        </p>
+                        
+                        <h5 class="mt-3">Syndrome Analysis</h5>
+                        <p><strong>Respiratory Score:</strong> {{ result.syndrome_analysis.respiratory_score }}</p>
+                        <p><strong>GI Score:</strong> {{ result.syndrome_analysis.gi_score }}</p>
+                        <p><strong>Multi-System:</strong> 
+                            <span class="badge bg-{% if result.syndrome_analysis.multi_system %}danger{% else %}success{% endif %}">
+                                {{ 'Yes' if result.syndrome_analysis.multi_system else 'No' }}
+                            </span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Top 3 Predictions -->
+        <div class="card shadow mb-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0"><i class="fas fa-list-ol me-2"></i>Top 3 Disease Predictions</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for pred in result.top_3_predictions %}
+                    <div class="col-md-4 mb-3">
+                        <div class="card {% if loop.first %}border-success{% endif %} h-100">
+                            <div class="card-header {% if loop.first %}bg-success text-white{% else %}bg-light{% endif %}">
+                                <strong>#{{ loop.index }}</strong>
+                            </div>
+                            <div class="card-body">
+                                <h6>{{ pred.disease }}</h6>
+                                <div class="progress mt-2">
+                                    <div class="progress-bar {% if loop.first %}bg-prediction-1{% elif loop.index == 2 %}          bg-prediction-2{% else %}bg-prediction-3{% endif %}" 
+                                         style="width: {{ pred.probability * 100 }}%">
+                                        {{ "%.1f"|format(pred.probability * 100) }}%
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <!-- Input Summary -->
+        <div class="card shadow">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Input Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>Basic Information</h6>
+                        <p><strong>Animal:</strong> {{ form_data.animal_type }} - {{ form_data.breed }}</p>
+                        <p><strong>Age:</strong> {{ form_data.age }} years</p>
+                        <p><strong>Gender:</strong> {{ form_data.gender }}</p>
+                        <p><strong>Weight:</strong> {{ form_data.weight }} kg</p>
+                        <p><strong>Duration:</strong> {{ form_data.duration }} days</p>
+                        
+                        <h6 class="mt-3">Vital Signs</h6>
+                        <p><strong>Temperature:</strong> {{ form_data.body_temperature }}°C</p>
+                        <p><strong>Heart Rate:</strong> {{ form_data.heart_rate }} BPM</p>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>Main Symptoms</h6>
+                        <ul class="list-unstyled">
+                            {% for i in range(1, 5) %}
+                                {% if form_data['symptom' ~ i] %}
+                                <li><i class="fas fa-arrow-right text-primary me-2"></i>{{ form_data['symptom' ~ i] }}</li>
+                                {% endif %}
+                            {% endfor %}
+                        </ul>
+                        
+                        <h6 class="mt-3">Additional Symptoms</h6>
+                        <ul class="list-unstyled">
+                            {% set symptom_names = {
+                                'appetite_loss': 'Appetite Loss',
+                                'vomiting': 'Vomiting',
+                                'diarrhea': 'Diarrhea',
+                                'coughing': 'Coughing',
+                                'labored_breathing': 'Labored Breathing',
+                                'nasal_discharge': 'Nasal Discharge',
+                                'lameness': 'Lameness',
+                                'skin_lesions': 'Skin Lesions',
+                                'eye_discharge': 'Eye Discharge'
+                            } %}
+                            
+                            {# Get main symptoms to exclude from additional symptoms #}
+                            {% set main_symptoms = [] %}
+                            {% for i in range(1, 5) %}
+                                {% if form_data['symptom' ~ i] %}
+                                    {% set _ = main_symptoms.append(form_data['symptom' ~ i].lower()) %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {# Display only additional symptoms that are not in main symptoms #}
+                            {% for key, display_name in symptom_names.items() %}
+                                {% set symptom_lower = display_name.lower() %}
+                                {% if form_data[key] == 'yes' and symptom_lower not in main_symptoms %}
+                                <li><i class="fas fa-check text-success me-2"></i>{{ display_name }}</li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {# Show message if no additional symptoms #}
+                            {% set has_additional_symptoms = false %}
+                            {% for key, display_name in symptom_names.items() %}
+                                {% set symptom_lower = display_name.lower() %}
+                                {% if form_data[key] == 'yes' and symptom_lower not in main_symptoms %}
+                                    {% set has_additional_symptoms = true %}
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if not has_additional_symptoms %}
+                                <li><i class="fas fa-minus text-muted me-2"></i>No additional symptoms</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="/" class="btn btn-primary me-2">
+                <i class="fas fa-redo me-2"></i>New Prediction
+            </a>
+            <button onclick="window.print()" class="btn btn-outline-primary">
+                <i class="fas fa-print me-2"></i>Print Report
+            </button>
+        </div>
+
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
