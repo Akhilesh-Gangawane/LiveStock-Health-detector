@@ -1343,6 +1343,16 @@ def voice_predict():
         'recommendation': 'Based on voice analysis, consider veterinary consultation.'
     })
 
+# Offline page route
+@app.route('/offline.html')
+def offline():
+    return render_template('offline.html')
+
+# Service Worker route
+@app.route('/sw.js')
+def service_worker():
+    return app.send_static_file('sw.js')
+
 # File upload route for images
 @app.route('/upload_image', methods=['POST'])
 def upload_image():
