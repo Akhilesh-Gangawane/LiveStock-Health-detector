@@ -1,0 +1,28 @@
+{
+  "vets": [
+    {
+      "id": 1,
+      "name": "Dr. A. Patil",
+      "specialization": "Large animals",
+      "phone": "+919876543210"
+    },
+    {
+      "id": 2,
+      "name": "Dr. S. Rao",
+      "specialization": "Poultry",
+      "phone": "+919812345678"
+    }
+  ],
+  "diseases": [
+    {
+      "id": 1,
+      "name": "Pneumonia",
+      "symptoms": [
+        "cough",
+        "fever"
+      ],
+      "treatment": "Antibiotics and supportive care"
+    }
+  ],
+  "predictions": []
+}
