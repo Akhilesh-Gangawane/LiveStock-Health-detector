@@ -1,0 +1,258 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-plus me-3"></i>Add Vaccination Record</h1>
+    <p>{{ animal.name or animal.animal_id }} - {{ animal.animal_type }} ({{ animal.breed }})</p>
+    <a href="{{ url_for('animal_vaccinations', animal_id=animal.id) }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Records
+    </a>
+</div>
+
+<div class="form-container">
+    <form method="POST">
+        <div class="section-divider">
+            <h5><i class="fas fa-syringe me-2"></i>Vaccination Details</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Vaccine Name *</label>
+                    <select class="form-select" name="vaccine_name" required>
+                        <option value="">Select Vaccine</option>
+                        {% if animal.animal_type in ['Cow', 'Buffalo'] %}
+                            <option value="FMD Vaccine">FMD (Foot and Mouth Disease) Vaccine</option>
+                            <option value="Anthrax Vaccine">Anthrax Vaccine</option>
+                            <option value="Brucellosis Vaccine">Brucellosis Vaccine</option>
+                            <option value="Blackleg Vaccine">Blackleg Vaccine</option>
+                            <option value="Hemorrhagic Septicemia Vaccine">Hemorrhagic Septicemia Vaccine</option>
+                        {% elif animal.animal_type in ['Goat', 'Sheep'] %}
+                            <option value="PPR Vaccine">PPR (Peste des Petits Ruminants) Vaccine</option>
+                            <option value="FMD Vaccine">FMD Vaccine</option>
+                            <option value="Anthrax Vaccine">Anthrax Vaccine</option>
+                            <option value="Clostridial Vaccine">Clostridial Vaccine</option>
+                        {% elif animal.animal_type == 'Dog' %}
+                            <option value="DHPP Vaccine">DHPP (Distemper, Hepatitis, Parvovirus, Parainfluenza)</option>
+                            <option value="Rabies Vaccine">Rabies Vaccine</option>
+                            <option value="Bordetella Vaccine">Bordetella (Kennel Cough) Vaccine</option>
+                            <option value="Lyme Disease Vaccine">Lyme Disease Vaccine</option>
+                        {% elif animal.animal_type == 'Cat' %}
+                            <option value="FVRCP Vaccine">FVRCP (Feline Viral Rhinotracheitis, Calicivirus, Panleukopenia)</option>
+                            <option value="Rabies Vaccine">Rabies Vaccine</option>
+                            <option value="FeLV Vaccine">FeLV (Feline Leukemia) Vaccine</option>
+                        {% elif animal.animal_type == 'Pig' %}
+                            <option value="Classical Swine Fever Vaccine">Classical Swine Fever Vaccine</option>
+                            <option value="FMD Vaccine">FMD Vaccine</option>
+                            <option value="Swine Erysipelas Vaccine">Swine Erysipelas Vaccine</option>
+                        {% else %}
+                            <option value="FMD Vaccine">FMD Vaccine</option>
+                            <option value="Anthrax Vaccine">Anthrax Vaccine</option>
+                        {% endif %}
+                        <option value="Other">Other (specify in notes)</option>
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Vaccination Date *</label>
+                    <input type="date" class="form-control" name="vaccination_date" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Next Due Date</label>
+                    <input type="date" class="form-control" name="next_due_date">
+                    <small class="form-text text-muted">When is the next vaccination due?</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Veterinarian</label>
+                    <input type="text" class="form-control" name="veterinarian" placeholder="Dr. Name or Clinic">
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Notes</label>
+                <textarea class="form-control" name="notes" rows="3" placeholder="Any additional notes about the vaccination..."></textarea>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save me-2"></i>Save Vaccination Record
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Vaccination Schedule Guide -->
+<div class="schedule-guide">
+    <h3><i class="fas fa-calendar-alt me-2"></i>Vaccination Schedule Guide</h3>
+    <div class="schedule-cards">
+        {% if animal.animal_type in ['Cow', 'Buffalo'] %}
+        <div class="schedule-card">
+            <h6>Cattle Vaccination Schedule</h6>
+            <ul>
+                <li><strong>FMD:</strong> Every 6 months</li>
+                <li><strong>Anthrax:</strong> Annual</li>
+                <li><strong>Brucellosis:</strong> Once (heifers 4-8 months)</li>
+                <li><strong>Blackleg:</strong> Annual</li>
+            </ul>
+        </div>
+        {% elif animal.animal_type in ['Goat', 'Sheep'] %}
+        <div class="schedule-card">
+            <h6>Small Ruminant Schedule</h6>
+            <ul>
+                <li><strong>PPR:</strong> Annual</li>
+                <li><strong>FMD:</strong> Every 6 months</li>
+                <li><strong>Anthrax:</strong> Annual</li>
+                <li><strong>Clostridial:</strong> Annual</li>
+            </ul>
+        </div>
+        {% elif animal.animal_type == 'Dog' %}
+        <div class="schedule-card">
+            <h6>Canine Vaccination Schedule</h6>
+            <ul>
+                <li><strong>DHPP:</strong> Annual</li>
+                <li><strong>Rabies:</strong> Every 1-3 years</li>
+                <li><strong>Bordetella:</strong> Every 6-12 months</li>
+                <li><strong>Lyme:</strong> Annual (if endemic area)</li>
+            </ul>
+        </div>
+        {% elif animal.animal_type == 'Cat' %}
+        <div class="schedule-card">
+            <h6>Feline Vaccination Schedule</h6>
+            <ul>
+                <li><strong>FVRCP:</strong> Every 1-3 years</li>
+                <li><strong>Rabies:</strong> Every 1-3 years</li>
+                <li><strong>FeLV:</strong> Annual (outdoor cats)</li>
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.form-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    padding: 40px;
+    margin-bottom: 40px;
+}
+
+.section-divider {
+    border-left: 4px solid #2d5a27;
+    padding-left: 20px;
+    margin-bottom: 30px;
+}
+
+.section-divider h5 {
+    color: #2d5a27;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #2d5a27;
+    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.schedule-guide {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    padding: 30px;
+}
+
+.schedule-guide h3 {
+    color: #2d5a27;
+    margin-bottom: 20px;
+}
+
+.schedule-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.schedule-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    border-left: 4px solid #2d5a27;
+}
+
+.schedule-card h6 {
+    color: #2d5a27;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.schedule-card ul {
+    margin: 0;
+    padding-left: 20px;
+}
+
+.schedule-card li {
+    margin-bottom: 8px;
+    color: #666;
+}
+
+.schedule-card strong {
+    color: #2d5a27;
+}
+</style>
+
+<script>
+// Set today's date as default for vaccination date
+document.addEventListener('DOMContentLoaded', function() {
+    const today = new Date().toISOString().split('T')[0];
+    document.querySelector('input[name="vaccination_date"]').value = today;
+    
+    // Auto-calculate next due date based on vaccine type
+    const vaccineSelect = document.querySelector('select[name="vaccine_name"]');
+    const nextDueDateInput = document.querySelector('input[name="next_due_date"]');
+    const vaccinationDateInput = document.querySelector('input[name="vaccination_date"]');
+    
+    function calculateNextDueDate() {
+        const vaccine = vaccineSelect.value;
+        const vaccinationDate = new Date(vaccinationDateInput.value);
+        
+        if (!vaccine || !vaccinationDateInput.value) return;
+        
+        let monthsToAdd = 12; // Default to annual
+        
+        // Set specific intervals based on vaccine type
+        if (vaccine.includes('FMD')) {
+            monthsToAdd = 6;
+        } else if (vaccine.includes('Bordetella')) {
+            monthsToAdd = 6;
+        } else if (vaccine.includes('Rabies')) {
+            monthsToAdd = 36; // 3 years
+        }
+        
+        const nextDueDate = new Date(vaccinationDate);
+        nextDueDate.setMonth(nextDueDate.getMonth() + monthsToAdd);
+        
+        nextDueDateInput.value = nextDueDate.toISOString().split('T')[0];
+    }
+    
+    vaccineSelect.addEventListener('change', calculateNextDueDate);
+    vaccinationDateInput.addEventListener('change', calculateNextDueDate);
+});
+</script>
+{% endblock %}

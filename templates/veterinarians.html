@@ -1,0 +1,257 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-user-md me-3"></i>Find Veterinarians</h1>
+    <p>Connect with qualified veterinarians in your area</p>
+</div>
+
+<div class="search-filters">
+    <div class="row">
+        <div class="col-md-4">
+            <input type="text" class="form-control" placeholder="Search by name or specialization" id="searchVets">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="specializationFilter">
+                <option value="">All Specializations</option>
+                <option value="Large Animal Medicine">Large Animal Medicine</option>
+                <option value="Dairy Cattle Specialist">Dairy Cattle Specialist</option>
+                <option value="Poultry & Small Animals">Poultry & Small Animals</option>
+                <option value="Emergency & Critical Care">Emergency & Critical Care</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="locationFilter">
+                <option value="">All Locations</option>
+                <option value="Pune">Pune</option>
+                <option value="Mumbai">Mumbai</option>
+                <option value="Nashik">Nashik</option>
+            </select>
+        </div>
+        <div class="col-md-2">
+            <button class="btn btn-primary w-100" onclick="filterVets()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="vets-grid">
+    {% for vet in veterinarians %}
+    <div class="vet-card">
+        <div class="vet-header">
+            <div class="vet-avatar">
+                <i class="fas fa-user-md"></i>
+            </div>
+            <div class="vet-info">
+                <h4>{{ vet.name }}</h4>
+                <p class="specialization">{{ vet.specialization }}</p>
+                <div class="rating">
+                    {% for i in range(5) %}
+                        {% if i < vet.rating %}
+                            <i class="fas fa-star"></i>
+                        {% else %}
+                            <i class="far fa-star"></i>
+                        {% endif %}
+                    {% endfor %}
+                    <span>({{ "%.1f"|format(vet.rating) }})</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="vet-details">
+            <div class="detail-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <span>{{ vet.location }}</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-phone"></i>
+                <span>{{ vet.phone }}</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-envelope"></i>
+                <span>{{ vet.email }}</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-graduation-cap"></i>
+                <span>{{ vet.experience_years }} years experience</span>
+            </div>
+        </div>
+        
+        <div class="vet-actions">
+            <button class="btn btn-success" onclick="callVet('{{ vet.phone }}')">
+                <i class="fas fa-phone"></i> Call
+            </button>
+            <button class="btn btn-info" onclick="whatsappVet('{{ vet.phone }}')">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </button>
+            <button class="btn btn-primary" onclick="emailVet('{{ vet.email }}')">
+                <i class="fas fa-envelope"></i> Email
+            </button>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-user-md"></i>
+        <h3>No Veterinarians Found</h3>
+        <p>We're working to add more veterinarians to our network. Please check back later.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+function callVet(phone) {
+    window.location.href = 'tel:' + phone;
+}
+
+function whatsappVet(phone) {
+    const message = encodeURIComponent('Hello, I found your contact through FarmCare Pro. I need veterinary assistance for my livestock.');
+    window.open('https://wa.me/' + phone.replace(/[^0-9]/g, '') + '?text=' + message, '_blank');
+}
+
+function emailVet(email) {
+    const subject = encodeURIComponent('Veterinary Consultation Request - FarmCare Pro');
+    const body = encodeURIComponent('Hello,\n\nI found your contact through FarmCare Pro and would like to schedule a consultation for my livestock.\n\nBest regards');
+    window.location.href = 'mailto:' + email + '?subject=' + subject + '&body=' + body;
+}
+
+function filterVets() {
+    // This would implement filtering functionality
+    console.log('Filtering veterinarians...');
+}
+</script>
+
+<style>
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.search-filters {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.vets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.vet-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.vet-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.vet-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 25px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.vet-avatar {
+    width: 70px;
+    height: 70px;
+    background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    color: white;
+}
+
+.vet-info h4 {
+    margin: 0 0 5px 0;
+    color: #2d5a27;
+    font-size: 1.3rem;
+}
+
+.specialization {
+    color: #666;
+    margin: 0 0 10px 0;
+    font-weight: 500;
+}
+
+.rating {
+    color: #ffc107;
+}
+
+.rating span {
+    color: #666;
+    margin-left: 5px;
+    font-size: 0.9rem;
+}
+
+.vet-details {
+    padding: 25px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+    color: #666;
+}
+
+.detail-item i {
+    color: #2d5a27;
+    width: 20px;
+}
+
+.vet-actions {
+    padding: 25px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.vet-actions .btn {
+    flex: 1;
+    min-width: 100px;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #2d5a27;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #666;
+}
+</style>
+{% endblock %}

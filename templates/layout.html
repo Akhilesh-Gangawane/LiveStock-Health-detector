@@ -3,32 +3,281 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐾 Animal Disease Prediction System</title>
+    <title>🐾 FarmCare Pro - Livestock Health Management</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    <style>
+        /* Enhanced Navigation */
+        .navbar-custom {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 15px 0;
+        }
+        
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white !important;
+            text-decoration: none;
+        }
+        
+        .navbar-brand:hover {
+            color: #e8f5e8 !important;
+        }
+        
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+            padding: 8px 16px !important;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            margin: 0 5px;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            background-color: rgba(255,255,255,0.2);
+            transform: translateY(-2px);
+        }
+        
+        .navbar-toggler {
+            border: none;
+            color: white;
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: none;
+        }
+        
+        /* Enhanced Footer */
+        .footer-custom {
+            background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: 60px;
+        }
+        
+        .footer-custom .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .footer-custom .footer-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-custom .footer-links a:hover {
+            color: #e8f5e8;
+            transform: translateY(-2px);
+        }
+        
+        .footer-custom .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .footer-custom .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .footer-custom .social-links a:hover {
+            color: #e8f5e8;
+            transform: scale(1.2);
+        }
+        
+        /* Container adjustments */
+        .main-container {
+            min-height: calc(100vh - 200px);
+            padding-top: 20px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .footer-custom .footer-links {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- <nav class="navbar navbar-dark bg-primary">
+    <!-- Enhanced Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <span class="navbar-brand mb-0 h1">
+            <a class="navbar-brand" href="/">
                 <i class="fas fa-paw me-2"></i>
-                Animal Disease Prediction System
-            </span>
+                FarmCare Pro
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('animals') }}">
+                                <i class="fas fa-paw me-1"></i>Animals
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('lands') }}">
+                                <i class="fas fa-map-marked-alt me-1"></i>Lands
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('index') }}">
+                                <i class="fas fa-stethoscope me-1"></i>Health Check
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('veterinarians') }}">
+                                <i class="fas fa-user-md me-1"></i>{{ get_text('veterinarians') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('knowledge_base') }}">
+                                <i class="fas fa-book-medical me-1"></i>{{ get_text('knowledge_base') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('subsidies') }}">
+                                <i class="fas fa-hand-holding-usd me-1"></i>{{ get_text('subsidies') }}
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ current_user.name }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#predictionForm">
+                                <i class="fas fa-stethoscope me-1"></i>Health Check
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('veterinarians') }}">
+                                <i class="fas fa-user-md me-1"></i>{{ get_text('veterinarians') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('knowledge_base') }}">
+                                <i class="fas fa-book-medical me-1"></i>{{ get_text('knowledge_base') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('subsidies') }}">
+                                <i class="fas fa-hand-holding-usd me-1"></i>{{ get_text('subsidies') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('register') }}">
+                                <i class="fas fa-user-plus me-1"></i>Register
+                            </a>
+                        </li>
+                    {% endif %}
+                    <!-- Language Switcher -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-language me-1"></i>
+                            {% if current_language == 'mr' %}मराठी{% else %}English{% endif %}
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="{{ url_for('set_language', language='en') }}">
+                                <i class="fas fa-flag-usa me-2"></i>English
+                            </a></li>
+                            <li><a class="dropdown-item" href="{{ url_for('set_language', language='mr') }}">
+                                <i class="fas fa-flag me-2"></i>मराठी
+                            </a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
-     -->
-    <div class="container mt-4">
+    
+    <!-- Main Content -->
+    <div class="container main-container">
         {% block content %}{% endblock %}
     </div>
     
-    <footer class="bg-light text-center py-3 mt-5">
+    <!-- Enhanced Footer -->
+    <footer class="footer-custom">
         <div class="container">
-            <p class="text-muted mb-0">🐾 Veterinary AI Assistant - For educational purposes</p>
+            <div class="footer-links">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+                <a href="#contact">Contact Us</a>
+                <a href="#support">Support</a>
+            </div>
+            
+            <div class="social-links">
+                <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+            
+            <div class="text-center">
+                <p class="mb-0">
+                    <i class="fas fa-paw me-2"></i>
+                    FarmCare Pro - AI-Powered Livestock Health Management
+                </p>
+                <small class="text-light opacity-75">
+                    © 2024 FarmCare Pro. For educational and research purposes.
+                </small>
+            </div>
         </div>
     </footer>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    <script>
+        function showEnhancedInfo(event) {
+            event.preventDefault();
+            alert('🚀 Enhanced Features Available!\n\nFor full farm management features including:\n• User accounts & authentication\n• Animal & land management\n• Dashboard & analytics\n• Prediction history\n\nRun: python app_enhanced.py\n\nThis will start the enhanced version with all features!');
+        }
+    </script>
 </body>
 </html>

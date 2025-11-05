@@ -1,201 +1,640 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        <div class="card shadow">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0"><i class="fas fa-stethoscope me-2"></i>Animal Health Assessment</h4>
-            </div>
-            <div class="card-body">
-                <form id="predictionForm" action="/predict" method="POST">
-                    
-                    <!-- Animal Basic Information -->
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3"><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Animal Type *</label>
-                                <select class="form-select" id="animal_type" name="animal_type" required>
-                                    <option value="">Select Animal Type</option>
-                                    {% for animal in animals %}
-                                        <option value="{{ animal }}">{{ animal }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Breed *</label>
-                                <select class="form-select" id="breed" name="breed" required>
-                                    <option value="">First select animal type</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <div class="row mt-3">
-                            <div class="col-md-3">
-                                <label class="form-label">Age (years) *</label>
-                                <input type="number" class="form-control" name="age" step="0.1" min="0" max="50" required value="5">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Gender *</label>
-                                <select class="form-select" name="gender" required>
-                                    <option value="">Select</option>
-                                    <option value="Male" selected>Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Weight (kg) *</label>
-                                <input type="number" class="form-control" name="weight" step="0.1" min="0" required value="25">
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Duration (days) *</label>
-                                <input type="number" class="form-control" name="duration" min="0" required value="3">
-                            </div>
-                        </div>
-                    </div>
+<style>
+    /* Enhanced styles for better UI */
+    .hero-section {
+        background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+        color: white;
+        padding: 60px 0;
+        margin-bottom: 40px;
+        border-radius: 15px;
+        text-align: center;
+    }
+    
+    .hero-section h1 {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .hero-section p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin-bottom: 30px;
+    }
+    
+    .feature-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 30px;
+        margin-bottom: 40px;
+    }
+    
+    .feature-card {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
+        cursor: pointer;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+    }
+    
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 20px;
+        font-size: 2rem;
+        color: #2d5a27;
+        transition: all 0.3s ease;
+    }
+    
+    .feature-card:hover .feature-icon {
+        background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+        color: white;
+        transform: scale(1.1);
+    }
+    
+    .prediction-form {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+        overflow: hidden;
+        margin-bottom: 40px;
+    }
+    
+    .form-header {
+        background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+    }
+    
+    .form-header h2 {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .form-body {
+        padding: 40px;
+    }
+    
+    .section-divider {
+        border-left: 4px solid #2d5a27;
+        padding-left: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .section-divider h5 {
+        color: #2d5a27;
+        font-weight: 600;
+        margin-bottom: 20px;
+    }
+    
+    .form-control, .form-select {
+        border: 2px solid #e1e8ed;
+        border-radius: 10px;
+        padding: 12px 15px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: #2d5a27;
+        box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+    }
+    
+    .symptom-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .symptom-card {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 10px;
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .symptom-card:hover {
+        background: #e8f5e8;
+        border-color: #2d5a27;
+    }
+    
+    .symptom-card.selected {
+        background: #e8f5e8;
+        border-color: #2d5a27;
+    }
+    
+    .btn-predict {
+        background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+        border: none;
+        padding: 15px 40px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        border-radius: 30px;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(45, 90, 39, 0.4);
+    }
+    
+    .btn-predict:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(45, 90, 39, 0.6);
+        color: white;
+    }
+    
+    .voice-prediction-btn {
+        background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+        border: none;
+        padding: 12px 30px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 25px;
+        color: white;
+        transition: all 0.3s ease;
+        margin-top: 15px;
+    }
+    
+    .voice-prediction-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(23, 162, 184, 0.4);
+        color: white;
+    }
+    
+    .quick-actions {
+        background: white;
+        padding: 30px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        margin-bottom: 40px;
+    }
+    
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 20px;
+        margin-top: 20px;
+    }
+    
+    .action-btn {
+        padding: 20px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        font-size: 1rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: all 0.3s ease;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .action-btn.success {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    }
+    
+    .action-btn.info {
+        background: linear-gradient(135deg, #17a2b8 0%, #6f42c1 100%);
+    }
+    
+    .action-btn.primary {
+        background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .knowledge-section {
+        background: #f8f9fa;
+        padding: 40px;
+        border-radius: 15px;
+        margin-top: 40px;
+    }
+    
+    .disease-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 25px;
+        margin-top: 30px;
+    }
+    
+    .disease-card {
+        background: white;
+        border-radius: 15px;
+        padding: 25px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        transition: all 0.3s ease;
+    }
+    
+    .disease-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+    }
+    
+    .disease-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 15px;
+        font-size: 1.5rem;
+        color: #2d5a27;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-section h1 {
+            font-size: 2rem;
+        }
+        
+        .feature-cards {
+            grid-template-columns: 1fr;
+        }
+        
+        .form-body {
+            padding: 25px;
+        }
+    }
+</style>
 
-                    <!-- Symptoms section -->
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3"><i class="fas fa-heartbeat me-2"></i>Symptoms</h5>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Symptom 1 *</label>
-                                <select class="form-select" name="symptom1" required>
-                                    <option value="">Select Symptom</option>
-                                    {% for symptom in symptoms %}
-                                        <option value="{{ symptom }}" {% if symptom == 'Cough' %}selected{% endif %}>{{ symptom }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Symptom 2 *</label>
-                                <select class="form-select" name="symptom2" required>
-                                    <option value="">Select Symptom</option>
-                                    {% for symptom in symptoms %}
-                                        <option value="{{ symptom }}" {% if symptom == 'Lethargy' %}selected{% endif %}>{{ symptom }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Symptom 3 *</label>
-                                <select class="form-select" name="symptom3" required>
-                                    <option value="">Select Symptom</option>
-                                    {% for symptom in symptoms %}
-                                        <option value="{{ symptom }}" {% if symptom == 'Loss of appetite' %}selected{% endif %}>{{ symptom }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Symptom 4 *</label>
-                                <select class="form-select" name="symptom4" required>
-                                    <option value="">Select Symptom</option>
-                                    {% for symptom in symptoms %}
-                                        <option value="{{ symptom }}" {% if symptom == 'Nasal discharge' %}selected{% endif %}>{{ symptom }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <!-- Updated Checkbox symptoms with all symptoms -->
-                        <div class="row mt-3">
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="appetite_loss" value="yes" id="appetite_loss" checked>
-                                    <label class="form-check-label" for="appetite_loss">Appetite Loss</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="vomiting" value="yes" id="vomiting">
-                                    <label class="form-check-label" for="vomiting">Vomiting</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="diarrhea" value="yes" id="diarrhea">
-                                    <label class="form-check-label" for="diarrhea">Diarrhea</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="coughing" value="yes" id="coughing" checked>
-                                    <label class="form-check-label" for="coughing">Coughing</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="labored_breathing" value="yes" id="labored_breathing" checked>
-                                    <label class="form-check-label" for="labored_breathing">Labored Breathing</label>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="nasal_discharge" value="yes" id="nasal_discharge" checked>
-                                    <label class="form-check-label" for="nasal_discharge">Nasal Discharge</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="lameness" value="yes" id="lameness">
-                                    <label class="form-check-label" for="lameness">Lameness</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="skin_lesions" value="yes" id="skin_lesions">
-                                    <label class="form-check-label" for="skin_lesions">Skin Lesions</label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="checkbox" name="eye_discharge" value="yes" id="eye_discharge">
-                                    <label class="form-check-label" for="eye_discharge">Eye Discharge</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Vital Signs -->
-                    <div class="mb-4">
-                        <h5 class="text-primary mb-3"><i class="fas fa-thermometer-half me-2"></i>Vital Signs</h5>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Body Temperature (°C) *</label>
-                                <input type="number" class="form-control" name="body_temperature" step="0.1" min="30" max="45" required value="39.8">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Heart Rate (BPM) *</label>
-                                <input type="number" class="form-control" name="heart_rate" min="20" max="300" required value="110">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="d-grid">
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <span class="btn-content">
-                                <i class="fas fa-search me-2"></i>
-                                Predict Disease
-                            </span>
-                        </button>
-                    </div>
-                </form>
-            </div>
+<!-- Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <h1><i class="fas fa-paw me-3"></i>FarmCare Pro</h1>
+        <p>AI-powered livestock health detection and comprehensive farm management system</p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <button class="btn btn-light btn-lg" onclick="scrollToForm()">
+                <i class="fas fa-stethoscope me-2"></i>Health Assessment
+            </button>
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                </a>
+            {% else %}
+                <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login / Register
+                </a>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Inline JavaScript as backup -->
-<script>
-console.log('Inline script running...');
+<!-- Feature Cards -->
+<div class="feature-cards">
+    <div class="feature-card" onclick="scrollToForm()">
+        <div class="feature-icon">
+            <i class="fas fa-robot"></i>
+        </div>
+        <h4>AI Disease Detection</h4>
+        <p>Advanced machine learning algorithms analyze symptoms to detect potential illnesses with high accuracy.</p>
+    </div>
+    <div class="feature-card" onclick="showVoicePrediction()">
+        <div class="feature-icon">
+            <i class="fas fa-microphone"></i>
+        </div>
+        <h4>Voice Analysis</h4>
+        <p>Describe symptoms verbally and let our AI analyze the audio for comprehensive health assessment.</p>
+    </div>
+    <div class="feature-card" onclick="window.location.href='{{ url_for('knowledge_base') }}'">
+        <div class="feature-icon">
+            <i class="fas fa-book-medical"></i>
+        </div>
+        <h4>{{ get_text('knowledge_base') }}</h4>
+        <p>Access comprehensive information about common livestock diseases, treatments, and prevention methods.</p>
+    </div>
+</div>
 
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+    <div class="action-grid">
+        <button class="action-btn success" onclick="scrollToForm()">
+            <i class="fas fa-stethoscope"></i>
+            Health Check
+        </button>
+        {% if current_user.is_authenticated %}
+            <a href="{{ url_for('add_animal') }}" class="action-btn info">
+                <i class="fas fa-paw"></i>
+                Add Animal
+            </a>
+            <a href="{{ url_for('veterinarians') }}" class="action-btn primary">
+                <i class="fas fa-user-md"></i>
+                Find Vet
+            </a>
+            <a href="{{ url_for('subsidies') }}" class="action-btn success">
+                <i class="fas fa-hand-holding-usd"></i>
+                Subsidies
+            </a>
+        {% else %}
+            <a href="{{ url_for('register') }}" class="action-btn info">
+                <i class="fas fa-user-plus"></i>
+                Register Account
+            </a>
+            <a href="{{ url_for('veterinarians') }}" class="action-btn primary">
+                <i class="fas fa-user-md"></i>
+                Find Vet
+            </a>
+            <a href="{{ url_for('subsidies') }}" class="action-btn success">
+                <i class="fas fa-hand-holding-usd"></i>
+                Subsidies
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Main Prediction Form -->
+<div class="prediction-form" id="predictionForm">
+    <div class="form-header">
+        <h2><i class="fas fa-stethoscope me-3"></i>Animal Health Assessment</h2>
+        <p>Comprehensive AI-powered health analysis for your livestock</p>
+    </div>
+    <div class="form-body">
+        <form action="/predict" method="POST">
+            <!-- Animal Basic Information -->
+            <div class="section-divider">
+                <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Animal Type *</label>
+                        <select class="form-select" id="animal_type" name="animal_type" required>
+                            <option value="">Select Animal Type</option>
+                            {% for animal in animals %}
+                                <option value="{{ animal }}">{{ animal }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Breed *</label>
+                        <select class="form-select" id="breed" name="breed" required>
+                            <option value="">First select animal type</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row">
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Age (years) *</label>
+                        <input type="number" class="form-control" name="age" step="0.1" min="0" max="50" required value="5">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Gender *</label>
+                        <select class="form-select" name="gender" required>
+                            <option value="">Select</option>
+                            <option value="Male" selected>Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Weight (kg) *</label>
+                        <input type="number" class="form-control" name="weight" step="0.1" min="0" required value="25">
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label">Duration (days) *</label>
+                        <input type="number" class="form-control" name="duration" min="0" required value="3">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Primary Symptoms -->
+            <div class="section-divider">
+                <h5><i class="fas fa-heartbeat me-2"></i>Primary Symptoms</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Primary Symptom *</label>
+                        <select class="form-select" name="symptom1" required>
+                            <option value="">Select Primary Symptom</option>
+                            {% for symptom in symptoms %}
+                                <option value="{{ symptom }}" {% if symptom == 'Cough' %}selected{% endif %}>{{ symptom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Secondary Symptom *</label>
+                        <select class="form-select" name="symptom2" required>
+                            <option value="">Select Secondary Symptom</option>
+                            {% for symptom in symptoms %}
+                                <option value="{{ symptom }}" {% if symptom == 'Lethargy' %}selected{% endif %}>{{ symptom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Additional Symptom *</label>
+                        <select class="form-select" name="symptom3" required>
+                            <option value="">Select Additional Symptom</option>
+                            {% for symptom in symptoms %}
+                                <option value="{{ symptom }}" {% if symptom == 'Loss of appetite' %}selected{% endif %}>{{ symptom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Other Symptom *</label>
+                        <select class="form-select" name="symptom4" required>
+                            <option value="">Select Other Symptom</option>
+                            {% for symptom in symptoms %}
+                                <option value="{{ symptom }}" {% if symptom == 'Nasal discharge' %}selected{% endif %}>{{ symptom }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Observable Symptoms -->
+            <div class="section-divider">
+                <h5><i class="fas fa-eye me-2"></i>Observable Symptoms</h5>
+                <p class="text-muted mb-3">Select all symptoms you have observed in the animal</p>
+                <div class="symptom-grid">
+                    <div class="symptom-card" onclick="toggleSymptom(this, 'appetite_loss')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="appetite_loss" value="yes" id="appetite_loss" checked>
+                            <label class="form-check-label" for="appetite_loss">
+                                <i class="fas fa-utensils me-2"></i>Appetite Loss
+                            </label>
+                        </div>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this, 'vomiting')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="vomiting" value="yes" id="vomiting">
+                            <label class="form-check-label" for="vomiting">
+                                <i class="fas fa-dizzy me-2"></i>Vomiting
+                            </label>
+                        </div>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this, 'diarrhea')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="diarrhea" value="yes" id="diarrhea">
+                            <label class="form-check-label" for="diarrhea">
+                                <i class="fas fa-tint me-2"></i>Diarrhea
+                            </label>
+                        </div>
+                    </div>
+                    <div class="symptom-card selected" onclick="toggleSymptom(this, 'coughing')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="coughing" value="yes" id="coughing" checked>
+                            <label class="form-check-label" for="coughing">
+                                <i class="fas fa-lungs me-2"></i>Coughing
+                            </label>
+                        </div>
+                    </div>
+                    <div class="symptom-card selected" onclick="toggleSymptom(this, 'labored_breathing')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="labored_breathing" value="yes" id="labored_breathing" checked>
+                            <label class="form-check-label" for="labored_breathing">
+                                <i class="fas fa-wind me-2"></i>Labored Breathing
+                            </label>
+                        </div>
+                    </div>
+                    <div class="symptom-card selected" onclick="toggleSymptom(this, 'nasal_discharge')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="nasal_discharge" value="yes" id="nasal_discharge" checked>
+                            <label class="form-check-label" for="nasal_discharge">
+                                <i class="fas fa-nose me-2"></i>Nasal Discharge
+                            </label>
+                        </div>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this, 'lameness')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="lameness" value="yes" id="lameness">
+                            <label class="form-check-label" for="lameness">
+                                <i class="fas fa-walking me-2"></i>Lameness
+                            </label>
+                        </div>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this, 'skin_lesions')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="skin_lesions" value="yes" id="skin_lesions">
+                            <label class="form-check-label" for="skin_lesions">
+                                <i class="fas fa-band-aid me-2"></i>Skin Lesions
+                            </label>
+                        </div>
+                    </div>
+                    <div class="symptom-card" onclick="toggleSymptom(this, 'eye_discharge')">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="eye_discharge" value="yes" id="eye_discharge">
+                            <label class="form-check-label" for="eye_discharge">
+                                <i class="fas fa-eye me-2"></i>Eye Discharge
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Vital Signs -->
+            <div class="section-divider">
+                <h5><i class="fas fa-thermometer-half me-2"></i>Vital Signs</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Body Temperature (°C) *</label>
+                        <input type="number" class="form-control" name="body_temperature" step="0.1" min="30" max="45" required value="39.8">
+                        <small class="form-text text-muted">Normal range: 38.0-39.5°C for most livestock</small>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Heart Rate (BPM) *</label>
+                        <input type="number" class="form-control" name="heart_rate" min="20" max="300" required value="110">
+                        <small class="form-text text-muted">Normal range varies by species and age</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn-predict">
+                    <i class="fas fa-robot me-2"></i>
+                    Analyze with AI
+                </button>
+                <br>
+                <button type="button" class="voice-prediction-btn" onclick="showVoicePrediction()">
+                    <i class="fas fa-microphone me-2"></i>
+                    Try Voice Prediction
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Knowledge Base Section -->
+<div class="knowledge-section" id="knowledgeBase" style="display: none;">
+    <h3><i class="fas fa-book-medical me-3"></i>Common Livestock Diseases</h3>
+    <p class="text-muted">Learn about common diseases, their symptoms, and prevention methods</p>
+    
+    <div class="disease-grid">
+        <div class="disease-card">
+            <div class="disease-icon">
+                <i class="fas fa-lungs"></i>
+            </div>
+            <h5>Bovine Respiratory Disease</h5>
+            <p>Common respiratory infection affecting cattle. Symptoms include coughing, nasal discharge, and fever.</p>
+            <small class="text-muted"><strong>Prevention:</strong> Proper ventilation, vaccination, quarantine</small>
+        </div>
+        <div class="disease-card">
+            <div class="disease-icon">
+                <i class="fas fa-virus"></i>
+            </div>
+            <h5>Foot and Mouth Disease</h5>
+            <p>Highly contagious viral disease affecting cloven-hoofed animals. Causes fever and blisters.</p>
+            <small class="text-muted"><strong>Prevention:</strong> Vaccination, biosecurity measures</small>
+        </div>
+        <div class="disease-card">
+            <div class="disease-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <h5>Mastitis</h5>
+            <p>Inflammation of mammary gland, common in dairy cows. Affects milk production significantly.</p>
+            <small class="text-muted"><strong>Prevention:</strong> Proper milking hygiene, teat dipping</small>
+        </div>
+        <div class="disease-card">
+            <div class="disease-icon">
+                <i class="fas fa-skull-crossbones"></i>
+            </div>
+            <h5>Anthrax</h5>
+            <p>Serious bacterial infection affecting all warm-blooded animals. Can cause sudden death.</p>
+            <small class="text-muted"><strong>Prevention:</strong> Annual vaccination, proper disposal</small>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced JavaScript functionality
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM Content Loaded - inline script');
+    console.log('Enhanced FarmCare Pro loaded');
     
     const animalSelect = document.getElementById('animal_type');
     const breedSelect = document.getElementById('breed');
     
     if (animalSelect && breedSelect) {
-        console.log('Found form elements');
-        
         animalSelect.addEventListener('change', function() {
             const animalType = this.value;
-            console.log('Animal changed to:', animalType);
             
             if (animalType) {
                 breedSelect.innerHTML = '<option value="">Loading breeds...</option>';
                 
-                // Simple fetch call
                 fetch('/get_breeds/' + animalType)
                     .then(response => response.json())
                     .then(breeds => {
-                        console.log('Received breeds:', breeds);
                         breedSelect.innerHTML = '<option value="">Select Breed</option>';
                         breeds.forEach(breed => {
                             const option = document.createElement('option');
@@ -219,6 +658,53 @@ document.addEventListener('DOMContentLoaded', function() {
             animalSelect.dispatchEvent(new Event('change'));
         }, 500);
     }
+});
+
+function scrollToForm() {
+    document.getElementById('predictionForm').scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+    });
+}
+
+function toggleSymptom(card, checkboxName) {
+    const checkbox = card.querySelector('input[type="checkbox"]');
+    checkbox.checked = !checkbox.checked;
+    
+    if (checkbox.checked) {
+        card.classList.add('selected');
+    } else {
+        card.classList.remove('selected');
+    }
+}
+
+function showVoicePrediction() {
+    alert('Voice prediction feature coming soon! This will allow you to describe symptoms verbally for AI analysis.');
+}
+
+function showKnowledgeBase() {
+    const knowledgeSection = document.getElementById('knowledgeBase');
+    if (knowledgeSection.style.display === 'none') {
+        knowledgeSection.style.display = 'block';
+        knowledgeSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        knowledgeSection.style.display = 'none';
+    }
+}
+
+function showEnhancedInfo(event) {
+    event.preventDefault();
+    alert('🚀 Enhanced Features Available!\n\nFor full farm management features including:\n• User accounts & authentication\n• Animal & land management\n• Dashboard & analytics\n• Prediction history\n\nRun: python app_enhanced.py\n\nThis will start the enhanced version with all features!');
+}
+
+// Add smooth scrolling for better UX
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelector(this.getAttribute('href')).scrollIntoView({
+            behavior: 'smooth'
+        });
+    });
 });
 </script>
 

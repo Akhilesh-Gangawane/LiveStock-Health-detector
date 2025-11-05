@@ -1,18 +1,251 @@
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from flask import Flask, render_template, request, jsonify, redirect, url_for, flash, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from flask_bcrypt import Bcrypt
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
-from sklearn.metrics import accuracy_score  # ADD THIS IMPORT
+from sklearn.metrics import accuracy_score
 from imblearn.over_sampling import SMOTE
 from collections import Counter
 import os
+import json
+from datetime import datetime
 import warnings
 warnings.filterwarnings('ignore')
 
-# Define the AnimalSpecificDiseasePredictor class
+# Initialize Flask app
+app = Flask(__name__)
+app.config['SECRET_KEY'] = 'farmcare-pro-secret-key-2024'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///farmcare.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Initialize extensions
+db = SQLAlchemy(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+bcrypt = Bcrypt(app)
+
+# Database Models
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    email = db.Column(db.String(120), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128))
+    name = db.Column(db.String(100), nullable=False)
+    farm_name = db.Column(db.String(100))
+    location = db.Column(db.String(100))
+    phone = db.Column(db.String(20))
+    user_type = db.Column(db.String(20), default='farmer')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    animals = db.relationship('Animal', backref='owner', lazy=True)
+    lands = db.relationship('FarmLand', backref='owner', lazy=True)
+    predictions = db.relationship('Prediction', backref='user', lazy=True)
+
+class Animal(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    animal_id = db.Column(db.String(50), unique=True, nullable=False)
+    animal_type = db.Column(db.String(50), nullable=False)
+    breed = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(100))
+    age = db.Column(db.Float, nullable=False)
+    gender = db.Column(db.String(10), nullable=False)
+    weight = db.Column(db.Float, nullable=False)
+    health_status = db.Column(db.String(20), default='healthy')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Relationships
+    predictions = db.relationship('Prediction', backref='animal', lazy=True)
+
+class FarmLand(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    land_name = db.Column(db.String(100), nullable=False)
+    size_acres = db.Column(db.Float, nullable=False)
+    location = db.Column(db.String(200), nullable=False)
+    soil_type = db.Column(db.String(50))
+    crops_grown = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Prediction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animal.id'), nullable=True)
+    prediction_data = db.Column(db.Text, nullable=False)
+    result = db.Column(db.Text, nullable=False)
+    confidence = db.Column(db.Float)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Veterinarian(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    specialization = db.Column(db.String(100))
+    location = db.Column(db.String(200))
+    phone = db.Column(db.String(20))
+    email = db.Column(db.String(120))
+    experience_years = db.Column(db.Integer)
+    rating = db.Column(db.Float, default=0.0)
+    is_available = db.Column(db.Boolean, default=True)
+
+class Disease(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    animal_types = db.Column(db.Text)  # JSON string of applicable animals
+    symptoms = db.Column(db.Text)  # JSON string of symptoms
+    description = db.Column(db.Text)
+    prevention = db.Column(db.Text)
+    treatment = db.Column(db.Text)
+    severity = db.Column(db.String(20), default='medium')
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Subsidy(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    scheme_name = db.Column(db.String(200), nullable=False)
+    scheme_type = db.Column(db.String(50))  # livestock, dairy, poultry, etc.
+    state = db.Column(db.String(50))
+    description = db.Column(db.Text)
+    eligibility = db.Column(db.Text)
+    subsidy_amount = db.Column(db.String(100))
+    application_deadline = db.Column(db.Date)
+    contact_info = db.Column(db.Text)
+    is_active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Vaccination(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    animal_id = db.Column(db.Integer, db.ForeignKey('animal.id'), nullable=False)
+    vaccine_name = db.Column(db.String(100), nullable=False)
+    vaccination_date = db.Column(db.Date, nullable=False)
+    next_due_date = db.Column(db.Date)
+    veterinarian = db.Column(db.String(100))
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# Load user callback for Flask-Login
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Multi-language support
+LANGUAGES = {
+    'en': {
+        'app_name': 'FarmCare Pro',
+        'home': 'Home',
+        'dashboard': 'Dashboard',
+        'animals': 'Animals',
+        'lands': 'Farm Lands',
+        'health_check': 'Health Check',
+        'veterinarians': 'Veterinarians',
+        'knowledge_base': 'Knowledge Base',
+        'subsidies': 'Subsidies & Schemes',
+        'login': 'Login',
+        'register': 'Register',
+        'logout': 'Logout',
+        'profile': 'Profile',
+        'welcome': 'Welcome to FarmCare Pro',
+        'ai_prediction': 'AI-powered livestock health detection',
+        'add_animal': 'Add Animal',
+        'add_land': 'Add Farm Land',
+        'total_animals': 'Total Animals',
+        'total_lands': 'Total Farm Lands',
+        'sick_animals': 'Sick Animals',
+        'predictions': 'Health Predictions',
+        'animal_type': 'Animal Type',
+        'breed': 'Breed',
+        'age': 'Age',
+        'gender': 'Gender',
+        'weight': 'Weight',
+        'health_status': 'Health Status',
+        'healthy': 'Healthy',
+        'sick': 'Sick',
+        'recovering': 'Recovering',
+        'symptoms': 'Symptoms',
+        'predict_disease': 'Predict Disease',
+        'confidence': 'Confidence',
+        'recommendations': 'Recommendations',
+        'prevention': 'Prevention',
+        'treatment': 'Treatment',
+        'contact_vet': 'Contact Veterinarian',
+        'scheme_type': 'Scheme Type',
+        'state': 'State',
+        'eligibility': 'Eligibility',
+        'apply_now': 'Apply Now',
+        'vaccination_due': 'Vaccination Due',
+        'next_vaccination': 'Next Vaccination'
+    },
+    'mr': {
+        'app_name': 'फार्मकेअर प्रो',
+        'home': 'मुख्यपृष्ठ',
+        'dashboard': 'डॅशबोर्ड',
+        'animals': 'जनावरे',
+        'lands': 'शेतजमीन',
+        'health_check': 'आरोग्य तपासणी',
+        'veterinarians': 'पशुवैद्य',
+        'knowledge_base': 'ज्ञान केंद्र',
+        'subsidies': 'अनुदान आणि योजना',
+        'login': 'लॉगिन',
+        'register': 'नोंदणी',
+        'logout': 'लॉगआउट',
+        'profile': 'प्रोफाइल',
+        'welcome': 'फार्मकेअर प्रो मध्ये आपले स्वागत',
+        'ai_prediction': 'AI-आधारित पशुधन आरोग्य शोध',
+        'add_animal': 'जनावर जोडा',
+        'add_land': 'शेतजमीन जोडा',
+        'total_animals': 'एकूण जनावरे',
+        'total_lands': 'एकूण शेतजमीन',
+        'sick_animals': 'आजारी जनावरे',
+        'predictions': 'आरोग्य अंदाज',
+        'animal_type': 'जनावराचा प्रकार',
+        'breed': 'जात',
+        'age': 'वय',
+        'gender': 'लिंग',
+        'weight': 'वजन',
+        'health_status': 'आरोग्य स्थिती',
+        'healthy': 'निरोगी',
+        'sick': 'आजारी',
+        'recovering': 'बरे होत आहे',
+        'symptoms': 'लक्षणे',
+        'predict_disease': 'रोगाचा अंदाज',
+        'confidence': 'विश्वास',
+        'recommendations': 'शिफारसी',
+        'prevention': 'प्रतिबंध',
+        'treatment': 'उपचार',
+        'contact_vet': 'पशुवैद्यांशी संपर्क',
+        'scheme_type': 'योजनेचा प्रकार',
+        'state': 'राज्य',
+        'eligibility': 'पात्रता',
+        'apply_now': 'आता अर्ज करा',
+        'vaccination_due': 'लसीकरण बाकी',
+        'next_vaccination': 'पुढील लसीकरण'
+    }
+}
+
+def get_language():
+    return session.get('language', 'en')
+
+def get_text(key):
+    lang = get_language()
+    return LANGUAGES.get(lang, LANGUAGES['en']).get(key, key)
+
+@app.context_processor
+def inject_language():
+    return dict(get_text=get_text, current_language=get_language())
+
+# Template filters
+@app.template_filter('from_json')
+def from_json_filter(value):
+    try:
+        return json.loads(value) if value else []
+    except:
+        return []
+
+# AI Disease Prediction Model
 class AnimalSpecificDiseasePredictor:
     def __init__(self):
         self.animal_models = {}
@@ -51,7 +284,7 @@ class AnimalSpecificDiseasePredictor:
         for animal_type in df['Animal_Type'].unique():
             animal_data = df[df['Animal_Type'] == animal_type].copy()
             
-            if len(animal_data) < 5:  # Skip animals with too few samples
+            if len(animal_data) < 5:
                 print(f"   Skipping {animal_type} (only {len(animal_data)} samples)")
                 continue
             
@@ -92,7 +325,7 @@ class AnimalSpecificDiseasePredictor:
                         smote = SMOTE(random_state=42, k_neighbors=k_neighbors)
                         X_scaled, y_encoded = smote.fit_resample(X_scaled, y_encoded)
                     except:
-                        pass  # Continue without SMOTE if it fails
+                        pass
             
             # Train ensemble of models for this animal
             models = {}
@@ -138,7 +371,7 @@ class AnimalSpecificDiseasePredictor:
         model_info = self.animal_models[animal_type]
         
         if model_info['type'] == 'single_disease':
-            return np.array([0] * len(X_scaled))  # Single disease encoded as 0
+            return np.array([0] * len(X_scaled))
         
         # Ensemble prediction
         models = model_info['models']
@@ -162,9 +395,7 @@ class AnimalSpecificDiseasePredictor:
                        appetite_loss, vomiting, diarrhea, coughing, labored_breathing,
                        lameness, skin_lesions, nasal_discharge, eye_discharge,
                        body_temperature, heart_rate):
-        """
-        Predict the most likely disease for a specific animal with given symptoms
-        """
+        """Predict the most likely disease for a specific animal with given symptoms"""
         
         # Check if we have a model for this animal type
         if animal_type not in self.animal_models:
@@ -185,7 +416,85 @@ class AnimalSpecificDiseasePredictor:
                 'message': f'Only one disease recorded for {animal_type} in training data'
             }
         
-        # Prepare input data
+        # Prepare input data with all required features
+        input_data = self._prepare_input_features(
+            breed, age, gender, weight, symptom1, symptom2, symptom3, symptom4,
+            duration, appetite_loss, vomiting, diarrhea, coughing, labored_breathing,
+            lameness, skin_lesions, nasal_discharge, eye_discharge,
+            body_temperature, heart_rate, animal_type
+        )
+        
+        # Encode categorical features
+        for col in ['Breed', 'Gender', 'Symptom_1', 'Symptom_2', 'Symptom_3', 'Symptom_4']:
+            if col in self.label_encoders:
+                try:
+                    input_data[col] = self.label_encoders[col].transform([str(input_data[col])])[0]
+                except:
+                    input_data[col] = 0
+        
+        # Create DataFrame and scale
+        input_df = pd.DataFrame([input_data])[self.feature_columns]
+        
+        if animal_type in self.animal_scalers:
+            input_scaled = self.animal_scalers[animal_type].transform(input_df)
+        else:
+            return {'prediction': 'Error - No scaler for this animal', 'confidence': 0.0}
+        
+        # Make prediction
+        models = model_info['models']
+        all_probs = []
+        
+        for model in models.values():
+            try:
+                proba = model.predict_proba(input_scaled)[0]
+                all_probs.append(proba)
+            except:
+                pred = model.predict(input_scaled)[0]
+                proba = np.zeros(len(self.animal_encoders[animal_type].classes_))
+                proba[pred] = 1.0
+                all_probs.append(proba)
+        
+        # Average probabilities
+        avg_proba = np.mean(all_probs, axis=0)
+        predicted_class = np.argmax(avg_proba)
+        confidence = float(avg_proba[predicted_class])
+        
+        # Decode prediction
+        predicted_disease = self.animal_encoders[animal_type].classes_[predicted_class]
+        
+        # Get top 3 predictions
+        top_indices = np.argsort(avg_proba)[-3:][::-1]
+        top_predictions = []
+        for idx in top_indices:
+            disease = self.animal_encoders[animal_type].classes_[idx]
+            prob = float(avg_proba[idx])
+            top_predictions.append({'disease': disease, 'probability': prob})
+        
+        return {
+            'animal_type': animal_type,
+            'predicted_disease': predicted_disease,
+            'confidence': confidence,
+            'top_3_predictions': top_predictions,
+            'vital_signs_analysis': {
+                'temperature_status': 'High' if input_data['Temp_Abnormal'] > 0 else 'Low' if input_data['Temp_Abnormal'] < 0 else 'Normal',
+                'heart_rate_status': 'High' if input_data['HR_Abnormal'] > 0 else 'Low' if input_data['HR_Abnormal'] < 0 else 'Normal',
+            },
+            'syndrome_analysis': {
+                'respiratory_score': input_data['Respiratory_Syndrome'],
+                'gi_score': input_data['GI_Syndrome'],
+                'systemic_score': input_data['Systemic_Syndrome'],
+                'multi_system': bool(input_data['Multi_System_Disease'])
+            },
+            'condition_severity': 'Acute' if input_data['Acute_Condition'] else 'Chronic' if input_data['Chronic_Condition'] else 'Subacute'
+        }
+    
+    def _prepare_input_features(self, breed, age, gender, weight, symptom1, symptom2, 
+                               symptom3, symptom4, duration, appetite_loss, vomiting, 
+                               diarrhea, coughing, labored_breathing, lameness, 
+                               skin_lesions, nasal_discharge, eye_discharge, 
+                               body_temperature, heart_rate, animal_type):
+        """Prepare input features with all medical calculations"""
+        
         input_data = {
             'Breed': breed,
             'Age': age,
@@ -209,13 +518,12 @@ class AnimalSpecificDiseasePredictor:
             'Eye_Discharge': 1 if str(eye_discharge).lower() == 'yes' else 0
         }
         
-        # Add species-specific features
+        # Species-specific vital sign analysis
         normal_ranges = {
             'Dog': {'temp': (38.0, 39.2), 'hr': (60, 160)},
             'Cat': {'temp': (38.1, 39.2), 'hr': (140, 220)},
             'Horse': {'temp': (37.2, 38.6), 'hr': (28, 44)},
             'Cow': {'temp': (38.0, 39.3), 'hr': (48, 84)},
-            'Cattle': {'temp': (38.0, 39.3), 'hr': (48, 84)},
             'Sheep': {'temp': (38.3, 39.9), 'hr': (60, 120)},
             'Goat': {'temp': (38.5, 40.0), 'hr': (70, 135)},
             'Pig': {'temp': (38.7, 39.8), 'hr': (58, 100)},
@@ -266,7 +574,6 @@ class AnimalSpecificDiseasePredictor:
         
         # Duration-based conditions
         input_data['Acute_Condition'] = 1 if duration <= 3 else 0
-        input_data['Subacute_Condition'] = 1 if 3 < duration <= 14 else 0
         input_data['Chronic_Condition'] = 1 if duration > 14 else 0
         
         # Multi-system involvement
@@ -284,82 +591,15 @@ class AnimalSpecificDiseasePredictor:
         input_data['Small_Animal'] = 1 if weight < 30 else 0
         input_data['Large_Animal'] = 1 if weight > 200 else 0
         
-        # Encode categorical features
-        for col in ['Breed', 'Gender', 'Symptom_1', 'Symptom_2', 'Symptom_3', 'Symptom_4']:
-            if col in self.label_encoders:
-                try:
-                    input_data[col] = self.label_encoders[col].transform([str(input_data[col])])[0]
-                except:
-                    input_data[col] = 0  # Unknown category
-        
-        # Create DataFrame and scale
-        input_df = pd.DataFrame([input_data])[self.feature_columns]
-        
-        if animal_type in self.animal_scalers:
-            input_scaled = self.animal_scalers[animal_type].transform(input_df)
-        else:
-            return {'prediction': 'Error - No scaler for this animal', 'confidence': 0.0}
-        
-        # Make prediction
-        models = model_info['models']
-        all_probs = []
-        
-        for model in models.values():
-            try:
-                proba = model.predict_proba(input_scaled)[0]
-                all_probs.append(proba)
-            except:
-                pred = model.predict(input_scaled)[0]
-                # Convert to probability-like format
-                proba = np.zeros(len(self.animal_encoders[animal_type].classes_))
-                proba[pred] = 1.0
-                all_probs.append(proba)
-        
-        # Average probabilities
-        avg_proba = np.mean(all_probs, axis=0)
-        predicted_class = np.argmax(avg_proba)
-        confidence = float(avg_proba[predicted_class])
-        
-        # Decode prediction
-        predicted_disease = self.animal_encoders[animal_type].classes_[predicted_class]
-        
-        # Get top 3 predictions
-        top_indices = np.argsort(avg_proba)[-3:][::-1]
-        top_predictions = []
-        for idx in top_indices:
-            disease = self.animal_encoders[animal_type].classes_[idx]
-            prob = float(avg_proba[idx])
-            top_predictions.append({'disease': disease, 'probability': prob})
-        
-        return {
-            'animal_type': animal_type,
-            'predicted_disease': predicted_disease,
-            'confidence': confidence,
-            'top_3_predictions': top_predictions,
-            'vital_signs_analysis': {
-                'temperature_status': 'High' if input_data['Temp_Abnormal'] > 0 else 'Low' if input_data['Temp_Abnormal'] < 0 else 'Normal',
-                'heart_rate_status': 'High' if input_data['HR_Abnormal'] > 0 else 'Low' if input_data['HR_Abnormal'] < 0 else 'Normal',
-                'fever_severity': input_data['Fever_Severity'],
-                'hr_severity': input_data['HR_Severity']
-            },
-            'syndrome_analysis': {
-                'respiratory_score': input_data['Respiratory_Syndrome'],
-                'gi_score': input_data['GI_Syndrome'],
-                'systemic_score': input_data['Systemic_Syndrome'],
-                'neurological_score': input_data['Neurological_Syndrome'],
-                'multi_system': bool(input_data['Multi_System_Disease'])
-            },
-            'condition_severity': 'Acute' if input_data['Acute_Condition'] else 'Chronic' if input_data['Chronic_Condition'] else 'Subacute'
-        }
+        return input_data
 
-app = Flask(__name__)
-
-# Global predictor variable
+# Global variables
 predictor = None
+breed_data = {}
 
 def load_and_train_model():
-    """Load data and train the model directly"""
-    global predictor
+    """Load data and train the model"""
+    global predictor, breed_data
     
     print("🐾 Loading and training Animal Disease Prediction Model...")
     print("=" * 60)
@@ -367,6 +607,16 @@ def load_and_train_model():
     try:
         # Load and preprocess data
         df = pd.read_csv('cleaned_animal_disease_prediction.csv')
+        
+        # Load breed data
+        breed_data = {}
+        for animal in df['Animal_Type'].unique():
+            breeds = df[df['Animal_Type'] == animal]['Breed'].unique().tolist()
+            breed_data[animal] = sorted(breeds)
+        
+        print("📊 Loaded breeds from CSV:")
+        for animal, breeds in breed_data.items():
+            print(f"   {animal}: {len(breeds)} breeds")
         
         # Binary encoding for symptoms
         yesno_cols = ['Appetite_Loss', 'Vomiting', 'Diarrhea', 'Coughing', 'Labored_Breathing',
@@ -384,8 +634,6 @@ def load_and_train_model():
         df['Heart_Rate'] = df['Heart_Rate'].astype(float)
 
         print("📊 Analyzing animal-specific disease patterns...")
-
-        # Show animal distribution
         animal_counts = df['Animal_Type'].value_counts()
         print(f"Animals in dataset: {len(animal_counts)}")
         for animal, count in animal_counts.items():
@@ -394,77 +642,9 @@ def load_and_train_model():
 
         print("\n🎯 Creating animal-specific medical features...")
 
-        # Species-specific vital sign analysis
-        def create_species_specific_features(df):
-            normal_ranges = {
-                'Dog': {'temp': (38.0, 39.2), 'hr': (60, 160)},
-                'Cat': {'temp': (38.1, 39.2), 'hr': (140, 220)},
-                'Horse': {'temp': (37.2, 38.6), 'hr': (28, 44)},
-                'Cow': {'temp': (38.0, 39.3), 'hr': (48, 84)},
-                'Cattle': {'temp': (38.0, 39.3), 'hr': (48, 84)},
-                'Sheep': {'temp': (38.3, 39.9), 'hr': (60, 120)},
-                'Goat': {'temp': (38.5, 40.0), 'hr': (70, 135)},
-                'Pig': {'temp': (38.7, 39.8), 'hr': (58, 100)},
-                'Rabbit': {'temp': (38.5, 40.0), 'hr': (120, 250)}
-            }
-            
-            df['Temp_Abnormal'] = 0
-            df['HR_Abnormal'] = 0
-            df['Fever_Severity'] = 0
-            df['HR_Severity'] = 0
-            
-            for idx, row in df.iterrows():
-                animal = row['Animal_Type']
-                temp = row['Body_Temperature']
-                hr = row['Heart_Rate']
-                
-                ranges = normal_ranges.get(animal, {'temp': (38.0, 39.5), 'hr': (60, 120)})
-                temp_range = ranges['temp']
-                hr_range = ranges['hr']
-                
-                if temp > temp_range[1]:
-                    df.loc[idx, 'Temp_Abnormal'] = 1
-                    df.loc[idx, 'Fever_Severity'] = (temp - temp_range[1]) / 2.0
-                elif temp < temp_range[0]:
-                    df.loc[idx, 'Temp_Abnormal'] = -1
-                    df.loc[idx, 'Fever_Severity'] = (temp_range[0] - temp) / 2.0
-                
-                if hr > hr_range[1]:
-                    df.loc[idx, 'HR_Abnormal'] = 1
-                    df.loc[idx, 'HR_Severity'] = (hr - hr_range[1]) / hr_range[1]
-                elif hr < hr_range[0]:
-                    df.loc[idx, 'HR_Abnormal'] = -1
-                    df.loc[idx, 'HR_Severity'] = (hr_range[0] - hr) / hr_range[0]
-            
-            return df
-
+        # Create comprehensive medical features
         df = create_species_specific_features(df)
-
-        # Create comprehensive medical scoring systems
-        df['Respiratory_Syndrome'] = (df['Coughing'] * 3 + df['Labored_Breathing'] * 4 + 
-                                     df['Nasal_Discharge'] * 2 + df['Eye_Discharge'] * 1)
-        df['GI_Syndrome'] = (df['Vomiting'] * 4 + df['Diarrhea'] * 3 + df['Appetite_Loss'] * 2)
-        df['Systemic_Syndrome'] = (df['Temp_Abnormal'].abs() * 3 + df['Appetite_Loss'] * 2)
-        df['Dermatological_Syndrome'] = df['Skin_Lesions'] * 3
-        df['Neurological_Syndrome'] = df['Lameness'] * 3
-
-        # Disease severity indicators
-        df['Acute_Condition'] = (df['Duration'] <= 3).astype(int)
-        df['Subacute_Condition'] = ((df['Duration'] > 3) & (df['Duration'] <= 14)).astype(int)
-        df['Chronic_Condition'] = (df['Duration'] > 14).astype(int)
-
-        # Multi-system involvement
-        df['Multi_System_Disease'] = ((df['Respiratory_Syndrome'] > 2) + 
-                                     (df['GI_Syndrome'] > 2) + 
-                                     (df['Systemic_Syndrome'] > 2) + 
-                                     (df['Neurological_Syndrome'] > 2) >= 2).astype(int)
-
-        # Age and size risk factors
-        df['Young_Animal'] = (df['Age'] < 2).astype(int)
-        df['Senior_Animal'] = (df['Age'] > 8).astype(int)
-        df['Small_Animal'] = (df['Weight'] < 30).astype(int)
-        df['Large_Animal'] = (df['Weight'] > 200).astype(int)
-
+        
         # Train the model
         predictor = AnimalSpecificDiseasePredictor()
         predictor.fit(df)
@@ -478,137 +658,447 @@ def load_and_train_model():
         traceback.print_exc()
         return False
 
-def format_prediction_result(result):
-    """Format prediction result to ensure consistent structure for all animal types"""
-    print(f"📋 Raw result type: {type(result)}")
-    print(f"📋 Raw result keys: {result.keys() if isinstance(result, dict) else 'Not a dict'}")
+def create_species_specific_features(df):
+    """Create species-specific medical features"""
+    normal_ranges = {
+        'Dog': {'temp': (38.0, 39.2), 'hr': (60, 160)},
+        'Cat': {'temp': (38.1, 39.2), 'hr': (140, 220)},
+        'Horse': {'temp': (37.2, 38.6), 'hr': (28, 44)},
+        'Cow': {'temp': (38.0, 39.3), 'hr': (48, 84)},
+        'Sheep': {'temp': (38.3, 39.9), 'hr': (60, 120)},
+        'Goat': {'temp': (38.5, 40.0), 'hr': (70, 135)},
+        'Pig': {'temp': (38.7, 39.8), 'hr': (58, 100)},
+        'Rabbit': {'temp': (38.5, 40.0), 'hr': (120, 250)}
+    }
     
-    # Handle different response formats
-    if 'predicted_disease' in result:
-        # This is the standard format we want
-        formatted = {
-            'animal_type': result.get('animal_type', 'Unknown'),
-            'predicted_disease': result.get('predicted_disease', 'Unknown Disease'),
-            'confidence': result.get('confidence', 0.0),
-            'top_3_predictions': result.get('top_3_predictions', []),
-            'vital_signs_analysis': result.get('vital_signs_analysis', {
-                'temperature_status': 'Unknown',
-                'heart_rate_status': 'Unknown',
-                'fever_severity': 0,
-                'hr_severity': 0
-            }),
-            'syndrome_analysis': result.get('syndrome_analysis', {
-                'respiratory_score': 0,
-                'gi_score': 0,
-                'systemic_score': 0,
-                'neurological_score': 0,
-                'multi_system': False
-            }),
-            'condition_severity': result.get('condition_severity', 'Unknown'),
-            'is_demo': False
-        }
-    elif 'prediction' in result:
-        # This is the error/simple format
-        formatted = {
-            'animal_type': result.get('animal_type', 'Unknown'),
-            'predicted_disease': result.get('prediction', 'Unknown Disease'),
-            'confidence': result.get('confidence', 0.0),
-            'top_3_predictions': [{'disease': result.get('prediction', 'Unknown'), 'probability': result.get('confidence', 0.0)}],
-            'vital_signs_analysis': {
-                'temperature_status': 'Unknown',
-                'heart_rate_status': 'Unknown',
-                'fever_severity': 0,
-                'hr_severity': 0
-            },
-            'syndrome_analysis': {
-                'respiratory_score': 0,
-                'gi_score': 0,
-                'systemic_score': 0,
-                'neurological_score': 0,
-                'multi_system': False
-            },
-            'condition_severity': 'Unknown',
-            'is_demo': False
-        }
-    else:
-        # Unknown format
-        formatted = {
-            'animal_type': 'Unknown',
-            'predicted_disease': 'Prediction format error',
-            'confidence': 0.0,
-            'top_3_predictions': [{'disease': 'Format error', 'probability': 0.0}],
-            'vital_signs_analysis': {
-                'temperature_status': 'Unknown',
-                'heart_rate_status': 'Unknown',
-                'fever_severity': 0,
-                'hr_severity': 0
-            },
-            'syndrome_analysis': {
-                'respiratory_score': 0,
-                'gi_score': 0,
-                'systemic_score': 0,
-                'neurological_score': 0,
-                'multi_system': False
-            },
-            'condition_severity': 'Unknown',
-            'is_demo': False
-        }
+    df['Temp_Abnormal'] = 0
+    df['HR_Abnormal'] = 0
+    df['Fever_Severity'] = 0
+    df['HR_Severity'] = 0
     
-    # Ensure top_3_predictions has at least one item
-    if not formatted['top_3_predictions']:
-        formatted['top_3_predictions'] = [
-            {'disease': formatted['predicted_disease'], 'probability': formatted['confidence']}
-        ]
-    
-    return formatted
-
-# Load breeds from CSV for form
-def load_breeds_from_csv():
-    try:
-        df = pd.read_csv('cleaned_animal_disease_prediction.csv')
-        animal_breeds = {}
-        for animal in df['Animal_Type'].unique():
-            breeds = df[df['Animal_Type'] == animal]['Breed'].unique()
-            animal_breeds[animal] = sorted([str(breed) for breed in breeds if pd.notna(breed)])
+    for idx, row in df.iterrows():
+        animal = row['Animal_Type']
+        temp = row['Body_Temperature']
+        hr = row['Heart_Rate']
         
-        print("📊 Loaded breeds from CSV:")
-        for animal, breeds in animal_breeds.items():
-            print(f"   {animal}: {len(breeds)} breeds")
-        return animal_breeds
-    except Exception as e:
-        print(f"❌ Error loading breeds from CSV: {e}")
-        return {}
+        ranges = normal_ranges.get(animal, {'temp': (38.0, 39.5), 'hr': (60, 120)})
+        temp_range = ranges['temp']
+        hr_range = ranges['hr']
+        
+        if temp > temp_range[1]:
+            df.loc[idx, 'Temp_Abnormal'] = 1
+            df.loc[idx, 'Fever_Severity'] = (temp - temp_range[1]) / 2.0
+        elif temp < temp_range[0]:
+            df.loc[idx, 'Temp_Abnormal'] = -1
+            df.loc[idx, 'Fever_Severity'] = (temp_range[0] - temp) / 2.0
+        
+        if hr > hr_range[1]:
+            df.loc[idx, 'HR_Abnormal'] = 1
+            df.loc[idx, 'HR_Severity'] = (hr - hr_range[1]) / hr_range[1]
+        elif hr < hr_range[0]:
+            df.loc[idx, 'HR_Abnormal'] = -1
+            df.loc[idx, 'HR_Severity'] = (hr_range[0] - hr) / hr_range[0]
+    
+    # Create comprehensive medical scoring systems
+    df['Respiratory_Syndrome'] = (df['Coughing'] * 3 + df['Labored_Breathing'] * 4 + 
+                                 df['Nasal_Discharge'] * 2 + df['Eye_Discharge'] * 1)
+    df['GI_Syndrome'] = (df['Vomiting'] * 4 + df['Diarrhea'] * 3 + df['Appetite_Loss'] * 2)
+    df['Systemic_Syndrome'] = (df['Temp_Abnormal'].abs() * 3 + df['Appetite_Loss'] * 2)
+    df['Dermatological_Syndrome'] = df['Skin_Lesions'] * 3
+    df['Neurological_Syndrome'] = df['Lameness'] * 3
 
-ANIMAL_BREEDS = load_breeds_from_csv()
+    # Disease severity indicators
+    df['Acute_Condition'] = (df['Duration'] <= 3).astype(int)
+    df['Chronic_Condition'] = (df['Duration'] > 14).astype(int)
 
-# Get available animals
-if predictor and hasattr(predictor, 'animal_models'):
-    AVAILABLE_ANIMALS = list(predictor.animal_models.keys())
-else:
-    AVAILABLE_ANIMALS = list(ANIMAL_BREEDS.keys())
+    # Multi-system involvement
+    df['Multi_System_Disease'] = ((df['Respiratory_Syndrome'] > 2) + 
+                                 (df['GI_Syndrome'] > 2) + 
+                                 (df['Systemic_Syndrome'] > 2) + 
+                                 (df['Neurological_Syndrome'] > 2) >= 2).astype(int)
 
-SYMPTOMS_LIST = [
-    'Cough', 'Lethargy', 'Loss of appetite', 'Nasal discharge', 'Fever',
-    'Vomiting', 'Diarrhea', 'Weight loss', 'Sneezing', 'Eye discharge',
-    'Lameness', 'Skin lesions', 'Labored breathing', 'Itching', 'Dehydration'
-]
+    # Age and size risk factors
+    df['Young_Animal'] = (df['Age'] < 2).astype(int)
+    df['Senior_Animal'] = (df['Age'] > 8).astype(int)
+    df['Small_Animal'] = (df['Weight'] < 30).astype(int)
+    df['Large_Animal'] = (df['Weight'] > 200).astype(int)
 
+    return df
+
+def initialize_database():
+    """Initialize database with sample data"""
+    with app.app_context():
+        db.create_all()
+        
+        # Add sample veterinarians if none exist
+        if Veterinarian.query.count() == 0:
+            sample_vets = [
+                Veterinarian(
+                    name="Dr. Rajesh Sharma",
+                    specialization="Large Animal Medicine",
+                    location="Village Center, Pune",
+                    phone="+91 98765 43210",
+                    email="rajesh.sharma@email.com",
+                    experience_years=15,
+                    rating=4.8
+                ),
+                Veterinarian(
+                    name="Dr. Priya Patel",
+                    specialization="Dairy Cattle Specialist",
+                    location="Market Road, Pune",
+                    phone="+91 87654 32109",
+                    email="priya.patel@email.com",
+                    experience_years=12,
+                    rating=4.6
+                ),
+                Veterinarian(
+                    name="Dr. Amit Kumar",
+                    specialization="Poultry & Small Animals",
+                    location="Hospital Road, Pune",
+                    phone="+91 76543 21098",
+                    email="amit.kumar@email.com",
+                    experience_years=8,
+                    rating=4.4
+                )
+            ]
+            
+            for vet in sample_vets:
+                db.session.add(vet)
+            
+            db.session.commit()
+            print("✅ Sample veterinarians added to database")
+        
+        # Add sample diseases if none exist
+        if Disease.query.count() == 0:
+            sample_diseases = [
+                Disease(
+                    name="Bovine Respiratory Disease",
+                    animal_types='["Cow", "Buffalo"]',
+                    symptoms='["Coughing", "Nasal discharge", "Fever", "Labored breathing"]',
+                    description="Common respiratory infection affecting cattle. Symptoms include coughing, nasal discharge, and fever.",
+                    prevention="Proper ventilation, vaccination, quarantine of new animals",
+                    treatment="Antibiotics, supportive care, isolation",
+                    severity="medium"
+                ),
+                Disease(
+                    name="Foot and Mouth Disease",
+                    animal_types='["Cow", "Buffalo", "Goat", "Sheep", "Pig"]',
+                    symptoms='["Fever", "Blisters", "Lameness", "Loss of appetite"]',
+                    description="Highly contagious viral disease affecting cloven-hoofed animals.",
+                    prevention="Vaccination, biosecurity measures, movement restrictions",
+                    treatment="Supportive care, isolation, wound management",
+                    severity="high"
+                ),
+                Disease(
+                    name="Mastitis",
+                    animal_types='["Cow", "Buffalo", "Goat"]',
+                    symptoms='["Swelling", "Heat in udder", "Abnormal milk"]',
+                    description="Inflammation of mammary gland, common in dairy animals.",
+                    prevention="Proper milking hygiene, teat dipping, dry cow therapy",
+                    treatment="Antibiotics, anti-inflammatory drugs, proper milking",
+                    severity="medium"
+                ),
+                Disease(
+                    name="Parvovirus",
+                    animal_types='["Dog"]',
+                    symptoms='["Vomiting", "Diarrhea", "Lethargy", "Loss of appetite"]',
+                    description="Highly contagious viral infection affecting dogs, especially puppies.",
+                    prevention="Vaccination, proper hygiene, isolation of infected animals",
+                    treatment="Supportive care, IV fluids, anti-nausea medication",
+                    severity="high"
+                ),
+                Disease(
+                    name="Upper Respiratory Infection",
+                    animal_types='["Cat"]',
+                    symptoms='["Sneezing", "Eye discharge", "Nasal discharge", "Coughing"]',
+                    description="Common respiratory infection in cats, often viral in nature.",
+                    prevention="Vaccination, stress reduction, proper ventilation",
+                    treatment="Supportive care, antibiotics if bacterial, eye drops",
+                    severity="low"
+                ),
+                Disease(
+                    name="Anthrax",
+                    animal_types='["Cow", "Buffalo", "Goat", "Sheep", "Horse"]',
+                    symptoms='["Sudden death", "Fever", "Swelling", "Difficulty breathing"]',
+                    description="Serious bacterial infection that can cause sudden death.",
+                    prevention="Annual vaccination, proper carcass disposal, quarantine",
+                    treatment="Early antibiotic treatment, supportive care",
+                    severity="high"
+                )
+            ]
+            
+            for disease in sample_diseases:
+                db.session.add(disease)
+            
+            db.session.commit()
+            print("✅ Sample diseases added to database")
+        
+        # Add sample subsidies if none exist
+        if Subsidy.query.count() == 0:
+            from datetime import date, timedelta
+            
+            sample_subsidies = [
+                Subsidy(
+                    scheme_name="National Livestock Development Scheme",
+                    scheme_type="livestock",
+                    state="Maharashtra",
+                    description="Financial assistance for livestock development and breeding programs",
+                    eligibility="Small and marginal farmers with livestock",
+                    subsidy_amount="Up to ₹50,000 per beneficiary",
+                    application_deadline=date.today() + timedelta(days=90),
+                    contact_info="District Animal Husbandry Office"
+                ),
+                Subsidy(
+                    scheme_name="Dairy Development Scheme",
+                    scheme_type="dairy",
+                    state="Maharashtra",
+                    description="Support for dairy farming and milk production enhancement",
+                    eligibility="Dairy farmers and cooperatives",
+                    subsidy_amount="₹25,000 - ₹1,00,000",
+                    application_deadline=date.today() + timedelta(days=60),
+                    contact_info="State Dairy Development Board"
+                ),
+                Subsidy(
+                    scheme_name="Poultry Development Assistance",
+                    scheme_type="poultry",
+                    state="Karnataka",
+                    description="Financial support for poultry farming and infrastructure",
+                    eligibility="Farmers interested in poultry farming",
+                    subsidy_amount="Up to ₹75,000",
+                    application_deadline=date.today() + timedelta(days=120),
+                    contact_info="Department of Animal Husbandry"
+                ),
+                Subsidy(
+                    scheme_name="Goat Development Program",
+                    scheme_type="livestock",
+                    state="Tamil Nadu",
+                    description="Support for goat rearing and breed improvement",
+                    eligibility="Rural farmers with land for goat rearing",
+                    subsidy_amount="₹15,000 - ₹40,000",
+                    application_deadline=date.today() + timedelta(days=75),
+                    contact_info="Tamil Nadu Animal Husbandry Department"
+                )
+            ]
+            
+            for subsidy in sample_subsidies:
+                db.session.add(subsidy)
+            
+            db.session.commit()
+            print("✅ Sample subsidies added to database")
+
+# Routes
 @app.route('/')
 def index():
-    model_status = "Loaded" if predictor else "Not Loaded"
-    return render_template('index.html', 
-                         animals=AVAILABLE_ANIMALS,
-                         symptoms=SYMPTOMS_LIST,
-                         model_status=model_status)
+    animals = list(breed_data.keys()) if breed_data else ['Dog', 'Cat', 'Cow', 'Horse']
+    symptoms = [
+        'Fever', 'Cough', 'Lethargy', 'Loss of appetite', 'Vomiting', 'Diarrhea',
+        'Nasal discharge', 'Eye discharge', 'Labored breathing', 'Lameness',
+        'Skin lesions', 'Swelling', 'Excessive drooling', 'Seizures'
+    ]
+    
+    return render_template('index.html', animals=animals, symptoms=symptoms)
 
-@app.route('/get_breeds/<animal_type>')
-def get_breeds(animal_type):
-    breeds = ANIMAL_BREEDS.get(animal_type, ['Unknown Breed'])
-    return jsonify(breeds)
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        data = request.get_json() if request.is_json else request.form
+        
+        name = data.get('name')
+        email = data.get('email')
+        password = data.get('password')
+        user_type = data.get('user_type', 'farmer')
+        
+        # Check if user already exists
+        if User.query.filter_by(email=email).first():
+            if request.is_json:
+                return jsonify({'success': False, 'message': 'Email already registered'})
+            flash('Email already registered', 'error')
+            return redirect(url_for('register'))
+        
+        # Create new user
+        password_hash = bcrypt.generate_password_hash(password).decode('utf-8')
+        user = User(
+            name=name,
+            email=email,
+            password_hash=password_hash,
+            user_type=user_type
+        )
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        login_user(user)
+        
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'Registration successful'})
+        
+        flash('Registration successful!', 'success')
+        return redirect(url_for('dashboard'))
+    
+    return render_template('auth/register.html')
 
-@app.route('/static/<path:filename>')
-def serve_static(filename):
-    return send_from_directory('static', filename)
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        data = request.get_json() if request.is_json else request.form
+        
+        email = data.get('email')
+        password = data.get('password')
+        
+        user = User.query.filter_by(email=email).first()
+        
+        if user and bcrypt.check_password_hash(user.password_hash, password):
+            login_user(user)
+            
+            if request.is_json:
+                return jsonify({'success': True, 'message': 'Login successful'})
+            
+            flash('Login successful!', 'success')
+            return redirect(url_for('dashboard'))
+        else:
+            if request.is_json:
+                return jsonify({'success': False, 'message': 'Invalid credentials'})
+            
+            flash('Invalid email or password', 'error')
+    
+    return render_template('auth/login.html')
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out', 'info')
+    return redirect(url_for('index'))
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    # Get user statistics
+    total_animals = Animal.query.filter_by(user_id=current_user.id).count()
+    total_lands = FarmLand.query.filter_by(user_id=current_user.id).count()
+    total_predictions = Prediction.query.filter_by(user_id=current_user.id).count()
+    
+    # Get recent animals
+    recent_animals = Animal.query.filter_by(user_id=current_user.id)\
+                                 .order_by(Animal.created_at.desc())\
+                                 .limit(5).all()
+    
+    # Get recent predictions
+    recent_predictions = Prediction.query.filter_by(user_id=current_user.id)\
+                                        .order_by(Prediction.created_at.desc())\
+                                        .limit(5).all()
+    
+    stats = {
+        'total_animals': total_animals,
+        'total_lands': total_lands,
+        'total_predictions': total_predictions,
+        'sick_animals': Animal.query.filter_by(user_id=current_user.id, health_status='sick').count()
+    }
+    
+    return render_template('dashboard/main.html', 
+                         stats=stats, 
+                         recent_animals=recent_animals,
+                         recent_predictions=recent_predictions)
+
+@app.route('/animals')
+@login_required
+def animals():
+    user_animals = Animal.query.filter_by(user_id=current_user.id).all()
+    return render_template('dashboard/animals.html', animals=user_animals)
+
+@app.route('/add_animal', methods=['GET', 'POST'])
+@login_required
+def add_animal():
+    if request.method == 'POST':
+        data = request.get_json() if request.is_json else request.form
+        
+        # Generate unique animal ID
+        animal_count = Animal.query.filter_by(user_id=current_user.id).count()
+        animal_id = f"{data.get('animal_type')[0].upper()}{animal_count + 1:03d}"
+        
+        animal = Animal(
+            user_id=current_user.id,
+            animal_id=animal_id,
+            animal_type=data.get('animal_type'),
+            breed=data.get('breed'),
+            name=data.get('name', animal_id),
+            age=float(data.get('age')),
+            gender=data.get('gender'),
+            weight=float(data.get('weight')),
+            health_status=data.get('health_status', 'healthy')
+        )
+        
+        db.session.add(animal)
+        db.session.commit()
+        
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'Animal added successfully'})
+        
+        flash('Animal added successfully!', 'success')
+        return redirect(url_for('animals'))
+    
+    animals = list(breed_data.keys()) if breed_data else []
+    return render_template('dashboard/add_animal.html', animals=animals)
+
+@app.route('/lands')
+@login_required
+def lands():
+    user_lands = FarmLand.query.filter_by(user_id=current_user.id).all()
+    return render_template('dashboard/lands.html', lands=user_lands)
+
+@app.route('/add_land', methods=['GET', 'POST'])
+@login_required
+def add_land():
+    if request.method == 'POST':
+        data = request.get_json() if request.is_json else request.form
+        
+        land = FarmLand(
+            user_id=current_user.id,
+            land_name=data.get('land_name'),
+            size_acres=float(data.get('size_acres')),
+            location=data.get('location'),
+            soil_type=data.get('soil_type'),
+            crops_grown=data.get('crops_grown')
+        )
+        
+        db.session.add(land)
+        db.session.commit()
+        
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'Farm land added successfully'})
+        
+        flash('Farm land added successfully!', 'success')
+        return redirect(url_for('lands'))
+    
+    return render_template('dashboard/add_land.html')
+
+@app.route('/profile')
+@login_required
+def profile():
+    return render_template('dashboard/profile.html', user=current_user)
+
+@app.route('/update_profile', methods=['POST'])
+@login_required
+def update_profile():
+    data = request.get_json() if request.is_json else request.form
+    
+    current_user.name = data.get('name', current_user.name)
+    current_user.farm_name = data.get('farm_name', current_user.farm_name)
+    current_user.location = data.get('location', current_user.location)
+    current_user.phone = data.get('phone', current_user.phone)
+    
+    db.session.commit()
+    
+    if request.is_json:
+        return jsonify({'success': True, 'message': 'Profile updated successfully'})
+    
+    flash('Profile updated successfully!', 'success')
+    return redirect(url_for('profile'))
+
+@app.route('/veterinarians')
+def veterinarians():
+    vets = Veterinarian.query.filter_by(is_available=True).all()
+    return render_template('veterinarians.html', veterinarians=vets)
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -670,24 +1160,35 @@ def predict():
         
         print(f"✅ Raw prediction result received")
         
-        # Format the result to ensure consistent structure
-        result = format_prediction_result(raw_result)
+        # Save prediction if user is logged in
+        if current_user.is_authenticated:
+            prediction_record = Prediction(
+                user_id=current_user.id,
+                prediction_data=json.dumps(request.form.to_dict()),
+                result=json.dumps(raw_result),
+                confidence=raw_result.get('confidence', 0)
+            )
+            db.session.add(prediction_record)
+            db.session.commit()
         
-        print(f"✅ Formatted prediction: {result.get('predicted_disease', 'Unknown')}")
-        
-        return render_template('result.html', result=result, form_data=request.form)
+        return render_template('result.html', result=raw_result, form_data=request.form)
     
     except Exception as e:
         error_msg = f"Prediction error: {str(e)}"
         print(f"❌ {error_msg}")
         return render_template('result.html', error=error_msg, form_data=request.form)
 
+@app.route('/get_breeds/<animal_type>')
+def get_breeds(animal_type):
+    breeds = breed_data.get(animal_type, [])
+    return jsonify(breeds)
+
 @app.route('/model_status')
 def model_status():
     """Endpoint to check model status"""
     status = {
         'model_loaded': predictor is not None,
-        'available_animals': AVAILABLE_ANIMALS,
+        'available_animals': list(breed_data.keys()) if breed_data else [],
     }
     
     if predictor:
@@ -706,24 +1207,174 @@ def model_status():
                     animal_details[animal] = {
                         'type': 'ensemble',
                         'disease_count': len(diseases),
-                        'diseases': diseases[:5]  # Show first 5 diseases
+                        'diseases': diseases[:5]
                     }
         status['animal_details'] = animal_details
     
     return jsonify(status)
 
+# Language switching route
+@app.route('/set_language/<language>')
+def set_language(language):
+    if language in LANGUAGES:
+        session['language'] = language
+    return redirect(request.referrer or url_for('index'))
+
+# Knowledge Base routes
+@app.route('/knowledge')
+def knowledge_base():
+    diseases = Disease.query.all()
+    return render_template('knowledge_base.html', diseases=diseases)
+
+@app.route('/disease/<int:disease_id>')
+def disease_detail(disease_id):
+    disease = Disease.query.get_or_404(disease_id)
+    return render_template('disease_detail.html', disease=disease)
+
+# Subsidies routes
+@app.route('/subsidies')
+def subsidies():
+    scheme_type = request.args.get('type', '')
+    state = request.args.get('state', '')
+    search = request.args.get('search', '')
+    
+    query = Subsidy.query.filter_by(is_active=True)
+    
+    if scheme_type:
+        query = query.filter(Subsidy.scheme_type == scheme_type)
+    if state:
+        query = query.filter(Subsidy.state == state)
+    if search:
+        query = query.filter(Subsidy.scheme_name.contains(search))
+    
+    subsidies = query.all()
+    
+    # Get unique values for filters
+    scheme_types = db.session.query(Subsidy.scheme_type).distinct().all()
+    states = db.session.query(Subsidy.state).distinct().all()
+    
+    return render_template('subsidies.html', 
+                         subsidies=subsidies,
+                         scheme_types=[s[0] for s in scheme_types if s[0]],
+                         states=[s[0] for s in states if s[0]])
+
+# Vaccination routes
+@app.route('/vaccinations/<int:animal_id>')
+@login_required
+def animal_vaccinations(animal_id):
+    animal = Animal.query.filter_by(id=animal_id, user_id=current_user.id).first_or_404()
+    vaccinations = Vaccination.query.filter_by(animal_id=animal_id).order_by(Vaccination.vaccination_date.desc()).all()
+    return render_template('dashboard/vaccinations.html', animal=animal, vaccinations=vaccinations)
+
+@app.route('/add_vaccination/<int:animal_id>', methods=['GET', 'POST'])
+@login_required
+def add_vaccination(animal_id):
+    animal = Animal.query.filter_by(id=animal_id, user_id=current_user.id).first_or_404()
+    
+    if request.method == 'POST':
+        data = request.form
+        
+        vaccination = Vaccination(
+            animal_id=animal_id,
+            vaccine_name=data.get('vaccine_name'),
+            vaccination_date=datetime.strptime(data.get('vaccination_date'), '%Y-%m-%d').date(),
+            next_due_date=datetime.strptime(data.get('next_due_date'), '%Y-%m-%d').date() if data.get('next_due_date') else None,
+            veterinarian=data.get('veterinarian'),
+            notes=data.get('notes')
+        )
+        
+        db.session.add(vaccination)
+        db.session.commit()
+        
+        flash('Vaccination record added successfully!', 'success')
+        return redirect(url_for('animal_vaccinations', animal_id=animal_id))
+    
+    return render_template('dashboard/add_vaccination.html', animal=animal)
+
+# API routes for dashboard charts
+@app.route('/api/dashboard_data')
+@login_required
+def dashboard_data():
+    # Health trends data
+    health_data = db.session.query(
+        Prediction.created_at,
+        Prediction.confidence
+    ).filter_by(user_id=current_user.id).order_by(Prediction.created_at.desc()).limit(30).all()
+    
+    # Animal distribution data
+    animal_distribution = db.session.query(
+        Animal.animal_type,
+        db.func.count(Animal.id)
+    ).filter_by(user_id=current_user.id).group_by(Animal.animal_type).all()
+    
+    # Vaccination due data
+    from datetime import date, timedelta
+    upcoming_vaccinations = db.session.query(Vaccination).join(Animal).filter(
+        Animal.user_id == current_user.id,
+        Vaccination.next_due_date <= date.today() + timedelta(days=30),
+        Vaccination.next_due_date >= date.today()
+    ).count()
+    
+    return jsonify({
+        'health_trends': [{'date': h[0].strftime('%Y-%m-%d'), 'confidence': h[1]} for h in health_data],
+        'animal_distribution': [{'type': a[0], 'count': a[1]} for a in animal_distribution],
+        'upcoming_vaccinations': upcoming_vaccinations
+    })
+
+# Voice prediction route (simulated)
+@app.route('/voice_predict', methods=['POST'])
+def voice_predict():
+    # This would integrate with speech recognition in a real implementation
+    transcript = request.form.get('transcript', '')
+    
+    # Simple keyword-based analysis for demo
+    symptoms = []
+    if 'cough' in transcript.lower():
+        symptoms.append('Coughing')
+    if 'fever' in transcript.lower():
+        symptoms.append('Fever')
+    if 'tired' in transcript.lower() or 'weak' in transcript.lower():
+        symptoms.append('Lethargy')
+    
+    return jsonify({
+        'transcript': transcript,
+        'detected_symptoms': symptoms,
+        'confidence': 0.85,
+        'recommendation': 'Based on voice analysis, consider veterinary consultation.'
+    })
+
+# File upload route for images
+@app.route('/upload_image', methods=['POST'])
+def upload_image():
+    if 'image' not in request.files:
+        return jsonify({'error': 'No image uploaded'}), 400
+    
+    file = request.files['image']
+    if file.filename == '':
+        return jsonify({'error': 'No file selected'}), 400
+    
+    # In a real implementation, this would process the image with AI
+    # For now, return a simulated response
+    return jsonify({
+        'analysis': 'Image analysis complete',
+        'detected_issues': ['Possible skin condition', 'Monitor for changes'],
+        'confidence': 0.78,
+        'recommendation': 'Consult veterinarian for proper diagnosis'
+    })
 
 if __name__ == '__main__':
-    # Load and train the model when starting the app
+    # Initialize everything
     success = load_and_train_model()
+    initialize_database()
     
     if success:
-        print("\n🌐 Starting Flask server with trained model...")
+        print("\n🌐 Starting FarmCare Pro Complete System...")
         print(f"🐾 Available animals: {list(predictor.animal_models.keys())}")
         print("🚀 Server running on http://localhost:5000")
         print("💡 Visit /model_status to see detailed model information")
+        print("👤 Register an account to access full features!")
     else:
-        print("\n⚠️  Starting Flask server in limited mode (model not loaded)")
+        print("\n⚠️  Starting server in limited mode (model not loaded)")
         print("🚀 Server running on http://localhost:5000")
     
     app.run(debug=True, host='0.0.0.0', port=5000)
