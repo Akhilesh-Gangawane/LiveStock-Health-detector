@@ -1,188 +1,755 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-10 mx-auto">
-        {% if error %}
-        <div class="alert alert-danger">
-            <h4><i class="fas fa-exclamation-triangle me-2"></i>Error</h4>
-            <p class="mb-0">{{ error }}</p>
-        </div>
-        <div class="text-center mt-4">
-            <a href="/" class="btn btn-primary">Try Again</a>
-        </div>
-        {% elif result %}
+<style>
+    /* Enhanced Result Page Styles */
+    .result-container {
+        animation: slideInUp 0.6s ease-out;
+    }
+    
+    .result-card {
+        border: none;
+        border-radius: var(--border-radius-lg);
+        box-shadow: var(--shadow-lg);
+        margin-bottom: 2rem;
+        overflow: hidden;
+        transition: var(--transition);
+    }
+    
+    .result-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .result-header {
+        background: var(--bg-gradient-primary);
+        color: white;
+        padding: 1.5rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .result-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { left: -100%; }
+        100% { left: 100%; }
+    }
+    
+    .confidence-meter {
+        position: relative;
+        height: 20px;
+        background: var(--grey-200);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 0.5rem 0;
+    }
+    
+    .confidence-fill {
+        height: 100%;
+        border-radius: 10px;
+        transition: width 2s ease-out;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .confidence-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: progressShine 2s infinite;
+    }
+    
+    @keyframes progressShine {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    .prediction-card {
+        border: 2px solid transparent;
+        border-radius: var(--border-radius-md);
+        transition: var(--transition);
+        height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .prediction-card.top-prediction {
+        border-color: var(--success);
+        background: linear-gradient(145deg, #ffffff, #f8fff8);
+    }
+    
+    .prediction-card:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .vital-sign-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: var(--border-radius-md);
+        font-weight: var(--font-weight-medium);
+        margin: 0.25rem;
+        transition: var(--transition);
+    }
+    
+    .vital-sign-indicator:hover {
+        transform: scale(1.05);
+    }
+    
+    .vital-normal {
+        background: linear-gradient(135deg, #d4edda, #c3e6cb);
+        color: #155724;
+    }
+    
+    .vital-warning {
+        background: linear-gradient(135deg, #fff3cd, #ffeaa7);
+        color: #856404;
+    }
+    
+    .vital-danger {
+        background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+        color: #721c24;
+    }
+    
+    .syndrome-score {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.75rem;
+        background: var(--grey-50);
+        border-radius: var(--border-radius-sm);
+        margin: 0.5rem 0;
+    }
+    
+    .score-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: var(--font-weight-bold);
+        color: white;
+        font-size: 0.9rem;
+    }
+    
+    .input-summary-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-top: 1rem;
+    }
+    
+    .summary-section {
+        background: var(--grey-50);
+        padding: 1.5rem;
+        border-radius: var(--border-radius-md);
+        border-left: 4px solid var(--primary-green);
+    }
+    
+    .symptom-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 0.5rem;
+        margin-top: 1rem;
+    }
+    
+    .symptom-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: white;
+        border-radius: var(--border-radius-sm);
+        border: 1px solid var(--grey-200);
+        transition: var(--transition);
+    }
+    
+    .symptom-item:hover {
+        background: var(--primary-green-light);
+        transform: translateX(5px);
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 2rem;
+    }
+    
+    .action-btn {
+        padding: 1rem 2rem;
+        border-radius: var(--border-radius-md);
+        font-weight: var(--font-weight-semibold);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .action-btn::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: var(--transition);
+    }
+    
+    .action-btn:hover::before {
+        left: 100%;
+    }
+    
+    .error-container {
+        text-align: center;
+        padding: 3rem;
+        background: linear-gradient(135deg, #fff5f5, #fed7d7);
+        border-radius: var(--border-radius-lg);
+        border: 2px solid #feb2b2;
+    }
+    
+    .error-icon {
+        font-size: 4rem;
+        color: var(--danger);
+        margin-bottom: 1rem;
+        animation: pulse 2s infinite;
+    }
+    
+    @media (max-width: 768px) {
+        .input-summary-grid {
+            grid-template-columns: 1fr;
+        }
         
-        {% if result.is_demo %}
-        <div class="alert alert-warning">
-            <h4><i class="fas fa-exclamation-triangle me-2"></i>Demo Mode</h4>
-            <p class="mb-0">The model is not loaded. Showing demo prediction results. Please check the model file path and try again.</p>
-        </div>
-        {% endif %}
+        .action-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .action-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+    }
+</style>
 
-        <!-- Prediction Result -->
-        <div class="card shadow mb-4">
-            <div class="card-header bg-success text-white">
-                <h4 class="mb-0"><i class="fas fa-diagnoses me-2"></i>Prediction Result</h4>
+<div class="result-container">
+    <div class="row">
+        <div class="col-lg-10 mx-auto">
+            {% if error %}
+            <div class="error-container">
+                <div class="error-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <h3>Oops! Something went wrong</h3>
+                <p class="text-muted mb-4">{{ error }}</p>
+                <a href="/" class="btn btn-primary action-btn">
+                    <i class="fas fa-redo me-2"></i>Try Again
+                </a>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h5>Animal Information</h5>
-                        <p><strong>Type:</strong> {{ result.animal_type }}</p>
-                        <p><strong>Most Likely Disease:</strong> <span class="text-danger fw-bold">{{ result.predicted_disease }}</span></p>
-                        <p><strong>Confidence:</strong> 
-                            <span class="badge bg-{% if result.confidence > 0.7 %}success{% elif result.confidence > 0.5 %}warning{% else %}danger{% endif %}">
-                                {{ "%.1f"|format(result.confidence * 100) }}%
-                            </span>
-                        </p>
-                        <p><strong>Condition Severity:</strong> 
-                            <span class="badge bg-{% if result.condition_severity == 'Acute' %}danger{% elif result.condition_severity == 'Chronic' %}warning{% else %}info{% endif %}">
-                                {{ result.condition_severity }}
-                            </span>
-                        </p>
-                    </div>
-                    <div class="col-md-6">
-                        <h5>Vital Signs Analysis</h5>
-                        <p><strong>Temperature:</strong> 
-                            <span class="badge bg-{% if result.vital_signs_analysis.temperature_status == 'High' %}danger{% elif result.vital_signs_analysis.temperature_status == 'Low' %}warning{% else %}success{% endif %}">
-                                {{ result.vital_signs_analysis.temperature_status }}
-                            </span>
-                        </p>
-                        <p><strong>Heart Rate:</strong> 
-                            <span class="badge bg-{% if result.vital_signs_analysis.heart_rate_status == 'High' %}danger{% elif result.vital_signs_analysis.heart_rate_status == 'Low' %}warning{% else %}success{% endif %}">
-                                {{ result.vital_signs_analysis.heart_rate_status }}
-                            </span>
-                        </p>
-                        
-                        <h5 class="mt-3">Syndrome Analysis</h5>
-                        <p><strong>Respiratory Score:</strong> {{ result.syndrome_analysis.respiratory_score }}</p>
-                        <p><strong>GI Score:</strong> {{ result.syndrome_analysis.gi_score }}</p>
-                        <p><strong>Multi-System:</strong> 
-                            <span class="badge bg-{% if result.syndrome_analysis.multi_system %}danger{% else %}success{% endif %}">
-                                {{ 'Yes' if result.syndrome_analysis.multi_system else 'No' }}
-                            </span>
-                        </p>
+            {% elif result %}
+            
+            {% if result.is_demo %}
+            <div class="alert alert-warning mb-4">
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-exclamation-triangle fa-2x me-3"></i>
+                    <div>
+                        <h5 class="mb-1">Demo Mode Active</h5>
+                        <p class="mb-0">The AI model is not loaded. Showing demo prediction results for demonstration purposes.</p>
                     </div>
                 </div>
             </div>
-        </div>
+            {% endif %}
 
-        <!-- Top 3 Predictions -->
-        <div class="card shadow mb-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0"><i class="fas fa-list-ol me-2"></i>Top 3 Disease Predictions</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    {% for pred in result.top_3_predictions %}
-                    <div class="col-md-4 mb-3">
-                        <div class="card {% if loop.first %}border-success{% endif %} h-100">
-                            <div class="card-header {% if loop.first %}bg-success text-white{% else %}bg-light{% endif %}">
-                                <strong>#{{ loop.index }}</strong>
+            <!-- Main Prediction Result -->
+            <div class="result-card">
+                <div class="result-header">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h3 class="mb-1">
+                                <i class="fas fa-robot me-2"></i>AI Diagnosis Complete
+                            </h3>
+                            <p class="mb-0 opacity-90">Analysis based on symptoms and vital signs</p>
+                        </div>
+                        <div class="text-end">
+                            <div class="badge bg-light text-dark fs-6 px-3 py-2">
+                                {{ result.animal_type }}
                             </div>
-                            <div class="card-body">
-                                <h6>{{ pred.disease }}</h6>
-                                <div class="progress mt-2">
-                                    <div class="progress-bar {% if loop.first %}bg-prediction-1{% elif loop.index == 2 %}          bg-prediction-2{% else %}bg-prediction-3{% endif %}" 
-                                         style="width: {{ pred.probability * 100 }}%">
-                                        {{ "%.1f"|format(pred.probability * 100) }}%
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-diagnoses me-2"></i>Primary Diagnosis
+                                </h5>
+                                <div class="p-3 bg-light rounded-3 border-start border-4 border-danger">
+                                    <h4 class="text-danger mb-2">{{ result.predicted_disease }}</h4>
+                                    <div class="mb-2">
+                                        <small class="text-muted">Confidence Level</small>
+                                        <div class="confidence-meter">
+                                            <div class="confidence-fill bg-{% if result.confidence > 0.7 %}success{% elif result.confidence > 0.5 %}warning{% else %}danger{% endif %}" 
+                                                 style="width: {{ result.confidence * 100 }}%">
+                                            </div>
+                                        </div>
+                                        <div class="d-flex justify-content-between">
+                                            <span class="fw-bold">{{ "%.1f"|format(result.confidence * 100) }}%</span>
+                                            <small class="text-muted">
+                                                {% if result.confidence > 0.8 %}Very High
+                                                {% elif result.confidence > 0.6 %}High
+                                                {% elif result.confidence > 0.4 %}Moderate
+                                                {% else %}Low{% endif %}
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class="badge bg-{% if result.condition_severity == 'Acute' %}danger{% elif result.condition_severity == 'Chronic' %}warning{% else %}info{% endif %} fs-6 px-3 py-2">
+                                            <i class="fas fa-clock me-1"></i>{{ result.condition_severity }} Condition
+                                        </span>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        <!-- Input Summary -->
-        <div class="card shadow">
-            <div class="card-header bg-secondary text-white">
-                <h5 class="mb-0"><i class="fas fa-clipboard-list me-2"></i>Input Summary</h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-6">
-                        <h6>Basic Information</h6>
-                        <p><strong>Animal:</strong> {{ form_data.animal_type }} - {{ form_data.breed }}</p>
-                        <p><strong>Age:</strong> {{ form_data.age }} years</p>
-                        <p><strong>Gender:</strong> {{ form_data.gender }}</p>
-                        <p><strong>Weight:</strong> {{ form_data.weight }} kg</p>
-                        <p><strong>Duration:</strong> {{ form_data.duration }} days</p>
-                        
-                        <h6 class="mt-3">Vital Signs</h6>
-                        <p><strong>Temperature:</strong> {{ form_data.body_temperature }}°C</p>
-                        <p><strong>Heart Rate:</strong> {{ form_data.heart_rate }} BPM</p>
-                    </div>
-                    <div class="col-md-6">
-                        <h6>Main Symptoms</h6>
-                        <ul class="list-unstyled">
-                            {% for i in range(1, 5) %}
-                                {% if form_data['symptom' ~ i] %}
-                                <li><i class="fas fa-arrow-right text-primary me-2"></i>{{ form_data['symptom' ~ i] }}</li>
+                        <div class="col-lg-6">
+                            <div class="mb-4">
+                                <h5 class="text-primary mb-3">
+                                    <i class="fas fa-heartbeat me-2"></i>Vital Signs Analysis
+                                </h5>
+                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                    <div class="vital-sign-indicator vital-{% if result.vital_signs_analysis.temperature_status == 'Normal' %}normal{% elif result.vital_signs_analysis.temperature_status == 'High' or result.vital_signs_analysis.temperature_status == 'Low' %}{% if result.vital_signs_analysis.temperature_status == 'High' %}danger{% else %}warning{% endif %}{% else %}normal{% endif %}">
+                                        <i class="fas fa-thermometer-half"></i>
+                                        <span>Temperature: {{ result.vital_signs_analysis.temperature_status }}</span>
+                                    </div>
+                                    <div class="vital-sign-indicator vital-{% if result.vital_signs_analysis.heart_rate_status == 'Normal' %}normal{% elif result.vital_signs_analysis.heart_rate_status == 'High' or result.vital_signs_analysis.heart_rate_status == 'Low' %}{% if result.vital_signs_analysis.heart_rate_status == 'High' %}danger{% else %}warning{% endif %}{% else %}normal{% endif %}">
+                                        <i class="fas fa-heart"></i>
+                                        <span>Heart Rate: {{ result.vital_signs_analysis.heart_rate_status }}</span>
+                                    </div>
+                                </div>
+                                
+                                <h6 class="text-secondary mb-2">Syndrome Scores</h6>
+                                <div class="syndrome-score">
+                                    <div class="score-circle bg-{% if result.syndrome_analysis.respiratory_score > 5 %}danger{% elif result.syndrome_analysis.respiratory_score > 2 %}warning{% else %}success{% endif %}">
+                                        {{ result.syndrome_analysis.respiratory_score }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Respiratory</div>
+                                        <small class="text-muted">Breathing & airway symptoms</small>
+                                    </div>
+                                </div>
+                                <div class="syndrome-score">
+                                    <div class="score-circle bg-{% if result.syndrome_analysis.gi_score > 5 %}danger{% elif result.syndrome_analysis.gi_score > 2 %}warning{% else %}success{% endif %}">
+                                        {{ result.syndrome_analysis.gi_score }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Gastrointestinal</div>
+                                        <small class="text-muted">Digestive system symptoms</small>
+                                    </div>
+                                </div>
+                                <div class="syndrome-score">
+                                    <div class="score-circle bg-{% if result.syndrome_analysis.systemic_score > 5 %}danger{% elif result.syndrome_analysis.systemic_score > 2 %}warning{% else %}success{% endif %}">
+                                        {{ result.syndrome_analysis.systemic_score }}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold">Systemic</div>
+                                        <small class="text-muted">General body symptoms</small>
+                                    </div>
+                                </div>
+                                
+                                {% if result.syndrome_analysis.multi_system %}
+                                <div class="alert alert-warning mt-3 py-2">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Multi-System Involvement Detected</strong>
+                                </div>
                                 {% endif %}
-                            {% endfor %}
-                        </ul>
-                        
-                        <h6 class="mt-3">Additional Symptoms</h6>
-                        <ul class="list-unstyled">
-                            {% set symptom_names = {
-                                'appetite_loss': 'Appetite Loss',
-                                'vomiting': 'Vomiting',
-                                'diarrhea': 'Diarrhea',
-                                'coughing': 'Coughing',
-                                'labored_breathing': 'Labored Breathing',
-                                'nasal_discharge': 'Nasal Discharge',
-                                'lameness': 'Lameness',
-                                'skin_lesions': 'Skin Lesions',
-                                'eye_discharge': 'Eye Discharge'
-                            } %}
-                            
-                            {# Get main symptoms to exclude from additional symptoms #}
-                            {% set main_symptoms = [] %}
-                            {% for i in range(1, 5) %}
-                                {% if form_data['symptom' ~ i] %}
-                                    {% set _ = main_symptoms.append(form_data['symptom' ~ i].lower()) %}
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {# Display only additional symptoms that are not in main symptoms #}
-                            {% for key, display_name in symptom_names.items() %}
-                                {% set symptom_lower = display_name.lower() %}
-                                {% if form_data[key] == 'yes' and symptom_lower not in main_symptoms %}
-                                <li><i class="fas fa-check text-success me-2"></i>{{ display_name }}</li>
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {# Show message if no additional symptoms #}
-                            {% set has_additional_symptoms = false %}
-                            {% for key, display_name in symptom_names.items() %}
-                                {% set symptom_lower = display_name.lower() %}
-                                {% if form_data[key] == 'yes' and symptom_lower not in main_symptoms %}
-                                    {% set has_additional_symptoms = true %}
-                                {% endif %}
-                            {% endfor %}
-                            
-                            {% if not has_additional_symptoms %}
-                                <li><i class="fas fa-minus text-muted me-2"></i>No additional symptoms</li>
-                            {% endif %}
-                        </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="text-center mt-4">
-            <a href="/" class="btn btn-primary me-2">
-                <i class="fas fa-redo me-2"></i>New Prediction
-            </a>
-            <button onclick="window.print()" class="btn btn-outline-primary">
-                <i class="fas fa-print me-2"></i>Print Report
-            </button>
-        </div>
+            <!-- Top 3 Predictions -->
+            <div class="result-card">
+                <div class="result-header bg-info">
+                    <h4 class="mb-1">
+                        <i class="fas fa-list-ol me-2"></i>Alternative Diagnoses
+                    </h4>
+                    <p class="mb-0 opacity-90">Ranked by probability based on AI analysis</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="row g-4">
+                        {% for pred in result.top_3_predictions %}
+                        <div class="col-lg-4">
+                            <div class="prediction-card {% if loop.first %}top-prediction{% endif %}">
+                                <div class="card-header d-flex align-items-center justify-content-between {% if loop.first %}bg-success text-white{% else %}bg-light{% endif %}">
+                                    <div class="d-flex align-items-center">
+                                        <div class="badge bg-{% if loop.first %}light text-success{% else %}primary{% endif %} me-2">
+                                            #{{ loop.index }}
+                                        </div>
+                                        {% if loop.first %}
+                                            <i class="fas fa-crown text-warning"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div class="fw-bold">
+                                        {{ "%.1f"|format(pred.probability * 100) }}%
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <h6 class="mb-3">{{ pred.disease }}</h6>
+                                    <div class="progress mb-2" style="height: 8px;">
+                                        <div class="progress-bar {% if loop.first %}bg-success{% elif loop.index == 2 %}bg-info{% else %}bg-secondary{% endif %}" 
+                                             style="width: {{ pred.probability * 100 }}%">
+                                        </div>
+                                    </div>
+                                    <div class="d-flex justify-content-between text-muted small">
+                                        <span>Confidence</span>
+                                        <span>
+                                            {% if pred.probability > 0.7 %}Very Likely
+                                            {% elif pred.probability > 0.5 %}Likely
+                                            {% elif pred.probability > 0.3 %}Possible
+                                            {% else %}Unlikely{% endif %}
+                                        </span>
+                                    </div>
+                                    {% if loop.first %}
+                                    <div class="mt-3">
+                                        <div class="badge bg-success-subtle text-success">
+                                            <i class="fas fa-check me-1"></i>Primary Diagnosis
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-light rounded-3">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="text-success fw-bold fs-5">{{ result.top_3_predictions|length }}</div>
+                                <small class="text-muted">Diagnoses Analyzed</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-primary fw-bold fs-5">{{ "%.0f"|format(result.confidence * 100) }}%</div>
+                                <small class="text-muted">Top Match Confidence</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="text-info fw-bold fs-5">
+                                    {% set total_prob = result.top_3_predictions|sum(attribute='probability') %}
+                                    {{ "%.0f"|format(total_prob * 100) }}%
+                                </div>
+                                <small class="text-muted">Combined Coverage</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Input Summary -->
+            <div class="result-card">
+                <div class="result-header bg-secondary">
+                    <h4 class="mb-1">
+                        <i class="fas fa-clipboard-list me-2"></i>Assessment Summary
+                    </h4>
+                    <p class="mb-0 opacity-90">Complete overview of provided information</p>
+                </div>
+                <div class="card-body p-4">
+                    <div class="input-summary-grid">
+                        <!-- Basic Information -->
+                        <div class="summary-section">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-info-circle me-2"></i>Basic Information
+                            </h6>
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Animal:</span>
+                                        <strong>{{ form_data.animal_type }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Breed:</span>
+                                        <strong>{{ form_data.breed }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Age:</span>
+                                        <strong>{{ form_data.age }} years</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Gender:</span>
+                                        <strong>{{ form_data.gender }}</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Weight:</span>
+                                        <strong>{{ form_data.weight }} kg</strong>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="text-muted">Duration:</span>
+                                        <strong>{{ form_data.duration }} days</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Vital Signs -->
+                        <div class="summary-section">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-heartbeat me-2"></i>Vital Signs
+                            </h6>
+                            <div class="row g-3">
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded border">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-thermometer-half text-danger me-2"></i>
+                                            <span>Temperature</span>
+                                        </div>
+                                        <strong class="text-danger">{{ form_data.body_temperature }}°C</strong>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center justify-content-between p-2 bg-white rounded border">
+                                        <div class="d-flex align-items-center">
+                                            <i class="fas fa-heart text-primary me-2"></i>
+                                            <span>Heart Rate</span>
+                                        </div>
+                                        <strong class="text-primary">{{ form_data.heart_rate }} BPM</strong>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Primary Symptoms -->
+                        <div class="summary-section">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-stethoscope me-2"></i>Primary Symptoms
+                            </h6>
+                            <div class="symptom-list">
+                                {% for i in range(1, 5) %}
+                                    {% if form_data['symptom' ~ i] %}
+                                    <div class="symptom-item">
+                                        <i class="fas fa-arrow-right text-primary"></i>
+                                        <span>{{ form_data['symptom' ~ i] }}</span>
+                                    </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Additional Symptoms -->
+                        <div class="summary-section">
+                            <h6 class="text-primary mb-3">
+                                <i class="fas fa-plus-circle me-2"></i>Additional Symptoms
+                            </h6>
+                            <div class="symptom-list">
+                                {% set symptom_names = {
+                                    'appetite_loss': 'Appetite Loss',
+                                    'vomiting': 'Vomiting',
+                                    'diarrhea': 'Diarrhea',
+                                    'coughing': 'Coughing',
+                                    'labored_breathing': 'Labored Breathing',
+                                    'nasal_discharge': 'Nasal Discharge',
+                                    'lameness': 'Lameness',
+                                    'skin_lesions': 'Skin Lesions',
+                                    'eye_discharge': 'Eye Discharge'
+                                } %}
+                                
+                                {% set main_symptoms = [] %}
+                                {% for i in range(1, 5) %}
+                                    {% if form_data['symptom' ~ i] %}
+                                        {% set _ = main_symptoms.append(form_data['symptom' ~ i].lower()) %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% set has_additional_symptoms = false %}
+                                {% for key, display_name in symptom_names.items() %}
+                                    {% set symptom_lower = display_name.lower() %}
+                                    {% if form_data[key] == 'yes' and symptom_lower not in main_symptoms %}
+                                        {% set has_additional_symptoms = true %}
+                                        <div class="symptom-item">
+                                            <i class="fas fa-check text-success"></i>
+                                            <span>{{ display_name }}</span>
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if not has_additional_symptoms %}
+                                    <div class="symptom-item">
+                                        <i class="fas fa-minus text-muted"></i>
+                                        <span class="text-muted">No additional symptoms reported</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-        {% endif %}
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <a href="/" class="btn btn-primary action-btn">
+                    <i class="fas fa-redo me-2"></i>New Assessment
+                </a>
+                <button onclick="window.print()" class="btn btn-outline-primary action-btn">
+                    <i class="fas fa-print me-2"></i>Print Report
+                </button>
+                <button onclick="shareResults()" class="btn btn-outline-info action-btn">
+                    <i class="fas fa-share-alt me-2"></i>Share Results
+                </button>
+                {% if current_user.is_authenticated %}
+                <a href="{{ url_for('veterinarians') }}" class="btn btn-outline-success action-btn">
+                    <i class="fas fa-user-md me-2"></i>Find Veterinarian
+                </a>
+                {% endif %}
+            </div>
+
+            {% endif %}
+        </div>
     </div>
 </div>
+
+<script>
+// Enhanced Result Page JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate confidence meters
+    setTimeout(() => {
+        document.querySelectorAll('.confidence-fill').forEach(fill => {
+            const width = fill.style.width;
+            fill.style.width = '0%';
+            setTimeout(() => {
+                fill.style.width = width;
+            }, 500);
+        });
+    }, 300);
+    
+    // Animate progress bars
+    setTimeout(() => {
+        document.querySelectorAll('.progress-bar').forEach((bar, index) => {
+            const width = bar.style.width;
+            bar.style.width = '0%';
+            setTimeout(() => {
+                bar.style.width = width;
+            }, 800 + (index * 200));
+        });
+    }, 600);
+    
+    // Add staggered animation to cards
+    document.querySelectorAll('.result-card').forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(30px)';
+        setTimeout(() => {
+            card.style.transition = 'all 0.6s ease-out';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, index * 200);
+    });
+    
+    // Add hover effects to symptom items
+    document.querySelectorAll('.symptom-item').forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateX(5px)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+
+// Share results function
+function shareResults() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'FarmCare Pro - Health Assessment Results',
+            text: 'AI-powered livestock health assessment completed',
+            url: window.location.href
+        }).then(() => {
+            if (window.farmCareUI) {
+                window.farmCareUI.showNotification('Results shared successfully!', 'success');
+            }
+        }).catch(err => {
+            console.log('Error sharing:', err);
+            fallbackShare();
+        });
+    } else {
+        fallbackShare();
+    }
+}
+
+function fallbackShare() {
+    // Copy URL to clipboard
+    navigator.clipboard.writeText(window.location.href).then(() => {
+        if (window.farmCareUI) {
+            window.farmCareUI.showNotification('Results URL copied to clipboard!', 'success');
+        } else {
+            alert('Results URL copied to clipboard!');
+        }
+    }).catch(() => {
+        if (window.farmCareUI) {
+            window.farmCareUI.showNotification('Unable to copy URL. Please copy manually.', 'warning');
+        } else {
+            alert('Unable to copy URL. Please copy manually from address bar.');
+        }
+    });
+}
+
+// Enhanced print functionality
+window.addEventListener('beforeprint', function() {
+    // Hide action buttons and add print-specific styles
+    document.querySelectorAll('.action-buttons').forEach(el => {
+        el.style.display = 'none';
+    });
+    
+    // Add print header
+    const printHeader = document.createElement('div');
+    printHeader.className = 'print-header';
+    printHeader.innerHTML = `
+        <div style="text-align: center; margin-bottom: 2rem; border-bottom: 2px solid #2d5a27; padding-bottom: 1rem;">
+            <h2 style="color: #2d5a27; margin: 0;">🐾 FarmCare Pro</h2>
+            <p style="margin: 0.5rem 0 0 0; color: #666;">AI-Powered Livestock Health Assessment Report</p>
+            <small style="color: #999;">Generated on ${new Date().toLocaleDateString()}</small>
+        </div>
+    `;
+    document.querySelector('.result-container').prepend(printHeader);
+});
+
+window.addEventListener('afterprint', function() {
+    // Restore action buttons
+    document.querySelectorAll('.action-buttons').forEach(el => {
+        el.style.display = 'flex';
+    });
+    
+    // Remove print header
+    const printHeader = document.querySelector('.print-header');
+    if (printHeader) {
+        printHeader.remove();
+    }
+});
+</script>
+
 {% endblock %}

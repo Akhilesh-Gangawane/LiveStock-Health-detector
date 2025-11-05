@@ -3,32 +3,646 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐾 Animal Disease Prediction System</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>🐾 FarmCare Pro - AI-Powered Livestock Health Management</title>
+    
+    <!-- Meta Tags for SEO and Social Media -->
+    <meta name="description" content="AI-powered livestock health detection and comprehensive farm management system. Get instant disease predictions and expert veterinary guidance.">
+    <meta name="keywords" content="livestock, health, AI, farm management, veterinary, disease detection">
+    <meta name="author" content="FarmCare Pro">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="FarmCare Pro - AI Livestock Health Management">
+    <meta property="og:description" content="Advanced AI-powered system for livestock health monitoring and farm management">
+    <meta property="og:image" content="/static/images/farmcare-og.jpg">
+    
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:title" content="FarmCare Pro - AI Livestock Health Management">
+    <meta property="twitter:description" content="Advanced AI-powered system for livestock health monitoring and farm management">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="/static/apple-touch-icon.png">
+    
+    <!-- Stylesheets -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#2d5a27">
+    <style>
+        /* Modern Navigation Styles */
+        .navbar-custom {
+            background: var(--gradient-primary);
+            box-shadow: var(--shadow-lg);
+            padding: 1rem 0;
+            backdrop-filter: blur(20px);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .navbar-brand {
+            font-family: var(--font-display);
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: white !important;
+            text-decoration: none;
+            transition: var(--transition);
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .navbar-brand:hover {
+            color: rgba(255, 255, 255, 0.9) !important;
+            transform: scale(1.05);
+        }
+        
+        .navbar-nav .nav-link {
+            color: white !important;
+            font-weight: 500;
+            padding: 0.75rem 1.25rem !important;
+            border-radius: var(--radius-full);
+            transition: var(--transition);
+            margin: 0 0.25rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .navbar-nav .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.15);
+            transition: var(--transition);
+            border-radius: var(--radius-full);
+        }
+        
+        .navbar-nav .nav-link:hover::before {
+            left: 0;
+        }
+        
+        .navbar-nav .nav-link:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .navbar-toggler {
+            border: none;
+            color: white;
+            padding: 0.5rem;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .navbar-toggler:focus {
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Modern Theme Toggle */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.15);
+            border: none;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            margin-left: 1rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: rotate(180deg) scale(1.1);
+            box-shadow: var(--shadow-md);
+        }
+        
+        /* Modern Footer */
+        .footer-custom {
+            background: var(--gradient-dark);
+            color: white;
+            padding: 4rem 0 2rem;
+            margin-top: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .footer-custom::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: var(--gradient-primary);
+        }
+        
+        .footer-custom::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            pointer-events: none;
+        }
+        
+        .footer-custom .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .footer-custom .footer-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+            padding: 0.75rem 1.25rem;
+            border-radius: var(--radius-full);
+            position: relative;
+        }
+        
+        .footer-custom .footer-links a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .footer-custom .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-custom .social-links a {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5rem;
+            transition: var(--transition);
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+        
+        .footer-custom .social-links a:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            transform: scale(1.15) rotate(5deg);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        /* Modern Container */
+        .main-container {
+            min-height: calc(100vh - 200px);
+            padding-top: 2rem;
+            position: relative;
+        }
+        
+        /* Modern Scroll to Top */
+        .scroll-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 56px;
+            height: 56px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-xl);
+            transition: var(--transition);
+            opacity: 0;
+            visibility: hidden;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+        
+        .scroll-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .scroll-to-top:hover {
+            transform: translateY(-4px) scale(1.1);
+            box-shadow: var(--shadow-2xl);
+        }
+        
+        /* Modern Loading Bar */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: var(--gradient-primary);
+            z-index: 9999;
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(22, 160, 133, 0.5);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .navbar-brand {
+                font-size: 1.5rem;
+            }
+            
+            .footer-custom .footer-links {
+                flex-direction: column;
+                text-align: center;
+                gap: 1rem;
+            }
+            
+            .theme-toggle {
+                margin-left: 0.5rem;
+                width: 40px;
+                height: 40px;
+                padding: 0.5rem;
+            }
+            
+            .scroll-to-top {
+                bottom: 1.5rem;
+                right: 1.5rem;
+                width: 48px;
+                height: 48px;
+            }
+        }
+        
+        /* Dark Theme */
+        .dark-theme .navbar-custom {
+            background: var(--gradient-dark);
+        }
+        
+        .dark-theme .footer-custom {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        }
+        
+        .dark-theme .loading-bar {
+            background: var(--gradient-secondary);
+            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+        }
+    </style>
 </head>
 <body>
-    <!-- <nav class="navbar navbar-dark bg-primary">
+    <!-- Enhanced Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-custom">
         <div class="container">
-            <span class="navbar-brand mb-0 h1">
+            <a class="navbar-brand" href="/">
                 <i class="fas fa-paw me-2"></i>
-                Animal Disease Prediction System
-            </span>
+                FarmCare Pro
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <i class="fas fa-bars"></i>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('dashboard') }}">
+                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="/" onclick="openHealthModal(); return false;">
+                                <i class="fas fa-stethoscope me-1"></i>Health Check
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-th-large me-1"></i>Services
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('veterinarians') }}">
+                                    <i class="fas fa-user-md me-2"></i>Find Veterinarians
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('knowledge_base') }}">
+                                    <i class="fas fa-book-medical me-2"></i>Knowledge Base
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('subsidies') }}">
+                                    <i class="fas fa-hand-holding-usd me-2"></i>Government Schemes
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('animals') }}">
+                                    <i class="fas fa-paw me-2"></i>My Animals
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('lands') }}">
+                                    <i class="fas fa-map-marked-alt me-2"></i>My Farm Lands
+                                </a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user me-1"></i>{{ current_user.name }}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('profile') }}">
+                                    <i class="fas fa-user me-2"></i>Profile
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('logout') }}">
+                                    <i class="fas fa-sign-out-alt me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="/">
+                                <i class="fas fa-home me-1"></i>Home
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#" onclick="openHealthModal(); return false;">
+                                <i class="fas fa-stethoscope me-1"></i>Health Check
+                            </a>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="servicesDropdownGuest" role="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-th-large me-1"></i>Services
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{{ url_for('veterinarians') }}">
+                                    <i class="fas fa-user-md me-2"></i>Find Veterinarians
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('knowledge_base') }}">
+                                    <i class="fas fa-book-medical me-2"></i>Knowledge Base
+                                </a></li>
+                                <li><a class="dropdown-item" href="{{ url_for('subsidies') }}">
+                                    <i class="fas fa-hand-holding-usd me-2"></i>Government Schemes
+                                </a></li>
+                            </ul>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('login') }}">
+                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+                
+                <!-- Theme Toggle Button -->
+                <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+                    <i class="fas fa-moon"></i>
+                </button>
+            </div>
         </div>
     </nav>
-     -->
-    <div class="container mt-4">
+    
+    <!-- Loading Bar -->
+    <div class="loading-bar" id="loadingBar"></div>
+    
+    <!-- Main Content -->
+    <div class="container main-container">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-messages">
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ 'danger' if category == 'error' else category }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{{ 'exclamation-circle' if category == 'error' else 'check-circle' if category == 'success' else 'info-circle' }} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
         {% block content %}{% endblock %}
     </div>
     
-    <footer class="bg-light text-center py-3 mt-5">
+    <!-- Scroll to Top Button -->
+    <button class="scroll-to-top" id="scrollToTop" title="Scroll to top">
+        <i class="fas fa-chevron-up"></i>
+    </button>
+    
+    <!-- Enhanced Footer -->
+    <footer class="footer-custom">
         <div class="container">
-            <p class="text-muted mb-0">🐾 Veterinary AI Assistant - For educational purposes</p>
+            <div class="footer-links">
+                <a href="#privacy">Privacy Policy</a>
+                <a href="#terms">Terms of Service</a>
+                <a href="#contact">Contact Us</a>
+                <a href="#support">Support</a>
+            </div>
+            
+            <div class="social-links">
+                <a href="#" title="Facebook"><i class="fab fa-facebook"></i></a>
+                <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                <a href="#" title="LinkedIn"><i class="fab fa-linkedin"></i></a>
+                <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+            </div>
+            
+            <div class="text-center">
+                <p class="mb-0">
+                    <i class="fas fa-paw me-2"></i>
+                    FarmCare Pro - AI-Powered Livestock Health Management
+                </p>
+                <small class="text-light opacity-75">
+                    © 2024 FarmCare Pro. For educational and research purposes.
+                </small>
+            </div>
         </div>
     </footer>
     
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="{{ url_for('static', filename='scripts.js') }}"></script>
+    
+    <script>
+        // Enhanced Layout JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Scroll to top functionality
+            const scrollToTopBtn = document.getElementById('scrollToTop');
+            
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    scrollToTopBtn.classList.add('visible');
+                } else {
+                    scrollToTopBtn.classList.remove('visible');
+                }
+            });
+            
+            scrollToTopBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Loading bar simulation
+            const loadingBar = document.getElementById('loadingBar');
+            
+            // Show loading bar on form submissions
+            document.querySelectorAll('form').forEach(form => {
+                form.addEventListener('submit', function() {
+                    loadingBar.style.width = '100%';
+                });
+            });
+            
+            // Theme toggle functionality
+            const themeToggle = document.getElementById('theme-toggle');
+            const themeIcon = themeToggle.querySelector('i');
+            
+            // Load saved theme
+            const savedTheme = localStorage.getItem('farmcare-theme');
+            if (savedTheme === 'dark-theme') {
+                document.body.classList.add('dark-theme');
+                themeIcon.className = 'fas fa-sun';
+            }
+            
+            themeToggle.addEventListener('click', function() {
+                const isDark = document.body.classList.contains('dark-theme');
+                
+                if (isDark) {
+                    document.body.classList.remove('dark-theme');
+                    themeIcon.className = 'fas fa-moon';
+                    localStorage.setItem('farmcare-theme', 'light-theme');
+                } else {
+                    document.body.classList.add('dark-theme');
+                    themeIcon.className = 'fas fa-sun';
+                    localStorage.setItem('farmcare-theme', 'dark-theme');
+                }
+            });
+            
+            // Enhanced navigation active state
+            const currentPath = window.location.pathname;
+            document.querySelectorAll('.navbar-nav .nav-link').forEach(link => {
+                if (link.getAttribute('href') === currentPath) {
+                    link.classList.add('active');
+                }
+            });
+            
+            // Auto-hide flash messages
+            setTimeout(() => {
+                document.querySelectorAll('.alert').forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+        
+        // Global utility functions
+        function showEnhancedInfo(event) {
+            event.preventDefault();
+            if (window.farmCareUI) {
+                window.farmCareUI.showNotification('🚀 Enhanced Features Available! Full farm management system with user accounts, analytics, and more!', 'info', 4000);
+            } else {
+                alert('🚀 Enhanced Features Available!\n\nFor full farm management features including:\n• User accounts & authentication\n• Animal & land management\n• Dashboard & analytics\n• Prediction history\n\nThis enhanced version includes all features!');
+            }
+        }
+        
+        // Global modal functions
+        function openHealthModal() {
+            const modal = document.getElementById('healthModal');
+            if (modal) {
+                modal.classList.add('show');
+                document.body.style.overflow = 'hidden';
+            } else {
+                // If modal doesn't exist on this page, redirect to home
+                window.location.href = '/';
+            }
+        }
+        
+        function closeHealthModal() {
+            const modal = document.getElementById('healthModal');
+            if (modal) {
+                modal.classList.remove('show');
+                document.body.style.overflow = 'auto';
+            }
+        }
+        
+        // Global notification system
+        window.showNotification = function(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <i class="fas fa-${getNotificationIcon(type)}"></i>
+                    <span>${message}</span>
+                    <button class="notification-close">&times;</button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+            
+            const timeout = setTimeout(() => {
+                removeNotification(notification);
+            }, 5000);
+            
+            notification.querySelector('.notification-close').addEventListener('click', () => {
+                clearTimeout(timeout);
+                removeNotification(notification);
+            });
+        };
+        
+        function getNotificationIcon(type) {
+            const icons = {
+                success: 'check-circle',
+                error: 'exclamation-circle',
+                warning: 'exclamation-triangle',
+                info: 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+        
+        function removeNotification(notification) {
+            notification.classList.add('hide');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
+        }
+        
+        // PWA Installation
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button or notification
+            if (window.farmCareUI) {
+                window.farmCareUI.showNotification('📱 Install FarmCare Pro as an app for better experience!', 'info', 6000);
+            }
+        });
+        
+        // Performance monitoring
+        window.addEventListener('load', function() {
+            if ('performance' in window) {
+                const loadTime = performance.timing.loadEventEnd - performance.timing.navigationStart;
+                console.log(`🚀 Page loaded in ${loadTime}ms`);
+            }
+        });
+    </script>
 </body>
 </html>
