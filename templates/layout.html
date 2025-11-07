@@ -1,19 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="{{ current_language }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐾 FarmCare Pro - AI-Powered Livestock Health Management</title>
+    <title>🌿 {{ get_text('app_name') }} - Eco-Tech Livestock Health Intelligence</title>
     
     <!-- Meta Tags for SEO and Social Media -->
-    <meta name="description" content="AI-powered livestock health detection and comprehensive farm management system. Get instant disease predictions and expert veterinary guidance.">
+    <meta name="description" content="🌿 Eco-tech livestock health platform combining agricultural expertise with AI intelligence. Professional farm management with sustainable technology solutions.">
     <meta name="keywords" content="livestock, health, AI, farm management, veterinary, disease detection">
     <meta name="author" content="FarmCare Pro">
     
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="FarmCare Pro - AI Livestock Health Management">
-    <meta property="og:description" content="Advanced AI-powered system for livestock health monitoring and farm management">
+    <meta property="og:title" content="🌿 FarmCare Pro - Eco-Tech Livestock Intelligence">
+    <meta property="og:description" content="🌿 Professional eco-tech platform for livestock health management. Agricultural expertise meets AI intelligence for sustainable farming solutions.">
     <meta property="og:image" content="/static/images/farmcare-og.jpg">
     
     <!-- Twitter -->
@@ -35,16 +35,16 @@
     <link rel="manifest" href="/static/manifest.json">
     <meta name="theme-color" content="#2d5a27">
     <style>
-        /* Modern Navigation Styles */
+        /* 🌿 Eco-Tech Navigation Styles */
         .navbar-custom {
             background: var(--gradient-primary);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-medium);
             padding: 1rem 0;
             backdrop-filter: blur(20px);
             position: sticky;
             top: 0;
             z-index: 1000;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 2px solid var(--accent);
         }
         
         .navbar-brand {
@@ -80,9 +80,10 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.15);
+            background: var(--secondary);
             transition: var(--transition);
             border-radius: var(--radius-full);
+            opacity: 0.2;
         }
         
         .navbar-nav .nav-link:hover::before {
@@ -91,7 +92,8 @@
         
         .navbar-nav .nav-link:hover {
             transform: translateY(-2px);
-            box-shadow: var(--shadow-md);
+            box-shadow: var(--shadow-soft);
+            color: var(--text-primary) !important;
         }
         
         .navbar-toggler {
@@ -106,6 +108,72 @@
             box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
         }
         
+        /* 🌱 Eco-Tech Language Toggle */
+        .language-toggle {
+            background: var(--accent);
+            border: 2px solid var(--accent-light);
+            color: var(--text-primary);
+            padding: 0.5rem 0.75rem;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+            margin-left: 1rem;
+            backdrop-filter: blur(10px);
+            font-size: 0.875rem;
+            font-weight: 600;
+            min-width: 60px;
+            box-shadow: var(--shadow-soft);
+        }
+        
+        .language-toggle:hover {
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-medium);
+            color: var(--text-primary);
+            border-color: var(--accent);
+        }
+        
+        .language-toggle:focus {
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .dropdown-menu {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border: 2px solid var(--secondary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-strong);
+            margin-top: 0.5rem;
+        }
+        
+        .dropdown-item {
+            padding: 0.75rem 1.25rem;
+            transition: var(--transition);
+            border-radius: var(--radius-md);
+            margin: 0.25rem;
+            color: var(--text-primary);
+        }
+        
+        .dropdown-item:hover {
+            background: var(--secondary);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+        
+        .dropdown-item.active {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .dropdown-item.active:hover {
+            background: var(--primary-dark);
+            color: white;
+            transform: none;
+        }
+
         /* Modern Theme Toggle */
         .theme-toggle {
             background: rgba(255, 255, 255, 0.15);
@@ -129,9 +197,9 @@
             box-shadow: var(--shadow-md);
         }
         
-        /* Modern Footer */
+        /* 🌿 Eco-Tech Footer */
         .footer-custom {
-            background: var(--gradient-dark);
+            background: var(--primary);
             color: white;
             padding: 4rem 0 2rem;
             margin-top: 5rem;
@@ -145,8 +213,8 @@
             top: 0;
             left: 0;
             width: 100%;
-            height: 3px;
-            background: var(--gradient-primary);
+            height: 4px;
+            background: var(--gradient-accent);
         }
         
         .footer-custom::after {
@@ -192,7 +260,7 @@
         }
         
         .footer-custom .social-links a {
-            color: rgba(255, 255, 255, 0.7);
+            color: var(--secondary);
             font-size: 1.5rem;
             transition: var(--transition);
             width: 56px;
@@ -201,15 +269,17 @@
             align-items: center;
             justify-content: center;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(167, 255, 235, 0.1);
             backdrop-filter: blur(10px);
+            border: 2px solid var(--secondary);
         }
         
         .footer-custom .social-links a:hover {
-            color: white;
-            background: rgba(255, 255, 255, 0.15);
+            color: var(--accent);
+            background: var(--secondary);
             transform: scale(1.15) rotate(5deg);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-medium);
+            border-color: var(--accent);
         }
         
         /* Modern Container */
@@ -276,6 +346,13 @@
                 gap: 1rem;
             }
             
+            .language-toggle {
+                margin-left: 0.5rem;
+                min-width: 50px;
+                padding: 0.5rem;
+                font-size: 0.75rem;
+            }
+            
             .theme-toggle {
                 margin-left: 0.5rem;
                 width: 40px;
@@ -291,18 +368,150 @@
             }
         }
         
-        /* Dark Theme */
+        /* Particle Container Cleanup */
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+        
+        .particle {
+            position: absolute;
+            font-size: 1.5rem;
+            animation: float-particle 20s linear infinite;
+            opacity: 0.6;
+        }
+        
+        @keyframes float-particle {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* 🌾 Modern AgriTech Dark Mode Theme */
+        .dark-theme {
+            /* 🌑 Dark Mode Color Palette */
+            --background: #121212;          /* 🌑 Deep Charcoal - Soft dark base */
+            --surface: #1E2D2F;            /* 🌿 Dark Teal - Natural green undertone */
+            --primary: #00E676;            /* 🌱 Mint Green - Vibrant highlights */
+            --accent: #FDD835;             /* ☀️ Harvest Yellow - Warm CTAs */
+            --text-primary: #E0E0E0;       /* ☁️ Off White - High contrast */
+            --text-secondary: #B0BEC5;     /* 🌾 Light Grey - Muted text */
+            --border: #2E3C3C;             /* 🌳 Forest Grey - Subtle borders */
+            --footer-dark: #0D1414;        /* Very dark teal for footer */
+            
+            /* AgriTech Gradients */
+            --gradient-primary: linear-gradient(135deg, #00E676 0%, #00C853 100%);
+            --gradient-accent: linear-gradient(135deg, #FDD835 0%, #FBC02D 100%);
+            --gradient-surface: linear-gradient(135deg, #1E2D2F 0%, #263238 100%);
+            
+            /* Smart Farming Shadows with Green Glow */
+            --shadow-glow: 0 4px 20px rgba(0, 230, 118, 0.15);
+            --shadow-accent: 0 4px 20px rgba(253, 216, 53, 0.15);
+        }
+        
+        /* 🌌 Dark Mode Navigation */
         .dark-theme .navbar-custom {
-            background: var(--gradient-dark);
+            background: var(--background);
+            border-bottom: 2px solid var(--primary);
+            box-shadow: var(--shadow-glow);
         }
         
+        .dark-theme .navbar-brand {
+            color: var(--primary) !important;
+            text-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+        }
+        
+        .dark-theme .navbar-nav .nav-link {
+            color: var(--text-primary) !important;
+        }
+        
+        .dark-theme .navbar-nav .nav-link:hover {
+            color: var(--primary) !important;
+            background: rgba(0, 230, 118, 0.1);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        /* 🌱 Dark Mode Language Toggle */
+        .dark-theme .language-toggle {
+            background: var(--accent);
+            color: var(--background);
+            border-color: var(--accent);
+            box-shadow: var(--shadow-accent);
+        }
+        
+        .dark-theme .language-toggle:hover {
+            background: #FFEB3B;
+            box-shadow: 0 6px 25px rgba(253, 216, 53, 0.25);
+        }
+        
+        /* 🌿 Dark Mode Dropdown */
+        .dark-theme .dropdown-menu {
+            background: var(--surface);
+            border: 2px solid var(--primary);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        .dark-theme .dropdown-item {
+            color: var(--text-primary);
+        }
+        
+        .dark-theme .dropdown-item:hover {
+            background: rgba(0, 230, 118, 0.15);
+            color: var(--primary);
+        }
+        
+        .dark-theme .dropdown-item.active {
+            background: var(--primary);
+            color: var(--background);
+        }
+        
+        /* 🌾 Dark Mode Footer */
         .dark-theme .footer-custom {
-            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            background: var(--footer-dark);
+            border-top: 3px solid var(--primary);
         }
         
+        .dark-theme .footer-custom .social-links a {
+            background: rgba(0, 230, 118, 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        
+        .dark-theme .footer-custom .social-links a:hover {
+            background: var(--primary);
+            color: var(--background);
+            box-shadow: var(--shadow-glow);
+        }
+        
+        /* 🌑 Dark Mode Loading Bar */
         .dark-theme .loading-bar {
-            background: var(--gradient-secondary);
-            box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+            background: var(--gradient-primary);
+            box-shadow: 0 0 15px rgba(0, 230, 118, 0.6);
+        }
+        
+        /* 🌿 Body Background with Eco Pattern */
+        body {
+            background: var(--background);
+            background-image: var(--bg-pattern);
+            color: var(--text-primary);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         }
     </style>
 </head>
@@ -324,34 +533,34 @@
                     {% if current_user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('dashboard') }}">
-                                <i class="fas fa-tachometer-alt me-1"></i>Dashboard
+                                <i class="fas fa-tachometer-alt me-1"></i>{{ get_text('dashboard') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="/" onclick="openHealthModal(); return false;">
-                                <i class="fas fa-stethoscope me-1"></i>Health Check
+                                <i class="fas fa-stethoscope me-1"></i>{{ get_text('health_check') }}
                             </a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-th-large me-1"></i>Services
+                                <i class="fas fa-th-large me-1"></i>{{ get_text('services') }}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ url_for('veterinarians') }}">
-                                    <i class="fas fa-user-md me-2"></i>Find Veterinarians
+                                    <i class="fas fa-user-md me-2"></i>{{ get_text('find_veterinarians') }}
                                 </a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('knowledge_base') }}">
-                                    <i class="fas fa-book-medical me-2"></i>Knowledge Base
+                                    <i class="fas fa-book-medical me-2"></i>{{ get_text('knowledge_base') }}
                                 </a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('subsidies') }}">
-                                    <i class="fas fa-hand-holding-usd me-2"></i>Government Schemes
+                                    <i class="fas fa-hand-holding-usd me-2"></i>{{ get_text('subsidies') }}
                                 </a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="{{ url_for('animals') }}">
-                                    <i class="fas fa-paw me-2"></i>My Animals
+                                    <i class="fas fa-paw me-2"></i>{{ get_text('my_animals') }}
                                 </a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('lands') }}">
-                                    <i class="fas fa-map-marked-alt me-2"></i>My Farm Lands
+                                    <i class="fas fa-map-marked-alt me-2"></i>{{ get_text('my_farm_lands') }}
                                 </a></li>
                             </ul>
                         </li>
@@ -372,37 +581,57 @@
                     {% else %}
                         <li class="nav-item">
                             <a class="nav-link" href="/">
-                                <i class="fas fa-home me-1"></i>Home
+                                <i class="fas fa-home me-1"></i>{{ get_text('home') }}
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="#" onclick="openHealthModal(); return false;">
-                                <i class="fas fa-stethoscope me-1"></i>Health Check
+                                <i class="fas fa-stethoscope me-1"></i>{{ get_text('health_check') }}
                             </a>
                         </li>
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="servicesDropdownGuest" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-th-large me-1"></i>Services
+                                <i class="fas fa-th-large me-1"></i>{{ get_text('services') }}
                             </a>
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="{{ url_for('veterinarians') }}">
-                                    <i class="fas fa-user-md me-2"></i>Find Veterinarians
+                                    <i class="fas fa-user-md me-2"></i>{{ get_text('find_veterinarians') }}
                                 </a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('knowledge_base') }}">
-                                    <i class="fas fa-book-medical me-2"></i>Knowledge Base
+                                    <i class="fas fa-book-medical me-2"></i>{{ get_text('knowledge_base') }}
                                 </a></li>
                                 <li><a class="dropdown-item" href="{{ url_for('subsidies') }}">
-                                    <i class="fas fa-hand-holding-usd me-2"></i>Government Schemes
+                                    <i class="fas fa-hand-holding-usd me-2"></i>{{ get_text('subsidies') }}
                                 </a></li>
                             </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="{{ url_for('login') }}">
-                                <i class="fas fa-sign-in-alt me-1"></i>Login
+                                <i class="fas fa-sign-in-alt me-1"></i>{{ get_text('login') }}
                             </a>
                         </li>
                     {% endif %}
                 </ul>
+                
+                <!-- Language Toggle Button -->
+                <div class="dropdown">
+                    <button class="language-toggle dropdown-toggle" type="button" id="languageDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Change Language">
+                        <i class="fas fa-globe me-1"></i>
+                        {% if current_language == 'mr' %}मर{% else %}EN{% endif %}
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                        <li>
+                            <a class="dropdown-item {% if current_language == 'en' %}active{% endif %}" href="{{ url_for('set_language', language='en') }}">
+                                <i class="fas fa-flag-usa me-2"></i>English
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item {% if current_language == 'mr' %}active{% endif %}" href="{{ url_for('set_language', language='mr') }}">
+                                <i class="fas fa-flag me-2"></i>मराठी (Marathi)
+                            </a>
+                        </li>
+                    </ul>
+                </div>
                 
                 <!-- Theme Toggle Button -->
                 <button class="theme-toggle" id="theme-toggle" title="Toggle theme">
@@ -476,6 +705,10 @@
     <script>
         // Enhanced Layout JavaScript
         document.addEventListener('DOMContentLoaded', function() {
+            // Clean up any existing particle containers
+            const existingParticles = document.querySelectorAll('.particle-container, .particle');
+            existingParticles.forEach(particle => particle.remove());
+            
             // Scroll to top functionality
             const scrollToTopBtn = document.getElementById('scrollToTop');
             

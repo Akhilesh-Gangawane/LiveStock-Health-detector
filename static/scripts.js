@@ -93,6 +93,10 @@ class FarmCareProEnhanced {
     }
 
     setupParticleBackground() {
+        // Particle background disabled to prevent emoji overflow
+        // Can be re-enabled by uncommenting the code below
+        
+        /*
         if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
             return; // Skip animations for users who prefer reduced motion
         }
@@ -115,6 +119,7 @@ class FarmCareProEnhanced {
                 this.createParticle(particleContainer, particles);
             }
         }, 5000);
+        */
     }
 
     createParticle(container, particles) {

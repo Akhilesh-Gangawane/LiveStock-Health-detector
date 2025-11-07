@@ -1,0 +1,521 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-left">
+        <h1><i class="fas fa-paw me-3"></i>{{ animal.name or animal.animal_id }}</h1>
+        <p class="animal-info">{{ animal.animal_type }} - {{ animal.breed }} - {{ animal.age }} years old</p>
+    </div>
+    <div class="header-actions">
+        <a href="{{ url_for('edit_animal', animal_id=animal.id) }}" class="btn btn-outline-primary">
+            <i class="fas fa-edit me-2"></i>Edit
+        </a>
+        <a href="{{ url_for('predict_for_animal', animal_id=animal.id) }}" class="btn btn-primary">
+            <i class="fas fa-stethoscope me-2"></i>Health Check
+        </a>
+        <a href="{{ url_for('animals') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Back to Animals
+        </a>
+    </div>
+</div>
+
+<!-- Animal Overview Cards -->
+<div class="overview-grid">
+    <div class="overview-card">
+        <div class="card-icon">
+            <i class="fas fa-heartbeat"></i>
+        </div>
+        <div class="card-content">
+            <h4>Health Status</h4>
+            <span class="status-badge {{ animal.health_status }}">{{ animal.health_status.title() }}</span>
+        </div>
+    </div>
+    <div class="overview-card">
+        <div class="card-icon">
+            <i class="fas fa-weight"></i>
+        </div>
+        <div class="card-content">
+            <h4>Weight</h4>
+            <p>{{ animal.weight }} kg</p>
+        </div>
+    </div>
+    <div class="overview-card">
+        <div class="card-icon">
+            <i class="fas fa-venus-mars"></i>
+        </div>
+        <div class="card-content">
+            <h4>Gender</h4>
+            <p>{{ animal.gender }}</p>
+        </div>
+    </div>
+    <div class="overview-card">
+        <div class="card-icon">
+            <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="card-content">
+            <h4>Added</h4>
+            <p>{{ animal.created_at.strftime('%B %d, %Y') }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs Section -->
+<div class="tabs-container">
+    <ul class="nav nav-tabs" id="animalTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="predictions-tab" data-bs-toggle="tab" data-bs-target="#predictions" type="button" role="tab">
+                <i class="fas fa-chart-line me-2"></i>Health History
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="vaccinations-tab" data-bs-toggle="tab" data-bs-target="#vaccinations" type="button" role="tab">
+                <i class="fas fa-syringe me-2"></i>Vaccinations
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
+                <i class="fas fa-chart-bar me-2"></i>Analytics
+            </button>
+        </li>
+    </ul>
+    
+    <div class="tab-content" id="animalTabsContent">
+        <!-- Health History Tab -->
+        <div class="tab-pane fade show active" id="predictions" role="tabpanel">
+            <div class="predictions-section">
+                <div class="section-header">
+                    <h4><i class="fas fa-stethoscope me-2"></i>Recent Health Checks</h4>
+                    <a href="{{ url_for('predict_for_animal', animal_id=animal.id) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-2"></i>New Health Check
+                    </a>
+                </div>
+                
+                {% if predictions %}
+                    <div class="predictions-list">
+                        {% for prediction in predictions %}
+                        <div class="prediction-item">
+                            <div class="prediction-header">
+                                <div class="prediction-date">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    {{ prediction.created_at.strftime('%B %d, %Y at %I:%M %p') }}
+                                </div>
+                                <div class="prediction-confidence">
+                                    <span class="confidence-badge">{{ "%.1f"|format(prediction.confidence * 100) }}% Confidence</span>
+                                </div>
+                            </div>
+                            <div class="prediction-details">
+                                {% set result = prediction.result | from_json %}
+                                {% if result.predicted_disease %}
+                                    <strong>Predicted: {{ result.predicted_disease }}</strong>
+                                {% endif %}
+                                {% if result.condition_severity %}
+                                    <p><i class="fas fa-exclamation-triangle me-2"></i>Severity: {{ result.condition_severity }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-stethoscope"></i>
+                        <h5>No Health Checks Yet</h5>
+                        <p>Run your first health check to start tracking this animal's health history.</p>
+                        <a href="{{ url_for('predict_for_animal', animal_id=animal.id) }}" class="btn btn-primary">
+                            <i class="fas fa-stethoscope me-2"></i>Start Health Check
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Vaccinations Tab -->
+        <div class="tab-pane fade" id="vaccinations" role="tabpanel">
+            <div class="vaccinations-section">
+                <div class="section-header">
+                    <h4><i class="fas fa-syringe me-2"></i>Vaccination Records</h4>
+                    <a href="{{ url_for('add_vaccination', animal_id=animal.id) }}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-plus me-2"></i>Add Vaccination
+                    </a>
+                </div>
+                
+                {% if vaccinations %}
+                    <div class="vaccinations-list">
+                        {% for vaccination in vaccinations %}
+                        <div class="vaccination-item">
+                            <div class="vaccination-icon">
+                                <i class="fas fa-syringe"></i>
+                            </div>
+                            <div class="vaccination-details">
+                                <h5>{{ vaccination.vaccine_name }}</h5>
+                                <p><i class="fas fa-calendar me-2"></i>Given: {{ vaccination.vaccination_date.strftime('%B %d, %Y') }}</p>
+                                {% if vaccination.next_due_date %}
+                                    <p><i class="fas fa-clock me-2"></i>Next Due: {{ vaccination.next_due_date.strftime('%B %d, %Y') }}</p>
+                                {% endif %}
+                                {% if vaccination.veterinarian %}
+                                    <p><i class="fas fa-user-md me-2"></i>By: {{ vaccination.veterinarian }}</p>
+                                {% endif %}
+                                {% if vaccination.notes %}
+                                    <p><i class="fas fa-sticky-note me-2"></i>{{ vaccination.notes }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-syringe"></i>
+                        <h5>No Vaccination Records</h5>
+                        <p>Keep track of your animal's vaccination history for better health management.</p>
+                        <a href="{{ url_for('add_vaccination', animal_id=animal.id) }}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Add First Vaccination
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <!-- Analytics Tab -->
+        <div class="tab-pane fade" id="analytics" role="tabpanel">
+            <div class="analytics-section">
+                <h4><i class="fas fa-chart-bar me-2"></i>Health Analytics</h4>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="chart-container">
+                            <h5>Health Confidence Over Time</h5>
+                            <canvas id="healthChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="stats-summary">
+                            <div class="stat-item">
+                                <h6>Total Health Checks</h6>
+                                <span class="stat-value">{{ predictions|length }}</span>
+                            </div>
+                            <div class="stat-item">
+                                <h6>Average Confidence</h6>
+                                <span class="stat-value">
+                                    {% if predictions %}
+                                        {{ "%.1f"|format((predictions|sum(attribute='confidence')|float / predictions|length) * 100) }}%
+                                    {% else %}
+                                        N/A
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="stat-item">
+                                <h6>Vaccinations</h6>
+                                <span class="stat-value">{{ vaccinations|length }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Create health chart if we have prediction data
+    const predictions = {{ predictions|tojson }};
+    if (predictions && predictions.length > 0) {
+        createHealthChart(predictions);
+    }
+});
+
+function createHealthChart(predictions) {
+    const ctx = document.getElementById('healthChart').getContext('2d');
+    
+    const chartData = predictions.map(p => ({
+        x: new Date(p.created_at).toLocaleDateString(),
+        y: (p.confidence || 0) * 100
+    }));
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [{
+                label: 'Health Confidence %',
+                data: chartData,
+                borderColor: '#2d5a27',
+                backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+</script>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.header-left h1 {
+    margin: 0;
+    color: #2d5a27;
+}
+
+.animal-info {
+    color: #666;
+    margin: 5px 0 0 0;
+    font-size: 1.1rem;
+}
+
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.overview-card {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.card-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.3rem;
+    color: #2d5a27;
+}
+
+.card-content h4 {
+    margin: 0 0 5px 0;
+    color: #2d5a27;
+    font-size: 1rem;
+}
+
+.card-content p {
+    margin: 0;
+    color: #666;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.healthy {
+    background: #28a745;
+    color: white;
+}
+
+.status-badge.sick {
+    background: #dc3545;
+    color: white;
+}
+
+.status-badge.recovering {
+    background: #ffc107;
+    color: #000;
+}
+
+.tabs-container {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.nav-tabs {
+    border-bottom: 1px solid #dee2e6;
+    padding: 0 20px;
+}
+
+.nav-tabs .nav-link {
+    border: none;
+    color: #666;
+    padding: 15px 20px;
+    font-weight: 500;
+}
+
+.nav-tabs .nav-link.active {
+    color: #2d5a27;
+    border-bottom: 3px solid #2d5a27;
+    background: none;
+}
+
+.tab-content {
+    padding: 30px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.section-header h4 {
+    color: #2d5a27;
+    margin: 0;
+}
+
+.predictions-list, .vaccinations-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.prediction-item, .vaccination-item {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 4px solid #2d5a27;
+}
+
+.prediction-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.prediction-date {
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.confidence-badge {
+    background: #2d5a27;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.prediction-details strong {
+    color: #2d5a27;
+    font-size: 1.1rem;
+}
+
+.vaccination-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.vaccination-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2d5a27;
+    flex-shrink: 0;
+}
+
+.vaccination-details h5 {
+    color: #2d5a27;
+    margin: 0 0 10px 0;
+}
+
+.vaccination-details p {
+    margin: 5px 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #666;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.empty-state h5 {
+    color: #2d5a27;
+    margin-bottom: 15px;
+}
+
+.chart-container {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.chart-container h5 {
+    color: #2d5a27;
+    margin-bottom: 20px;
+}
+
+.stats-summary {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+.stat-item {
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.stat-item h6 {
+    color: #666;
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2d5a27;
+}
+</style>
+{% endblock %}

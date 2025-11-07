@@ -1,49 +1,49 @@
-/* ===== MODERN FARMCARE PRO THEME ===== */
+/* ===== ECO-TECH FARMCARE PRO THEME ===== */
 
 :root {
-  /* Modern Color Palette - Fresh & Professional */
-  --primary: #16a085;
-  --primary-light: #48c9b0;
-  --primary-dark: #138d75;
-  --secondary: #3498db;
-  --secondary-light: #5dade2;
-  --secondary-dark: #2980b9;
+  /* 🌿 Eco-Tech Color Palette - Agricultural Intelligence */
+  --primary: #00695C;           /* 🌿 Teal Green - Growth, intelligence, trust */
+  --primary-light: #26A69A;    /* Lighter teal for hover states */
+  --primary-dark: #004D40;     /* Darker teal for depth */
+  --secondary: #A7FFEB;        /* 🌱 Light Mint - Clean, modern, calming */
+  --secondary-light: #B2DFDB;  /* Softer mint variation */
+  --secondary-dark: #80CBC4;   /* Deeper mint for contrast */
 
-  /* Accent Colors */
-  --accent: #e74c3c;
-  --accent-light: #ec7063;
-  --accent-dark: #c0392b;
-  --success: #27ae60;
-  --warning: #f39c12;
-  --info: #3498db;
-  --danger: #e74c3c;
+  /* ☀️ Accent Colors */
+  --accent: #FBC02D;           /* ☀️ Harvest Yellow - Warmth, highlights, CTAs */
+  --accent-light: #FFF176;     /* Lighter yellow for backgrounds */
+  --accent-dark: #F57F17;      /* Deeper yellow for emphasis */
+  --success: #4CAF50;          /* Natural green for success states */
+  --warning: #FF9800;          /* Warm orange for warnings */
+  --info: #00BCD4;            /* Cyan for information */
+  --danger: #F44336;          /* Red for errors */
 
-  /* Neutral Colors */
-  --white: #ffffff;
-  --light: #ecf0f1;
-  --light-2: #f8f9fa;
-  --gray-100: #f4f6f7;
-  --gray-200: #eaeded;
-  --gray-300: #d5dbdb;
-  --gray-400: #aeb6bf;
-  --gray-500: #85929e;
-  --gray-600: #5d6d7e;
-  --gray-700: #34495e;
-  --gray-800: #2c3e50;
-  --gray-900: #1b2631;
+  /* 🖋️ Text & Neutral Colors */
+  --text-primary: #263238;     /* 🖋️ Charcoal Grey - Strong readability */
+  --text-secondary: #455A64;  /* Lighter charcoal for secondary text */
+  --text-muted: #78909C;      /* Muted grey for less important text */
+  --white: #FFFFFF;           /* Pure white */
+  --background: #FAFAFA;      /* ☁️ Soft White - Fresh and open */
+  --surface: #FFFFFF;         /* Card/surface backgrounds */
+  --border: #E0E0E0;         /* Subtle borders */
 
-  /* Gradients */
-  --gradient-primary: linear-gradient(135deg, #16a085 0%, #48c9b0 100%);
-  --gradient-secondary: linear-gradient(135deg, #3498db 0%, #5dade2 100%);
-  --gradient-accent: linear-gradient(135deg, #e74c3c 0%, #ec7063 100%);
-  --gradient-success: linear-gradient(135deg, #27ae60 0%, #58d68d 100%);
-  --gradient-dark: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-  --gradient-light: linear-gradient(135deg, #ecf0f1 0%, #ffffff 100%);
+  /* 🎨 Eco-Tech Gradients */
+  --gradient-primary: linear-gradient(135deg, #00695C 0%, #26A69A 100%);
+  --gradient-secondary: linear-gradient(135deg, #A7FFEB 0%, #B2DFDB 100%);
+  --gradient-accent: linear-gradient(135deg, #FBC02D 0%, #FFF176 100%);
+  --gradient-success: linear-gradient(135deg, #4CAF50 0%, #81C784 100%);
+  --gradient-dark: linear-gradient(135deg, #263238 0%, #37474F 100%);
+  --gradient-light: linear-gradient(135deg, #FAFAFA 0%, #FFFFFF 100%);
 
-  /* Background Patterns */
-  --bg-pattern: radial-gradient(circle at 20% 80%, rgba(22, 160, 133, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 20%, rgba(52, 152, 219, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 40% 40%, rgba(231, 76, 60, 0.03) 0%, transparent 50%);
+  /* 🌿 Agricultural Background Patterns */
+  --bg-pattern: radial-gradient(circle at 20% 80%, rgba(0, 105, 92, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(167, 255, 235, 0.05) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(251, 192, 45, 0.02) 0%, transparent 50%);
+
+  /* 🌱 Nature-inspired shadows */
+  --shadow-soft: 0 2px 8px rgba(0, 105, 92, 0.08);
+  --shadow-medium: 0 4px 16px rgba(0, 105, 92, 0.12);
+  --shadow-strong: 0 8px 32px rgba(0, 105, 92, 0.16);
 
   /* Spacing */
   --space-xs: 0.25rem;
@@ -1031,35 +1031,157 @@ a:hover {
   }
 }
 
-/* ===== DARK THEME SUPPORT ===== */
+/* ===== 🌾 MODERN AGRITECH DARK THEME SUPPORT ===== */
 
 .dark-theme {
-  --white: #1e293b;
-  --light: #0f172a;
-  --light-2: #1e293b;
-  --gray-100: #334155;
-  --gray-200: #475569;
-  --gray-300: #64748b;
-  --gray-700: #e2e8f0;
-  --gray-800: #f1f5f9;
-  --gray-900: #ffffff;
+  /* 🌑 AgriTech Dark Mode Color Palette */
+  --background: #121212;          /* 🌑 Deep Charcoal - Soft dark base */
+  --surface: #1E2D2F;            /* 🌿 Dark Teal - Natural green undertone */
+  --primary: #00E676;            /* 🌱 Mint Green - Vibrant highlights */
+  --accent: #FDD835;             /* ☀️ Harvest Yellow - Warm CTAs */
+  --text-primary: #E0E0E0;       /* ☁️ Off White - High contrast */
+  --text-secondary: #B0BEC5;     /* 🌾 Light Grey - Muted text */
+  --border: #2E3C3C;             /* 🌳 Forest Grey - Subtle borders */
+  --footer-dark: #0D1414;        /* Very dark teal for footer */
+  
+  /* Override light theme variables for consistency */
+  --white: #1E2D2F;
+  --light: #121212;
+  --light-2: #1E2D2F;
+  --gray-100: #2E3C3C;
+  --gray-200: #37474F;
+  --gray-300: #455A64;
+  --gray-500: #B0BEC5;
+  --gray-600: #B0BEC5;
+  --gray-700: #E0E0E0;
+  --gray-800: #E0E0E0;
+  --gray-900: #FFFFFF;
+  
+  /* AgriTech Dark Gradients */
+  --gradient-primary: linear-gradient(135deg, #00E676 0%, #00C853 100%);
+  --gradient-accent: linear-gradient(135deg, #FDD835 0%, #FBC02D 100%);
+  --gradient-surface: linear-gradient(135deg, #1E2D2F 0%, #263238 100%);
+  
+  /* Smart Farming Glow Effects */
+  --shadow-glow: 0 4px 20px rgba(0, 230, 118, 0.15);
+  --shadow-accent: 0 4px 20px rgba(253, 216, 53, 0.15);
+  --shadow-soft: 0 2px 8px rgba(0, 230, 118, 0.08);
+  --shadow-medium: 0 4px 16px rgba(0, 230, 118, 0.12);
+  --shadow-strong: 0 8px 32px rgba(0, 230, 118, 0.16);
 }
 
 .dark-theme body {
-  background: var(--light);
-  color: var(--gray-800);
+  background: var(--background);
+  color: var(--text-primary);
 }
 
 .dark-theme .card {
-  background: var(--white);
-  border-color: var(--gray-300);
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text-primary);
 }
 
 .dark-theme .form-control,
 .dark-theme .form-select {
-  background: var(--white);
-  border-color: var(--gray-300);
-  color: var(--gray-800);
+  background: rgba(30, 45, 47, 0.8);
+  border-color: var(--border);
+  color: var(--text-primary);
+}
+
+.dark-theme .form-control:focus,
+.dark-theme .form-select:focus {
+  background: rgba(0, 230, 118, 0.1);
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15);
+}
+
+/* 🌱 Dark Mode Buttons */
+.dark-theme .btn-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--background);
+  box-shadow: var(--shadow-glow);
+}
+
+.dark-theme .btn-primary:hover {
+  background: #00C853;
+  border-color: #00C853;
+  box-shadow: 0 6px 25px rgba(0, 230, 118, 0.25);
+}
+
+.dark-theme .btn-secondary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--background);
+  box-shadow: var(--shadow-accent);
+}
+
+.dark-theme .btn-secondary:hover {
+  background: #FFEB3B;
+  border-color: #FFEB3B;
+  box-shadow: 0 6px 25px rgba(253, 216, 53, 0.25);
+}
+
+.dark-theme .text-muted {
+  color: var(--text-secondary) !important;
+}
+
+/* 🌿 Dark Mode Modal System */
+.dark-theme .health-modal .modal-content {
+  background: var(--surface);
+  border: 2px solid var(--primary);
+  color: var(--text-primary);
+}
+
+.dark-theme .health-modal .modal-header {
+  background: var(--gradient-surface);
+  border-bottom: 2px solid var(--primary);
+}
+
+.dark-theme .health-modal .modal-close {
+  background: var(--accent);
+  color: var(--background);
+  border: 2px solid var(--accent);
+}
+
+.dark-theme .health-modal .modal-close:hover {
+  background: #FFEB3B;
+  box-shadow: var(--shadow-accent);
+}
+
+/* 🌾 Dark Mode Notifications */
+.dark-theme .notification {
+  background: var(--surface);
+  border-left-color: var(--primary);
+  color: var(--text-primary);
+}
+
+.dark-theme .notification-success {
+  border-left-color: var(--primary);
+}
+
+.dark-theme .notification-warning {
+  border-left-color: var(--accent);
+}
+
+.dark-theme .notification-error {
+  border-left-color: #FF5252;
+}
+
+/* ☀️ Dark Mode Dropdown */
+.dark-theme .dropdown-menu {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  box-shadow: var(--shadow-glow);
+}
+
+.dark-theme .dropdown-item {
+  color: var(--text-primary);
+}
+
+.dark-theme .dropdown-item:hover {
+  background: rgba(0, 230, 118, 0.1);
+  color: var(--primary);
 }
 
 /* ===== UTILITY CLASSES ===== */
