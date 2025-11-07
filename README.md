@@ -1,8 +1,8 @@
-# 🐾 FarmCare Pro - Livestock Health Management System
+# 🌿 FarmCare Pro - AI-Powered Livestock Health Management
 
-A comprehensive AI-powered livestock health management platform that helps farmers monitor, predict, and manage their animals' health with advanced machine learning capabilities.
+A comprehensive eco-tech livestock health management platform that combines agricultural expertise with AI intelligence. Features bilingual support (English/Marathi) and dual theme system (Light/Dark mode) for professional farm management.
 
-## ✨ Complete All-in-One Features
+## ✨ Key Features
 
 ### 🤖 AI-Powered Health Detection
 - Advanced machine learning models for disease prediction
@@ -10,24 +10,29 @@ A comprehensive AI-powered livestock health management platform that helps farme
 - Symptom-based health assessment with 100% training accuracy
 - Comprehensive vital signs analysis and syndrome scoring
 
+### 🌐 Bilingual Support
+- **English**: Complete interface in English
+- **मराठी (Marathi)**: Full Marathi translation for local farmers
+- **Language Toggle**: Seamless switching between languages
+- **Persistent Choice**: Language preference saved automatically
+
+### 🎨 Dual Theme System
+- **🌿 Light Mode**: Eco-tech harmony with teal green and harvest yellow
+- **🌌 Dark Mode**: Modern AgriTech with mint green and deep charcoal
+- **Smart Toggle**: Instant theme switching with smooth animations
+- **Eye Comfort**: Dark mode optimized for evening use
+
 ### 👨‍🌾 Complete Farm Management
 - **User Accounts**: Secure registration and authentication system
-- **Animal Management**: Add, track, and manage livestock records with health status
-- **Farm Land Management**: Register and monitor farm properties with crop tracking
+- **Animal Management**: Add, track, and manage livestock records
+- **Farm Land Management**: Register and monitor farm properties
 - **Dashboard**: Real-time statistics and farm overview
 - **Prediction History**: Track all health assessments and results
 
 ### 🏥 Veterinary Network
 - Professional veterinarian directory with ratings and specializations
 - Direct contact via phone, WhatsApp, and email
-- Location-based vet finder
-- Emergency veterinary support information
-
-### 📊 Analytics & Insights
-- Real-time farm statistics and health metrics
-- Animal health trends and patterns
-- Prediction confidence scoring
-- Comprehensive reporting system
+- Location-based vet finder with multilingual support
 
 ## 🚀 Getting Started
 
@@ -49,13 +54,6 @@ A comprehensive AI-powered livestock health management platform that helps farme
    ```
 
 3. **Run the application**
-   
-   **Option 1: Interactive Startup (Recommended)**
-   ```bash
-   python start.py
-   ```
-   
-   **Option 2: Direct Launch**
    ```bash
    python app.py
    ```
@@ -65,27 +63,32 @@ A comprehensive AI-powered livestock health management platform that helps farme
    - **Guest Mode**: Use core AI prediction features immediately
    - **Full Features**: Register an account to access complete farm management
 
-## 📁 Clean Project Structure
+## 📁 Project Structure
 
 ```
-LiveStock-Health-detector/
-├── app.py                          # 🚀 Complete unified application
-├── start.py                        # Interactive startup script
-├── cleaned_animal_disease_prediction.csv  # Training dataset
+FarmCare-Pro/
+├── app.py                          # 🚀 Main Flask application
+├── cleaned_animal_disease_prediction.csv  # AI training dataset
 ├── requirements.txt                # Python dependencies
-├── README.md                       # Documentation
+├── README.md                       # Project documentation
 ├── static/
-│   ├── style.css                  # Enhanced CSS styling
-│   └── scripts.js                 # JavaScript functionality
+│   ├── style.css                  # Eco-tech theme CSS with dark mode
+│   ├── scripts.js                 # Enhanced JavaScript functionality
+│   ├── manifest.json              # PWA manifest
+│   ├── sw.js                      # Service worker
+│   └── favicon.ico                # App icon
 └── templates/
-    ├── layout.html                # Responsive base template
+    ├── layout.html                # Base template with theme toggle
     ├── index.html                 # Main prediction page
-    ├── result.html                # Results display
+    ├── result.html                # AI prediction results
+    ├── knowledge_base.html        # Disease information
+    ├── subsidies.html             # Government schemes
     ├── veterinarians.html         # Vet directory
-    ├── auth/                      # Login/Register pages
+    ├── offline.html               # Offline page
+    ├── auth/                      # Authentication pages
     │   ├── login.html
     │   └── register.html
-    └── dashboard/                 # Farm management pages
+    └── dashboard/                 # Farm management
         ├── main.html              # Dashboard overview
         ├── animals.html           # Animal management
         ├── add_animal.html        # Add new animal
@@ -94,19 +97,25 @@ LiveStock-Health-detector/
         └── profile.html           # User profile
 ```
 
-**Note:** Database (`farmcare.db`) is auto-created on first run.
+**Note:** Database (`farmcare.db`) and instance folder are auto-created on first run.
 
 ## 🎯 Usage
 
+### 🌐 Language & Theme Selection
+1. **Language Toggle**: Click the language button in navigation (🌐 EN/मर)
+2. **Theme Toggle**: Click the theme button (🌙/☀️) for light/dark mode
+3. **Preferences**: Your choices are automatically saved
+
 ### 🔍 Health Assessment (Available to All Users)
-1. Select animal type and breed from dropdown
-2. Enter basic information (age, gender, weight, duration)
-3. Select observed symptoms from comprehensive list
-4. Enter vital signs (temperature, heart rate)
-5. Click "Analyze with AI" for instant results with confidence scores
+1. Click "Health Check" or "आरोग्य तपासणी" in navigation
+2. Select animal type and breed from dropdown
+3. Enter basic information (age, gender, weight, duration)
+4. Select observed symptoms from comprehensive list
+5. Enter vital signs (temperature, heart rate)
+6. Click "Analyze with AI" / "AI सह विश्लेषण करा" for instant results
 
 ### 👤 Full Farm Management (Registered Users)
-1. **Register Account**: Create your farmer profile
+1. **Register Account**: Create your farmer profile in preferred language
 2. **Dashboard**: View farm statistics and recent activity
 3. **Add Animals**: Register livestock with detailed profiles
 4. **Add Farm Lands**: Track agricultural properties and crops
@@ -127,25 +136,35 @@ LiveStock-Health-detector/
 - **Backend**: Flask (Python web framework)
 - **Database**: SQLite with SQLAlchemy ORM
 - **Authentication**: Flask-Login with bcrypt password hashing
-- **ML**: scikit-learn, pandas, numpy
-- **Frontend**: Bootstrap 5, Font Awesome, custom CSS
-- **Charts**: Chart.js (for analytics)
+- **ML/AI**: scikit-learn, pandas, numpy, XGBoost, LightGBM
+- **Frontend**: Bootstrap 5, Font Awesome, custom eco-tech CSS
+- **Internationalization**: Flask session-based language system
+- **Themes**: CSS variables with smooth transitions
+- **PWA**: Service worker and manifest for app-like experience
 
 ## 📱 Features Overview
 
 ### For Farmers
-- ✅ Animal health prediction
-- ✅ Livestock management
-- ✅ Farm land tracking
-- ✅ Veterinarian directory
-- ✅ Health history
-- ✅ Dashboard analytics
+- ✅ **Bilingual Interface**: English and Marathi support
+- ✅ **AI Health Prediction**: Instant disease detection
+- ✅ **Livestock Management**: Complete animal tracking
+- ✅ **Farm Land Tracking**: Property and crop management
+- ✅ **Veterinarian Directory**: Local vet finder
+- ✅ **Health History**: Prediction tracking and analytics
+- ✅ **Dashboard Analytics**: Real-time farm insights
+- ✅ **Dark/Light Mode**: Eye-friendly theme options
 
 ### For Veterinarians
-- ✅ Professional profiles
-- ✅ Contact management
-- ✅ Specialization listing
-- ✅ Rating system
+- ✅ **Professional Profiles**: Detailed vet information
+- ✅ **Contact Management**: Multiple communication channels
+- ✅ **Specialization Listing**: Area of expertise display
+- ✅ **Rating System**: Community feedback and reviews
+
+### For Developers
+- ✅ **Clean Codebase**: Well-organized, documented code
+- ✅ **Responsive Design**: Mobile-first approach
+- ✅ **PWA Ready**: Progressive web app capabilities
+- ✅ **Eco-Tech Theme**: Professional agricultural design
 
 ## 🔒 Security Features
 
@@ -215,6 +234,33 @@ lsof -ti:5000 | xargs kill -9
 
 For support and questions, please contact the development team.
 
+## 🌟 Screenshots & Demo
+
+### Light Mode (Eco-Tech Theme)
+- 🌿 Teal green navigation with harvest yellow accents
+- ☀️ Clean, professional interface for daytime use
+- 🌱 Mint green hover effects and interactions
+
+### Dark Mode (Modern AgriTech Theme)  
+- 🌌 Deep charcoal background with mint green highlights
+- 🌾 Eye-friendly interface for evening farm management
+- ☀️ Harvest yellow CTAs maintain prominence
+
+### Bilingual Support
+- **English**: Complete professional interface
+- **मराठी**: Full Marathi translation for local farmers
+- **Seamless Toggle**: Instant language switching
+
+## 🚀 Live Demo
+
+Visit the application at `http://localhost:5000` after running the setup instructions above.
+
+**Test Features:**
+- Try the language toggle (🌐 EN/मर) in the navigation
+- Switch between light/dark themes (🌙/☀️)
+- Test AI prediction with sample animal data
+- Explore the bilingual interface
+
 ---
 
-**🐾 FarmCare Pro - Empowering farmers with AI-driven livestock health management**
+**🌿 FarmCare Pro - Empowering farmers with AI-driven livestock health management in their preferred language and theme**

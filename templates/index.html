@@ -25,16 +25,17 @@
     }
     
     .modal-content {
-        background: var(--white);
+        background: var(--surface);
         border-radius: var(--radius-2xl);
         max-width: 90vw;
         max-height: 90vh;
         width: 800px;
         overflow-y: auto;
-        box-shadow: var(--shadow-2xl);
+        box-shadow: var(--shadow-strong);
         transform: scale(0.8) translateY(-50px);
         transition: var(--transition-bounce);
         position: relative;
+        border: 3px solid var(--secondary);
     }
     
     .health-modal.show .modal-content {
@@ -53,9 +54,9 @@
     }
     
     .modal-close {
-        background: rgba(255, 255, 255, 0.2);
-        border: none;
-        color: var(--white);
+        background: var(--accent);
+        border: 2px solid var(--accent-light);
+        color: var(--text-primary);
         width: 40px;
         height: 40px;
         border-radius: 50%;
@@ -65,11 +66,13 @@
         cursor: pointer;
         transition: var(--transition);
         font-size: 1.25rem;
+        box-shadow: var(--shadow-soft);
     }
     
     .modal-close:hover {
-        background: rgba(255, 255, 255, 0.3);
+        background: var(--accent-light);
         transform: scale(1.1);
+        box-shadow: var(--shadow-medium);
     }
     
     .modal-body {
@@ -141,30 +144,34 @@
     }
     
     .hero-btn-primary {
-        background: var(--white);
-        color: var(--primary);
-        border: 2px solid var(--white);
+        background: var(--accent);
+        color: var(--text-primary);
+        border: 2px solid var(--accent);
+        font-weight: 700;
+        box-shadow: var(--shadow-soft);
     }
     
     .hero-btn-outline {
         background: transparent;
         color: var(--white);
-        border: 2px solid var(--white);
+        border: 2px solid var(--secondary);
     }
     
     .hero-btn:hover {
         transform: translateY(-3px);
-        box-shadow: var(--shadow-xl);
+        box-shadow: var(--shadow-strong);
     }
     
     .hero-btn-primary:hover {
-        background: var(--primary);
-        color: var(--white);
+        background: var(--accent-light);
+        color: var(--text-primary);
+        border-color: var(--accent-light);
     }
     
     .hero-btn-outline:hover {
-        background: var(--white);
-        color: var(--primary);
+        background: var(--secondary);
+        color: var(--text-primary);
+        border-color: var(--secondary);
     }
     
     /* ===== ENHANCED FEATURE CARDS ===== */
@@ -197,13 +204,13 @@
     }
     
     .feature-card {
-        background: var(--white);
+        background: var(--surface);
         padding: var(--space-2xl);
         border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--shadow-soft);
         text-align: center;
         transition: var(--transition);
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 2px solid var(--border);
         position: relative;
         overflow: hidden;
         cursor: pointer;
@@ -216,12 +223,14 @@
         left: 0;
         width: 100%;
         height: 4px;
-        background: var(--gradient-primary);
+        background: var(--gradient-accent);
     }
     
     .feature-card:hover {
         transform: translateY(-12px);
-        box-shadow: var(--shadow-xl);
+        box-shadow: var(--shadow-strong);
+        background: var(--secondary);
+        border-color: var(--accent);
     }
     
     .feature-icon {
@@ -236,12 +245,16 @@
         font-size: 2rem;
         color: var(--white);
         transition: var(--transition);
-        box-shadow: var(--shadow-md);
+        box-shadow: var(--shadow-soft);
+        border: 3px solid var(--secondary);
     }
     
     .feature-card:hover .feature-icon {
         transform: scale(1.1) rotate(5deg);
-        box-shadow: var(--shadow-lg);
+        box-shadow: var(--shadow-medium);
+        background: var(--gradient-accent);
+        border-color: var(--accent);
+        color: var(--text-primary);
     }
     
     .feature-title {
@@ -272,41 +285,48 @@
     }
     
     .action-card {
-        background: var(--white);
+        background: var(--surface);
         padding: var(--space-xl);
         border-radius: var(--radius-lg);
         text-align: center;
         transition: var(--transition);
         cursor: pointer;
-        border: 2px solid transparent;
+        border: 2px solid var(--border);
         text-decoration: none;
         color: inherit;
+        box-shadow: var(--shadow-soft);
     }
     
     .action-card:hover {
         transform: translateY(-8px);
-        box-shadow: var(--shadow-lg);
-        border-color: var(--primary);
+        box-shadow: var(--shadow-medium);
+        border-color: var(--accent);
         text-decoration: none;
         color: inherit;
+        background: var(--secondary);
     }
     
     .action-icon {
         width: 60px;
         height: 60px;
-        background: var(--gradient-secondary);
+        background: var(--accent);
         border-radius: var(--radius-full);
         display: flex;
         align-items: center;
         justify-content: center;
         margin: 0 auto var(--space-md);
         font-size: 1.5rem;
-        color: var(--white);
+        color: var(--text-primary);
         transition: var(--transition);
+        border: 2px solid var(--accent-light);
+        box-shadow: var(--shadow-soft);
     }
     
     .action-card:hover .action-icon {
         transform: scale(1.1);
+        background: var(--primary);
+        color: var(--white);
+        border-color: var(--primary-light);
     }
     
     .action-title {
@@ -383,6 +403,317 @@
         50% { transform: translateY(-10px); }
     }
     
+    /* ===== ECO-TECH BUTTON STYLES ===== */
+    .eco-btn-primary {
+        background: var(--gradient-accent) !important;
+        border: 2px solid var(--accent) !important;
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+        padding: 0.75rem 2rem !important;
+        border-radius: 50px !important;
+        box-shadow: var(--shadow-soft) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .eco-btn-primary:hover {
+        background: var(--accent-light) !important;
+        border-color: var(--accent-light) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: var(--shadow-strong) !important;
+    }
+    
+    .eco-btn-secondary {
+        background: var(--gradient-primary) !important;
+        border: 2px solid var(--primary) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 2rem !important;
+        border-radius: 50px !important;
+        box-shadow: var(--shadow-soft) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .eco-btn-secondary:hover {
+        background: var(--primary-light) !important;
+        border-color: var(--primary-light) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: var(--shadow-strong) !important;
+    }
+    
+    /* ===== ECO-TECH FORM STYLES ===== */
+    .form-control, .form-select {
+        border: 2px solid var(--border) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+        background: var(--surface) !important;
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(251, 192, 45, 0.1) !important;
+        background: var(--secondary) !important;
+    }
+    
+    .form-label {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* ===== SYMPTOM CARDS ECO-TECH STYLE ===== */
+    .symptom-card {
+        background: var(--surface) !important;
+        border: 2px solid var(--border) !important;
+        border-radius: 12px !important;
+        padding: 1rem !important;
+        margin: 0.5rem !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        box-shadow: var(--shadow-soft) !important;
+    }
+    
+    .symptom-card:hover {
+        border-color: var(--accent) !important;
+        background: var(--secondary) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: var(--shadow-medium) !important;
+    }
+    
+    .symptom-card.selected {
+        background: var(--accent) !important;
+        border-color: var(--accent-dark) !important;
+        color: var(--text-primary) !important;
+        box-shadow: var(--shadow-medium) !important;
+    }
+    
+    .symptom-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        gap: 0.5rem !important;
+        margin-top: 1rem !important;
+    }
+
+    /* ===== 🌾 MODERN AGRITECH DARK MODE ===== */
+    
+    /* 🌑 Dark Mode Body & Background */
+    .dark-theme body {
+        background: var(--background) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* 🌿 Dark Mode Hero Section */
+    .dark-theme .hero-section {
+        background: var(--gradient-surface) !important;
+        border-bottom: 3px solid var(--primary);
+    }
+    
+    .dark-theme .hero-title {
+        color: var(--primary) !important;
+        text-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
+    }
+    
+    .dark-theme .hero-subtitle {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* 🌱 Dark Mode Feature Cards */
+    .dark-theme .feature-card {
+        background: var(--surface) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .feature-card::before {
+        background: var(--gradient-primary) !important;
+    }
+    
+    .dark-theme .feature-card:hover {
+        background: rgba(0, 230, 118, 0.1) !important;
+        border-color: var(--primary) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .feature-title {
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .feature-description {
+        color: var(--text-secondary) !important;
+    }
+    
+    .dark-theme .feature-card:hover .feature-title {
+        color: var(--primary) !important;
+    }
+    
+    /* ☀️ Dark Mode Action Cards */
+    .dark-theme .action-card {
+        background: var(--surface) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .action-card:hover {
+        background: rgba(0, 230, 118, 0.1) !important;
+        border-color: var(--primary) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .action-title {
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .action-description {
+        color: var(--text-secondary) !important;
+    }
+    
+    .dark-theme .action-icon {
+        background: var(--accent) !important;
+        color: var(--background) !important;
+        border-color: var(--accent) !important;
+    }
+    
+    .dark-theme .action-card:hover .action-icon {
+        background: var(--primary) !important;
+        color: var(--background) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    /* 🌾 Dark Mode Quick Actions Section */
+    .dark-theme .quick-actions-section {
+        background: rgba(30, 45, 47, 0.3) !important;
+    }
+    
+    .dark-theme .section-title {
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .section-subtitle {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* 🌌 Dark Mode Stats Section */
+    .dark-theme .stats-section {
+        background: var(--gradient-surface) !important;
+        border-top: 3px solid var(--primary);
+    }
+    
+    .dark-theme .stat-number {
+        color: var(--accent) !important;
+        text-shadow: 0 0 15px rgba(253, 216, 53, 0.4);
+    }
+    
+    .dark-theme .stat-label {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* 🌿 Dark Mode Modal */
+    .dark-theme .modal-content {
+        background: var(--surface) !important;
+        border-color: var(--primary) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .modal-header {
+        background: var(--gradient-surface) !important;
+        border-bottom: 2px solid var(--primary);
+    }
+    
+    .dark-theme .modal-close {
+        background: var(--accent) !important;
+        color: var(--background) !important;
+        border-color: var(--accent) !important;
+    }
+    
+    .dark-theme .modal-close:hover {
+        background: #FFEB3B !important;
+        box-shadow: var(--shadow-accent) !important;
+    }
+    
+    /* 🌱 Dark Mode Forms */
+    .dark-theme .form-control,
+    .dark-theme .form-select {
+        background: rgba(30, 45, 47, 0.8) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .form-control:focus,
+    .dark-theme .form-select:focus {
+        background: rgba(0, 230, 118, 0.1) !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15) !important;
+    }
+    
+    .dark-theme .form-label {
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .form-text {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* ☀️ Dark Mode Buttons */
+    .dark-theme .eco-btn-primary {
+        background: var(--gradient-accent) !important;
+        border-color: var(--accent) !important;
+        color: var(--background) !important;
+        box-shadow: var(--shadow-accent) !important;
+    }
+    
+    .dark-theme .eco-btn-primary:hover {
+        background: #FFEB3B !important;
+        box-shadow: 0 8px 30px rgba(253, 216, 53, 0.3) !important;
+    }
+    
+    .dark-theme .eco-btn-secondary {
+        background: var(--gradient-primary) !important;
+        border-color: var(--primary) !important;
+        color: var(--background) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .eco-btn-secondary:hover {
+        background: #00C853 !important;
+        box-shadow: 0 8px 30px rgba(0, 230, 118, 0.3) !important;
+    }
+    
+    /* 🌿 Dark Mode Symptom Cards */
+    .dark-theme .symptom-card {
+        background: var(--surface) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .symptom-card:hover {
+        border-color: var(--primary) !important;
+        background: rgba(0, 230, 118, 0.1) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .symptom-card.selected {
+        background: var(--primary) !important;
+        border-color: #00C853 !important;
+        color: var(--background) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    /* 🌾 Dark Mode Section Dividers */
+    .dark-theme .section-divider h5 {
+        color: var(--primary) !important;
+    }
+    
+    /* 🌌 Dark Mode Scroll to Top */
+    .dark-theme .scroll-to-top {
+        background: var(--gradient-primary) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .scroll-to-top:hover {
+        box-shadow: 0 8px 30px rgba(0, 230, 118, 0.4) !important;
+    }
+
     /* ===== RESPONSIVE DESIGN ===== */
     @media (max-width: 768px) {
         .hero-title {
@@ -441,22 +772,22 @@
     <div class="container">
         <div class="hero-content">
             <h1 class="hero-title">
-                <i class="fas fa-paw me-3"></i>FarmCare Pro
+                <i class="fas fa-paw me-3"></i>{{ get_text('app_name') }}
             </h1>
             <p class="hero-subtitle">
-                AI-powered livestock health detection and comprehensive farm management system
+                {{ get_text('ai_prediction') }}
             </p>
             <div class="hero-buttons">
                 <button class="btn hero-btn hero-btn-primary" onclick="openHealthModal()">
-                    <i class="fas fa-stethoscope me-2"></i>Start Health Assessment
+                    <i class="fas fa-stethoscope me-2"></i>{{ get_text('health_check') }}
                 </button>
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('dashboard') }}" class="btn hero-btn hero-btn-outline">
-                        <i class="fas fa-tachometer-alt me-2"></i>Go to Dashboard
+                        <i class="fas fa-tachometer-alt me-2"></i>{{ get_text('go_to_dashboard') }}
                     </a>
                 {% else %}
                     <a href="{{ url_for('login') }}" class="btn hero-btn hero-btn-outline">
-                        <i class="fas fa-sign-in-alt me-2"></i>Login / Register
+                        <i class="fas fa-sign-in-alt me-2"></i>{{ get_text('login') }} / {{ get_text('register') }}
                     </a>
                 {% endif %}
             </div>
@@ -466,9 +797,9 @@
 
 <!-- Enhanced Features Section -->
 <div class="container features-section">
-    <h2 class="section-title">Powerful AI-Driven Features</h2>
+    <h2 class="section-title">{{ get_text('powerful_ai_features') }}</h2>
     <p class="section-subtitle">
-        Advanced technology meets veterinary expertise to provide comprehensive livestock health management
+        {{ get_text('advanced_technology') }}
     </p>
     
     <div class="features-grid">
@@ -476,9 +807,9 @@
             <div class="feature-icon">
                 <i class="fas fa-robot"></i>
             </div>
-            <h4 class="feature-title">AI Disease Detection</h4>
+            <h4 class="feature-title">{{ get_text('ai_disease_detection') }}</h4>
             <p class="feature-description">
-                Advanced machine learning algorithms analyze symptoms to detect potential illnesses with high accuracy and provide instant results.
+                {{ get_text('ai_disease_desc') }}
             </p>
         </div>
         
@@ -486,9 +817,9 @@
             <div class="feature-icon">
                 <i class="fas fa-microphone"></i>
             </div>
-            <h4 class="feature-title">Voice Analysis</h4>
+            <h4 class="feature-title">{{ get_text('voice_analysis') }}</h4>
             <p class="feature-description">
-                Describe symptoms verbally and let our AI analyze the audio for comprehensive health assessment and recommendations.
+                {{ get_text('voice_analysis_desc') }}
             </p>
         </div>
         
@@ -496,9 +827,9 @@
             <div class="feature-icon">
                 <i class="fas fa-book-medical"></i>
             </div>
-            <h4 class="feature-title">Knowledge Base</h4>
+            <h4 class="feature-title">{{ get_text('knowledge_base') }}</h4>
             <p class="feature-description">
-                Access comprehensive information about common livestock diseases, treatments, and prevention methods from experts.
+                {{ get_text('knowledge_base_desc') }}
             </p>
         </div>
     </div>
@@ -507,9 +838,9 @@
 <!-- Quick Actions Section -->
 <div class="quick-actions-section">
     <div class="container">
-        <h2 class="section-title">Quick Actions</h2>
+        <h2 class="section-title">{{ get_text('quick_actions') }}</h2>
         <p class="section-subtitle">
-            Access essential farm management tools and services with just one click
+            {{ get_text('quick_actions_desc') }}
         </p>
         
         <div class="actions-grid">
@@ -517,8 +848,8 @@
                 <div class="action-icon">
                     <i class="fas fa-stethoscope"></i>
                 </div>
-                <h5 class="action-title">Health Assessment</h5>
-                <p class="action-description">Quick AI-powered health check for your livestock</p>
+                <h5 class="action-title">{{ get_text('health_assessment') }}</h5>
+                <p class="action-description">{{ get_text('health_assessment_desc') }}</p>
             </div>
             
             {% if current_user.is_authenticated %}
@@ -526,24 +857,24 @@
                     <div class="action-icon">
                         <i class="fas fa-paw"></i>
                     </div>
-                    <h5 class="action-title">Add Animal</h5>
-                    <p class="action-description">Register new livestock to your farm</p>
+                    <h5 class="action-title">{{ get_text('add_animal') }}</h5>
+                    <p class="action-description">{{ get_text('add_animal_desc') }}</p>
                 </a>
                 
                 <a href="{{ url_for('dashboard') }}" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
-                    <h5 class="action-title">View Analytics</h5>
-                    <p class="action-description">Monitor farm performance and health trends</p>
+                    <h5 class="action-title">{{ get_text('view_analytics') }}</h5>
+                    <p class="action-description">{{ get_text('view_analytics_desc') }}</p>
                 </a>
             {% else %}
                 <a href="{{ url_for('register') }}" class="action-card">
                     <div class="action-icon">
                         <i class="fas fa-user-plus"></i>
                     </div>
-                    <h5 class="action-title">Create Account</h5>
-                    <p class="action-description">Join FarmCare Pro for full features</p>
+                    <h5 class="action-title">{{ get_text('create_account') }}</h5>
+                    <p class="action-description">{{ get_text('create_account_desc') }}</p>
                 </a>
             {% endif %}
             
@@ -551,24 +882,24 @@
                 <div class="action-icon">
                     <i class="fas fa-user-md"></i>
                 </div>
-                <h5 class="action-title">Find Veterinarian</h5>
-                <p class="action-description">Locate qualified vets in your area</p>
+                <h5 class="action-title">{{ get_text('find_veterinarian') }}</h5>
+                <p class="action-description">{{ get_text('find_veterinarian_desc') }}</p>
             </a>
             
             <a href="{{ url_for('subsidies') }}" class="action-card">
                 <div class="action-icon">
                     <i class="fas fa-hand-holding-usd"></i>
                 </div>
-                <h5 class="action-title">Government Schemes</h5>
-                <p class="action-description">Explore available subsidies and programs</p>
+                <h5 class="action-title">{{ get_text('government_schemes') }}</h5>
+                <p class="action-description">{{ get_text('government_schemes_desc') }}</p>
             </a>
             
             <a href="{{ url_for('knowledge_base') }}" class="action-card">
                 <div class="action-icon">
                     <i class="fas fa-graduation-cap"></i>
                 </div>
-                <h5 class="action-title">Learn & Educate</h5>
-                <p class="action-description">Access educational resources and guides</p>
+                <h5 class="action-title">{{ get_text('learn_educate') }}</h5>
+                <p class="action-description">{{ get_text('learn_educate_desc') }}</p>
             </a>
         </div>
     </div>
@@ -577,27 +908,27 @@
 <!-- Stats Section -->
 <div class="stats-section">
     <div class="container">
-        <h2 class="section-title" style="color: white;">Trusted by Farmers Worldwide</h2>
+        <h2 class="section-title" style="color: white;">{{ get_text('trusted_by_farmers') }}</h2>
         <p class="section-subtitle" style="color: rgba(255,255,255,0.9);">
-            Join thousands of farmers who trust FarmCare Pro for their livestock health management
+            {{ get_text('trusted_desc') }}
         </p>
         
         <div class="stats-grid">
             <div class="stat-item">
                 <span class="stat-number">8</span>
-                <span class="stat-label">Animal Species Supported</span>
+                <span class="stat-label">{{ get_text('animal_species_supported') }}</span>
             </div>
             <div class="stat-item">
                 <span class="stat-number">100%</span>
-                <span class="stat-label">AI Model Accuracy</span>
+                <span class="stat-label">{{ get_text('ai_model_accuracy') }}</span>
             </div>
             <div class="stat-item">
                 <span class="stat-number">24/7</span>
-                <span class="stat-label">Available Support</span>
+                <span class="stat-label">{{ get_text('available_support') }}</span>
             </div>
             <div class="stat-item">
                 <span class="stat-number">150+</span>
-                <span class="stat-label">Disease Patterns</span>
+                <span class="stat-label">{{ get_text('disease_patterns') }}</span>
             </div>
         </div>
     </div>
@@ -608,8 +939,8 @@
     <div class="modal-content">
         <div class="modal-header">
             <div>
-                <h2><i class="fas fa-stethoscope me-3"></i>Animal Health Assessment</h2>
-                <p class="mb-0 opacity-90">Comprehensive AI-powered health analysis for your livestock</p>
+                <h2><i class="fas fa-stethoscope me-3"></i>{{ get_text('animal_health_assessment') }}</h2>
+                <p class="mb-0 opacity-90">{{ get_text('comprehensive_ai_analysis') }}</p>
             </div>
             <button class="modal-close" onclick="closeHealthModal()">
                 <i class="fas fa-times"></i>
@@ -620,44 +951,44 @@
             <form action="/predict" method="POST" id="healthForm">
                 <!-- Animal Basic Information -->
                 <div class="section-divider">
-                    <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+                    <h5><i class="fas fa-info-circle me-2"></i>{{ get_text('basic_information') }}</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Animal Type *</label>
+                            <label class="form-label">{{ get_text('animal_type') }} *</label>
                             <select class="form-select" id="animal_type" name="animal_type" required>
-                                <option value="">Select Animal Type</option>
+                                <option value="">{{ get_text('select_animal_type') }}</option>
                                 {% for animal in animals %}
                                     <option value="{{ animal }}">{{ animal }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Breed *</label>
+                            <label class="form-label">{{ get_text('breed') }} *</label>
                             <select class="form-select" id="breed" name="breed" required>
-                                <option value="">First select animal type</option>
+                                <option value="">{{ get_text('first_select_animal') }}</option>
                             </select>
                         </div>
                     </div>
                     
                     <div class="row">
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Age (years) *</label>
+                            <label class="form-label">{{ get_text('age') }} ({{ get_text('years') }}) *</label>
                             <input type="number" class="form-control" name="age" step="0.1" min="0" max="50" required value="5">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Gender *</label>
+                            <label class="form-label">{{ get_text('gender') }} *</label>
                             <select class="form-select" name="gender" required>
-                                <option value="">Select</option>
-                                <option value="Male" selected>Male</option>
-                                <option value="Female">Female</option>
+                                <option value="">{{ get_text('select_gender') }}</option>
+                                <option value="Male" selected>{{ get_text('male') }}</option>
+                                <option value="Female">{{ get_text('female') }}</option>
                             </select>
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Weight (kg) *</label>
+                            <label class="form-label">{{ get_text('weight') }} ({{ get_text('kg') }}) *</label>
                             <input type="number" class="form-control" name="weight" step="0.1" min="0" required value="25">
                         </div>
                         <div class="col-md-3 mb-3">
-                            <label class="form-label">Duration (days) *</label>
+                            <label class="form-label">Duration ({{ get_text('days') }}) *</label>
                             <input type="number" class="form-control" name="duration" min="0" required value="3">
                         </div>
                     </div>
@@ -665,39 +996,39 @@
 
                 <!-- Primary Symptoms -->
                 <div class="section-divider">
-                    <h5><i class="fas fa-heartbeat me-2"></i>Primary Symptoms</h5>
+                    <h5><i class="fas fa-heartbeat me-2"></i>{{ get_text('primary_symptoms') }}</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Primary Symptom *</label>
+                            <label class="form-label">{{ get_text('primary_symptom') }} *</label>
                             <select class="form-select" name="symptom1" required>
-                                <option value="">Select Primary Symptom</option>
+                                <option value="">{{ get_text('select_primary_symptom') }}</option>
                                 {% for symptom in symptoms %}
                                     <option value="{{ symptom }}" {% if symptom == 'Cough' %}selected{% endif %}>{{ symptom }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Secondary Symptom *</label>
+                            <label class="form-label">{{ get_text('secondary_symptom') }} *</label>
                             <select class="form-select" name="symptom2" required>
-                                <option value="">Select Secondary Symptom</option>
+                                <option value="">{{ get_text('select_secondary_symptom') }}</option>
                                 {% for symptom in symptoms %}
                                     <option value="{{ symptom }}" {% if symptom == 'Lethargy' %}selected{% endif %}>{{ symptom }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Additional Symptom *</label>
+                            <label class="form-label">{{ get_text('additional_symptom') }} *</label>
                             <select class="form-select" name="symptom3" required>
-                                <option value="">Select Additional Symptom</option>
+                                <option value="">{{ get_text('select_additional_symptom') }}</option>
                                 {% for symptom in symptoms %}
                                     <option value="{{ symptom }}" {% if symptom == 'Loss of appetite' %}selected{% endif %}>{{ symptom }}</option>
                                 {% endfor %}
                             </select>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Other Symptom *</label>
+                            <label class="form-label">{{ get_text('other_symptom') }} *</label>
                             <select class="form-select" name="symptom4" required>
-                                <option value="">Select Other Symptom</option>
+                                <option value="">{{ get_text('select_other_symptom') }}</option>
                                 {% for symptom in symptoms %}
                                     <option value="{{ symptom }}" {% if symptom == 'Nasal discharge' %}selected{% endif %}>{{ symptom }}</option>
                                 {% endfor %}
@@ -708,14 +1039,14 @@
                 
                 <!-- Observable Symptoms -->
                 <div class="section-divider">
-                    <h5><i class="fas fa-eye me-2"></i>Observable Symptoms</h5>
-                    <p class="text-muted mb-3">Select all symptoms you have observed in the animal</p>
+                    <h5><i class="fas fa-eye me-2"></i>{{ get_text('observable_symptoms') }}</h5>
+                    <p class="text-muted mb-3">{{ get_text('select_all_observed') }}</p>
                     <div class="symptom-grid">
                         <div class="symptom-card" onclick="toggleSymptom(this, 'appetite_loss')">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="appetite_loss" value="yes" id="appetite_loss" checked>
                                 <label class="form-check-label" for="appetite_loss">
-                                    <i class="fas fa-utensils me-2"></i>Appetite Loss
+                                    <i class="fas fa-utensils me-2"></i>{{ get_text('appetite_loss') }}
                                 </label>
                             </div>
                         </div>
@@ -723,7 +1054,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="vomiting" value="yes" id="vomiting">
                                 <label class="form-check-label" for="vomiting">
-                                    <i class="fas fa-dizzy me-2"></i>Vomiting
+                                    <i class="fas fa-dizzy me-2"></i>{{ get_text('vomiting') }}
                                 </label>
                             </div>
                         </div>
@@ -731,7 +1062,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="diarrhea" value="yes" id="diarrhea">
                                 <label class="form-check-label" for="diarrhea">
-                                    <i class="fas fa-tint me-2"></i>Diarrhea
+                                    <i class="fas fa-tint me-2"></i>{{ get_text('diarrhea') }}
                                 </label>
                             </div>
                         </div>
@@ -739,7 +1070,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="coughing" value="yes" id="coughing" checked>
                                 <label class="form-check-label" for="coughing">
-                                    <i class="fas fa-lungs me-2"></i>Coughing
+                                    <i class="fas fa-lungs me-2"></i>{{ get_text('coughing') }}
                                 </label>
                             </div>
                         </div>
@@ -747,7 +1078,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="labored_breathing" value="yes" id="labored_breathing" checked>
                                 <label class="form-check-label" for="labored_breathing">
-                                    <i class="fas fa-wind me-2"></i>Labored Breathing
+                                    <i class="fas fa-wind me-2"></i>{{ get_text('labored_breathing') }}
                                 </label>
                             </div>
                         </div>
@@ -755,7 +1086,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="nasal_discharge" value="yes" id="nasal_discharge" checked>
                                 <label class="form-check-label" for="nasal_discharge">
-                                    <i class="fas fa-nose me-2"></i>Nasal Discharge
+                                    <i class="fas fa-nose me-2"></i>{{ get_text('nasal_discharge') }}
                                 </label>
                             </div>
                         </div>
@@ -763,7 +1094,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="lameness" value="yes" id="lameness">
                                 <label class="form-check-label" for="lameness">
-                                    <i class="fas fa-walking me-2"></i>Lameness
+                                    <i class="fas fa-walking me-2"></i>{{ get_text('lameness') }}
                                 </label>
                             </div>
                         </div>
@@ -771,7 +1102,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="skin_lesions" value="yes" id="skin_lesions">
                                 <label class="form-check-label" for="skin_lesions">
-                                    <i class="fas fa-band-aid me-2"></i>Skin Lesions
+                                    <i class="fas fa-band-aid me-2"></i>{{ get_text('skin_lesions') }}
                                 </label>
                             </div>
                         </div>
@@ -779,7 +1110,7 @@
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" name="eye_discharge" value="yes" id="eye_discharge">
                                 <label class="form-check-label" for="eye_discharge">
-                                    <i class="fas fa-eye me-2"></i>Eye Discharge
+                                    <i class="fas fa-eye me-2"></i>{{ get_text('eye_discharge') }}
                                 </label>
                             </div>
                         </div>
@@ -788,29 +1119,29 @@
 
                 <!-- Vital Signs -->
                 <div class="section-divider">
-                    <h5><i class="fas fa-thermometer-half me-2"></i>Vital Signs</h5>
+                    <h5><i class="fas fa-thermometer-half me-2"></i>{{ get_text('vital_signs') }}</h5>
                     <div class="row">
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Body Temperature (°C) *</label>
+                            <label class="form-label">{{ get_text('body_temperature') }} *</label>
                             <input type="number" class="form-control" name="body_temperature" step="0.1" min="30" max="45" required value="39.8">
-                            <small class="form-text text-muted">Normal range: 38.0-39.5°C for most livestock</small>
+                            <small class="form-text text-muted">{{ get_text('normal_range_temp') }}</small>
                         </div>
                         <div class="col-md-6 mb-3">
-                            <label class="form-label">Heart Rate (BPM) *</label>
+                            <label class="form-label">{{ get_text('heart_rate') }} *</label>
                             <input type="number" class="form-control" name="heart_rate" min="20" max="300" required value="110">
-                            <small class="form-text text-muted">Normal range varies by species and age</small>
+                            <small class="form-text text-muted">{{ get_text('normal_range_hr') }}</small>
                         </div>
                     </div>
                 </div>
 
                 <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-primary btn-lg">
+                    <button type="submit" class="btn btn-lg eco-btn-primary">
                         <i class="fas fa-robot me-2"></i>
-                        Analyze with AI
+                        {{ get_text('analyze_with_ai') }}
                     </button>
-                    <button type="button" class="btn btn-secondary btn-lg ms-3" onclick="showVoicePrediction()">
+                    <button type="button" class="btn btn-lg eco-btn-secondary ms-3" onclick="showVoicePrediction()">
                         <i class="fas fa-microphone me-2"></i>
-                        Voice Analysis
+                        {{ get_text('voice_analysis_btn') }}
                     </button>
                 </div>
             </form>

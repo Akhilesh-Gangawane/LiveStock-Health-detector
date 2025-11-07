@@ -177,7 +177,86 @@ LANGUAGES = {
         'eligibility': 'Eligibility',
         'apply_now': 'Apply Now',
         'vaccination_due': 'Vaccination Due',
-        'next_vaccination': 'Next Vaccination'
+        'next_vaccination': 'Next Vaccination',
+        
+        # Additional translations for homepage and features
+        'powerful_ai_features': 'Powerful AI-Driven Features',
+        'advanced_technology': 'Advanced technology meets veterinary expertise to provide comprehensive livestock health management',
+        'ai_disease_detection': 'AI Disease Detection',
+        'ai_disease_desc': 'Advanced machine learning algorithms analyze symptoms to detect potential illnesses with high accuracy and provide instant results.',
+        'voice_analysis': 'Voice Analysis',
+        'voice_analysis_desc': 'Describe symptoms verbally and let our AI analyze the audio for comprehensive health assessment and recommendations.',
+        'knowledge_base_desc': 'Access comprehensive information about common livestock diseases, treatments, and prevention methods from experts.',
+        'quick_actions': 'Quick Actions',
+        'quick_actions_desc': 'Access essential farm management tools and services with just one click',
+        'health_assessment': 'Health Assessment',
+        'health_assessment_desc': 'Quick AI-powered health check for your livestock',
+        'add_animal_desc': 'Register new livestock to your farm',
+        'view_analytics': 'View Analytics',
+        'view_analytics_desc': 'Monitor farm performance and health trends',
+        'create_account': 'Create Account',
+        'create_account_desc': 'Join FarmCare Pro for full features',
+        'find_veterinarian': 'Find Veterinarian',
+        'find_veterinarian_desc': 'Locate qualified vets in your area',
+        'government_schemes': 'Government Schemes',
+        'government_schemes_desc': 'Explore available subsidies and programs',
+        'learn_educate': 'Learn & Educate',
+        'learn_educate_desc': 'Access educational resources and guides',
+        'trusted_by_farmers': 'Trusted by Farmers Worldwide',
+        'trusted_desc': 'Join thousands of farmers who trust FarmCare Pro for their livestock health management',
+        'animal_species_supported': 'Animal Species Supported',
+        'ai_model_accuracy': 'AI Model Accuracy',
+        'available_support': 'Available Support',
+        'disease_patterns': 'Disease Patterns',
+        
+        # Modal and form translations
+        'animal_health_assessment': 'Animal Health Assessment',
+        'comprehensive_ai_analysis': 'Comprehensive AI-powered health analysis for your livestock',
+        'basic_information': 'Basic Information',
+        'select_animal_type': 'Select Animal Type',
+        'first_select_animal': 'First select animal type',
+        'select_breed': 'Select Breed',
+        'years': 'years',
+        'select_gender': 'Select Gender',
+        'male': 'Male',
+        'female': 'Female',
+        'kg': 'kg',
+        'days': 'days',
+        'primary_symptoms': 'Primary Symptoms',
+        'primary_symptom': 'Primary Symptom',
+        'secondary_symptom': 'Secondary Symptom',
+        'additional_symptom': 'Additional Symptom',
+        'other_symptom': 'Other Symptom',
+        'select_primary_symptom': 'Select Primary Symptom',
+        'select_secondary_symptom': 'Select Secondary Symptom',
+        'select_additional_symptom': 'Select Additional Symptom',
+        'select_other_symptom': 'Select Other Symptom',
+        'observable_symptoms': 'Observable Symptoms',
+        'select_all_observed': 'Select all symptoms you have observed in the animal',
+        'appetite_loss': 'Appetite Loss',
+        'vomiting': 'Vomiting',
+        'diarrhea': 'Diarrhea',
+        'coughing': 'Coughing',
+        'labored_breathing': 'Labored Breathing',
+        'nasal_discharge': 'Nasal Discharge',
+        'lameness': 'Lameness',
+        'skin_lesions': 'Skin Lesions',
+        'eye_discharge': 'Eye Discharge',
+        'vital_signs': 'Vital Signs',
+        'body_temperature': 'Body Temperature (°C)',
+        'normal_range_temp': 'Normal range: 38.0-39.5°C for most livestock',
+        'heart_rate': 'Heart Rate (BPM)',
+        'normal_range_hr': 'Normal range varies by species and age',
+        'analyze_with_ai': 'Analyze with AI',
+        'voice_analysis_btn': 'Voice Analysis',
+        
+        # Navigation items
+        'services': 'Services',
+        'find_veterinarians': 'Find Veterinarians',
+        'my_animals': 'My Animals',
+        'my_farm_lands': 'My Farm Lands',
+        'go_to_dashboard': 'Go to Dashboard',
+        'start_health_assessment': 'Start Health Assessment'
     },
     'mr': {
         'app_name': 'फार्मकेअर प्रो',
@@ -222,7 +301,86 @@ LANGUAGES = {
         'eligibility': 'पात्रता',
         'apply_now': 'आता अर्ज करा',
         'vaccination_due': 'लसीकरण बाकी',
-        'next_vaccination': 'पुढील लसीकरण'
+        'next_vaccination': 'पुढील लसीकरण',
+        
+        # Additional translations for homepage and features
+        'powerful_ai_features': 'शक्तिशाली AI-चालित वैशिष्ट्ये',
+        'advanced_technology': 'प्रगत तंत्रज्ञान पशुवैद्यकीय तज्ञांसह मिळून व्यापक पशुधन आरोग्य व्यवस्थापन प्रदान करते',
+        'ai_disease_detection': 'AI रोग शोध',
+        'ai_disease_desc': 'प्रगत मशीन लर्निंग अल्गोरिदम लक्षणांचे विश्लेषण करून संभाव्य आजारांचा उच्च अचूकतेने शोध लावतात आणि तत्काळ परिणाम देतात.',
+        'voice_analysis': 'आवाज विश्लेषण',
+        'voice_analysis_desc': 'लक्षणांचे मौखिक वर्णन करा आणि आमच्या AI ला व्यापक आरोग्य मूल्यांकन आणि शिफारसींसाठी ऑडिओचे विश्लेषण करू द्या.',
+        'knowledge_base_desc': 'तज्ञांकडून सामान्य पशुधन रोग, उपचार आणि प्रतिबंधक पद्धतींबद्दल व्यापक माहिती मिळवा.',
+        'quick_actions': 'द्रुत क्रिया',
+        'quick_actions_desc': 'फक्त एका क्लिकसह आवश्यक शेत व्यवस्थापन साधने आणि सेवांमध्ये प्रवेश करा',
+        'health_assessment': 'आरोग्य मूल्यांकन',
+        'health_assessment_desc': 'आपल्या पशुधनासाठी द्रुत AI-चालित आरोग्य तपासणी',
+        'add_animal_desc': 'आपल्या शेतात नवीन पशुधनाची नोंदणी करा',
+        'view_analytics': 'विश्लेषणे पहा',
+        'view_analytics_desc': 'शेताची कामगिरी आणि आरोग्य ट्रेंडचे निरीक्षण करा',
+        'create_account': 'खाते तयार करा',
+        'create_account_desc': 'संपूर्ण वैशिष्ट्यांसाठी फार्मकेअर प्रो मध्ये सामील व्हा',
+        'find_veterinarian': 'पशुवैद्य शोधा',
+        'find_veterinarian_desc': 'आपल्या क्षेत्रातील पात्र पशुवैद्यांचा शोध घ्या',
+        'government_schemes': 'सरकारी योजना',
+        'government_schemes_desc': 'उपलब्ध अनुदान आणि कार्यक्रमांचा शोध घ्या',
+        'learn_educate': 'शिका आणि शिक्षण घ्या',
+        'learn_educate_desc': 'शैक्षणिक संसाधने आणि मार्गदर्शकांमध्ये प्रवेश करा',
+        'trusted_by_farmers': 'जगभरातील शेतकऱ्यांचा विश्वास',
+        'trusted_desc': 'हजारो शेतकरी त्यांच्या पशुधन आरोग्य व्यवस्थापनासाठी फार्मकेअर प्रो वर विश्वास ठेवतात',
+        'animal_species_supported': 'प्राणी प्रजाती समर्थित',
+        'ai_model_accuracy': 'AI मॉडेल अचूकता',
+        'available_support': 'उपलब्ध समर्थन',
+        'disease_patterns': 'रोग पॅटर्न',
+        
+        # Modal and form translations
+        'animal_health_assessment': 'प्राणी आरोग्य मूल्यांकन',
+        'comprehensive_ai_analysis': 'आपल्या पशुधनासाठी व्यापक AI-चालित आरोग्य विश्लेषण',
+        'basic_information': 'मूलभूत माहिती',
+        'select_animal_type': 'प्राणी प्रकार निवडा',
+        'first_select_animal': 'प्रथम प्राणी प्रकार निवडा',
+        'select_breed': 'जात निवडा',
+        'years': 'वर्षे',
+        'select_gender': 'लिंग निवडा',
+        'male': 'नर',
+        'female': 'मादा',
+        'kg': 'किलो',
+        'days': 'दिवस',
+        'primary_symptoms': 'प्राथमिक लक्षणे',
+        'primary_symptom': 'प्राथमिक लक्षण',
+        'secondary_symptom': 'दुय्यम लक्षण',
+        'additional_symptom': 'अतिरिक्त लक्षण',
+        'other_symptom': 'इतर लक्षण',
+        'select_primary_symptom': 'प्राथमिक लक्षण निवडा',
+        'select_secondary_symptom': 'दुय्यम लक्षण निवडा',
+        'select_additional_symptom': 'अतिरिक्त लक्षण निवडा',
+        'select_other_symptom': 'इतर लक्षण निवडा',
+        'observable_symptoms': 'निरीक्षणयोग्य लक्षणे',
+        'select_all_observed': 'प्राण्यामध्ये आपण पाहिलेली सर्व लक्षणे निवडा',
+        'appetite_loss': 'भूक न लागणे',
+        'vomiting': 'उलट्या',
+        'diarrhea': 'अतिसार',
+        'coughing': 'खोकला',
+        'labored_breathing': 'कष्टकरी श्वास',
+        'nasal_discharge': 'नाकातून स्राव',
+        'lameness': 'लंगडेपणा',
+        'skin_lesions': 'त्वचेवर जखम',
+        'eye_discharge': 'डोळ्यातून स्राव',
+        'vital_signs': 'महत्वाचे चिन्हे',
+        'body_temperature': 'शरीराचे तापमान',
+        'normal_range_temp': 'सामान्य श्रेणी: बहुतेक पशुधनासाठी 38.0-39.5°C',
+        'heart_rate': 'हृदयाचे ठोके',
+        'normal_range_hr': 'सामान्य श्रेणी प्रजाती आणि वयानुसार बदलते',
+        'analyze_with_ai': 'AI सह विश्लेषण करा',
+        'voice_analysis_btn': 'आवाज विश्लेषण',
+        
+        # Navigation items
+        'services': 'सेवा',
+        'find_veterinarians': 'पशुवैद्य शोधा',
+        'my_animals': 'माझे जनावरे',
+        'my_farm_lands': 'माझी शेतजमीन',
+        'go_to_dashboard': 'डॅशबोर्डवर जा',
+        'start_health_assessment': 'आरोग्य मूल्यांकन सुरू करा'
     }
 }
 
@@ -1213,72 +1371,147 @@ def model_status():
     
     return jsonify(status)
 
-# Language switching route
-@app.route('/set_language/<language>')
-def set_language(language):
-    if language in LANGUAGES:
-        session['language'] = language
-    return redirect(request.referrer or url_for('index'))
-
-# Knowledge Base routes
-@app.route('/knowledge')
-def knowledge_base():
-    diseases = Disease.query.all()
-    return render_template('knowledge_base.html', diseases=diseases)
-
-@app.route('/disease/<int:disease_id>')
-def disease_detail(disease_id):
-    disease = Disease.query.get_or_404(disease_id)
-    return render_template('disease_detail.html', disease=disease)
-
-# Subsidies routes
-@app.route('/subsidies')
-def subsidies():
-    scheme_type = request.args.get('type', '')
-    state = request.args.get('state', '')
-    search = request.args.get('search', '')
-    
-    query = Subsidy.query.filter_by(is_active=True)
-    
-    if scheme_type:
-        query = query.filter(Subsidy.scheme_type == scheme_type)
-    if state:
-        query = query.filter(Subsidy.state == state)
-    if search:
-        query = query.filter(Subsidy.scheme_name.contains(search))
-    
-    subsidies = query.all()
-    
-    # Get unique values for filters
-    scheme_types = db.session.query(Subsidy.scheme_type).distinct().all()
-    states = db.session.query(Subsidy.state).distinct().all()
-    
-    return render_template('subsidies.html', 
-                         subsidies=subsidies,
-                         scheme_types=[s[0] for s in scheme_types if s[0]],
-                         states=[s[0] for s in states if s[0]])
-
-# Vaccination routes
-@app.route('/vaccinations/<int:animal_id>')
+@app.route('/animal/<int:animal_id>')
 @login_required
-def animal_vaccinations(animal_id):
+def animal_detail(animal_id):
+    """View detailed information about a specific animal"""
     animal = Animal.query.filter_by(id=animal_id, user_id=current_user.id).first_or_404()
+    
+    # Get animal's prediction history
+    predictions = Prediction.query.filter_by(animal_id=animal_id).order_by(Prediction.created_at.desc()).limit(10).all()
+    
+    # Get vaccination records
     vaccinations = Vaccination.query.filter_by(animal_id=animal_id).order_by(Vaccination.vaccination_date.desc()).all()
-    return render_template('dashboard/vaccinations.html', animal=animal, vaccinations=vaccinations)
+    
+    return render_template('dashboard/animal_detail.html', 
+                         animal=animal, 
+                         predictions=predictions,
+                         vaccinations=vaccinations)
 
-@app.route('/add_vaccination/<int:animal_id>', methods=['GET', 'POST'])
+@app.route('/animal/<int:animal_id>/edit', methods=['GET', 'POST'])
 @login_required
-def add_vaccination(animal_id):
+def edit_animal(animal_id):
+    """Edit animal information"""
     animal = Animal.query.filter_by(id=animal_id, user_id=current_user.id).first_or_404()
     
     if request.method == 'POST':
-        data = request.form
+        data = request.get_json() if request.is_json else request.form
+        
+        animal.name = data.get('name', animal.name)
+        animal.age = float(data.get('age', animal.age))
+        animal.weight = float(data.get('weight', animal.weight))
+        animal.health_status = data.get('health_status', animal.health_status)
+        
+        db.session.commit()
+        
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'Animal updated successfully'})
+        
+        flash('Animal updated successfully!', 'success')
+        return redirect(url_for('animal_detail', animal_id=animal_id))
+    
+    animals = list(breed_data.keys()) if breed_data else []
+    return render_template('dashboard/edit_animal.html', animal=animal, animals=animals)
+
+@app.route('/animal/<int:animal_id>/predict', methods=['GET', 'POST'])
+@login_required
+def predict_for_animal(animal_id):
+    """Run disease prediction for a specific animal"""
+    animal = Animal.query.filter_by(id=animal_id, user_id=current_user.id).first_or_404()
+    
+    if request.method == 'POST':
+        if not predictor:
+            return jsonify({'error': 'Model not loaded'}), 500
+        
+        try:
+            data = request.get_json() if request.is_json else request.form
+            
+            # Use animal's existing data as defaults
+            result = predictor.predict_disease(
+                animal_type=animal.animal_type,
+                breed=animal.breed,
+                age=animal.age,
+                gender=animal.gender,
+                weight=animal.weight,
+                symptom1=data.get('symptom1'),
+                symptom2=data.get('symptom2'),
+                symptom3=data.get('symptom3'),
+                symptom4=data.get('symptom4'),
+                duration=float(data.get('duration', 1)),
+                appetite_loss=data.get('appetite_loss', 'no'),
+                vomiting=data.get('vomiting', 'no'),
+                diarrhea=data.get('diarrhea', 'no'),
+                coughing=data.get('coughing', 'no'),
+                labored_breathing=data.get('labored_breathing', 'no'),
+                lameness=data.get('lameness', 'no'),
+                skin_lesions=data.get('skin_lesions', 'no'),
+                nasal_discharge=data.get('nasal_discharge', 'no'),
+                eye_discharge=data.get('eye_discharge', 'no'),
+                body_temperature=float(data.get('body_temperature', 38.5)),
+                heart_rate=float(data.get('heart_rate', 80))
+            )
+            
+            # Save prediction linked to this animal
+            prediction_record = Prediction(
+                user_id=current_user.id,
+                animal_id=animal_id,
+                prediction_data=json.dumps(data),
+                result=json.dumps(result),
+                confidence=result.get('confidence', 0)
+            )
+            db.session.add(prediction_record)
+            db.session.commit()
+            
+            if request.is_json:
+                return jsonify({'success': True, 'result': result})
+            
+            return render_template('result.html', result=result, animal=animal)
+            
+        except Exception as e:
+            if request.is_json:
+                return jsonify({'error': str(e)}), 500
+            return render_template('result.html', error=str(e), animal=animal)
+    
+    # GET request - show prediction form
+    symptoms = [
+        'Fever', 'Cough', 'Lethargy', 'Loss of appetite', 'Vomiting', 'Diarrhea',
+        'Nasal discharge', 'Eye discharge', 'Labored breathing', 'Lameness',
+        'Skin lesions', 'Swelling', 'Excessive drooling', 'Seizures'
+    ]
+    
+    return render_template('dashboard/animal_predict.html', animal=animal, symptoms=symptoms)
+
+@app.route('/animal/<int:animal_id>/vaccinations')
+@login_required
+def animal_vaccinations(animal_id):
+    """View vaccination records for an animal"""
+    animal = Animal.query.filter_by(id=animal_id, user_id=current_user.id).first_or_404()
+    vaccinations = Vaccination.query.filter_by(animal_id=animal_id).order_by(Vaccination.vaccination_date.desc()).all()
+    
+    return render_template('dashboard/vaccinations.html', animal=animal, vaccinations=vaccinations)
+
+@app.route('/animal/<int:animal_id>/add_vaccination', methods=['GET', 'POST'])
+@login_required
+def add_vaccination(animal_id):
+    """Add vaccination record for an animal"""
+    animal = Animal.query.filter_by(id=animal_id, user_id=current_user.id).first_or_404()
+    
+    if request.method == 'POST':
+        data = request.get_json() if request.is_json else request.form
+        
+        from datetime import datetime, timedelta
+        vaccination_date = datetime.strptime(data.get('vaccination_date'), '%Y-%m-%d').date()
+        
+        # Calculate next due date (default 1 year later)
+        next_due_date = vaccination_date + timedelta(days=365)
+        if data.get('next_due_date'):
+            next_due_date = datetime.strptime(data.get('next_due_date'), '%Y-%m-%d').date()
         
         vaccination = Vaccination(
             animal_id=animal_id,
             vaccine_name=data.get('vaccine_name'),
-            vaccination_date=datetime.strptime(data.get('vaccination_date'), '%Y-%m-%d').date(),
-            next_due_date=datetime.strptime(data.get('next_due_date'), '%Y-%m-%d').date() if data.get('next_due_date') else None,
+            vaccination_date=vaccination_date,
+            next_due_date=next_due_date,
             veterinarian=data.get('veterinarian'),
             notes=data.get('notes')
         )
@@ -1286,40 +1519,81 @@ def add_vaccination(animal_id):
         db.session.add(vaccination)
         db.session.commit()
         
+        if request.is_json:
+            return jsonify({'success': True, 'message': 'Vaccination record added successfully'})
+        
         flash('Vaccination record added successfully!', 'success')
         return redirect(url_for('animal_vaccinations', animal_id=animal_id))
     
     return render_template('dashboard/add_vaccination.html', animal=animal)
 
-# API routes for dashboard charts
 @app.route('/api/dashboard_data')
 @login_required
 def dashboard_data():
-    # Health trends data
-    health_data = db.session.query(
-        Prediction.created_at,
-        Prediction.confidence
-    ).filter_by(user_id=current_user.id).order_by(Prediction.created_at.desc()).limit(30).all()
+    """API endpoint for dashboard data"""
+    # Get health trends (last 30 days of predictions)
+    from datetime import datetime, timedelta
+    thirty_days_ago = datetime.utcnow() - timedelta(days=30)
     
-    # Animal distribution data
-    animal_distribution = db.session.query(
-        Animal.animal_type,
-        db.func.count(Animal.id)
-    ).filter_by(user_id=current_user.id).group_by(Animal.animal_type).all()
+    predictions = Prediction.query.filter(
+        Prediction.user_id == current_user.id,
+        Prediction.created_at >= thirty_days_ago
+    ).order_by(Prediction.created_at).all()
     
-    # Vaccination due data
-    from datetime import date, timedelta
-    upcoming_vaccinations = db.session.query(Vaccination).join(Animal).filter(
+    health_trends = []
+    for prediction in predictions:
+        health_trends.append({
+            'date': prediction.created_at.strftime('%m/%d'),
+            'confidence': prediction.confidence or 0
+        })
+    
+    # Get animal distribution
+    animals = Animal.query.filter_by(user_id=current_user.id).all()
+    animal_types = {}
+    for animal in animals:
+        animal_types[animal.animal_type] = animal_types.get(animal.animal_type, 0) + 1
+    
+    animal_distribution = [
+        {'type': animal_type, 'count': count}
+        for animal_type, count in animal_types.items()
+    ]
+    
+    # Get upcoming vaccinations (next 30 days)
+    thirty_days_later = datetime.utcnow().date() + timedelta(days=30)
+    upcoming_vaccinations = Vaccination.query.join(Animal).filter(
         Animal.user_id == current_user.id,
-        Vaccination.next_due_date <= date.today() + timedelta(days=30),
-        Vaccination.next_due_date >= date.today()
+        Vaccination.next_due_date <= thirty_days_later,
+        Vaccination.next_due_date >= datetime.utcnow().date()
     ).count()
     
     return jsonify({
-        'health_trends': [{'date': h[0].strftime('%Y-%m-%d'), 'confidence': h[1]} for h in health_data],
-        'animal_distribution': [{'type': a[0], 'count': a[1]} for a in animal_distribution],
+        'health_trends': health_trends,
+        'animal_distribution': animal_distribution,
         'upcoming_vaccinations': upcoming_vaccinations
     })
+
+@app.route('/knowledge_base')
+def knowledge_base():
+    """Knowledge base with disease information"""
+    diseases = Disease.query.all()
+    return render_template('knowledge_base.html', diseases=diseases)
+
+@app.route('/subsidies')
+def subsidies():
+    """Government subsidies and schemes"""
+    subsidies = Subsidy.query.filter_by(is_active=True).all()
+    return render_template('subsidies.html', subsidies=subsidies)
+
+@app.route('/set_language/<language>')
+def set_language(language):
+    """Set user language preference"""
+    if language in LANGUAGES:
+        session['language'] = language
+    return redirect(request.referrer or url_for('index'))
+
+
+
+# Additional routes for enhanced functionality
 
 # Voice prediction route (simulated)
 @app.route('/voice_predict', methods=['POST'])
