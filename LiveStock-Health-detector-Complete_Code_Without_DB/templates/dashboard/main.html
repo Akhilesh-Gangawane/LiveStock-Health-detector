@@ -1,0 +1,457 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1><i class="fas fa-tachometer-alt me-3"></i>{{ get_text('dashboard') }}</h1>
+    <p>{{ get_text('welcome') }}, {{ current_user.name }}! Here's your farm overview.</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-paw"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.total_animals }}</h3>
+            <p>Total Animals</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-map-marked-alt"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.total_lands }}</h3>
+            <p>Farm Lands</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-stethoscope"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.total_predictions }}</h3>
+            <p>Health Checks</p>
+        </div>
+    </div>
+    <div class="stat-card alert">
+        <div class="stat-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ stats.sick_animals }}</h3>
+            <p>Sick Animals</p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="quick-actions">
+    <h3><i class="fas fa-bolt me-2"></i>Quick Actions</h3>
+    <div class="action-grid">
+        <a href="{{ url_for('add_animal') }}" class="action-btn success">
+            <i class="fas fa-plus"></i>
+            Add Animal
+        </a>
+        <a href="{{ url_for('animals') }}" class="action-btn info">
+            <i class="fas fa-paw"></i>
+            Manage Animals
+        </a>
+        <a href="{{ url_for('index') }}" class="action-btn primary">
+            <i class="fas fa-stethoscope"></i>
+            Health Check
+        </a>
+        <a href="{{ url_for('veterinarians') }}" class="action-btn warning">
+            <i class="fas fa-user-md"></i>
+            Find Vet
+        </a>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-6">
+        <div class="activity-card">
+            <h4><i class="fas fa-paw me-2"></i>Recent Animals</h4>
+            {% if recent_animals %}
+                {% for animal in recent_animals %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                    <div class="activity-content">
+                        <strong><a href="{{ url_for('animal_detail', animal_id=animal.get('id')) }}" class="animal-link">{{ animal.get('name') or animal.get('animal_id') }}</a></strong>
+                        <p>{{ animal.get('animal_type') }} - {{ animal.get('breed') }}</p>
+                        <small>Added {{ animal.get('created_at')|format_date }}</small>
+                    </div>
+                    <div class="activity-actions">
+                        <a href="{{ url_for('predict_for_animal', animal_id=animal.get('id')) }}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-stethoscope"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No animals added yet. <a href="{{ url_for('add_animal') }}">Add your first animal</a></p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="activity-card">
+            <h4><i class="fas fa-chart-line me-2"></i>Recent Predictions</h4>
+            {% if recent_predictions %}
+                {% for prediction in recent_predictions %}
+                <div class="activity-item">
+                    <div class="activity-icon">
+                        <i class="fas fa-stethoscope"></i>
+                    </div>
+                    <div class="activity-content">
+                        <strong>Health Check</strong>
+                        <p>Confidence: {{ "%.1f"|format(prediction.confidence * 100) }}%</p>
+                        <small>{{ prediction.created_at|format_datetime }}</small>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">No health checks yet. <a href="{{ url_for('index') }}">Run your first analysis</a></p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="charts-section">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="chart-container">
+                <h4><i class="fas fa-chart-line me-2"></i>Health Trends</h4>
+                <canvas id="healthTrendsChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-container">
+                <h4><i class="fas fa-chart-pie me-2"></i>Animal Distribution</h4>
+                <canvas id="animalDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Vaccination Reminders -->
+<div class="vaccination-reminders">
+    <h3><i class="fas fa-syringe me-2"></i>{{ get_text('vaccination_due') }}</h3>
+    <div class="reminders-grid" id="vaccinationReminders">
+        <!-- Vaccination reminders will be loaded here -->
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+// Load dashboard data and create charts
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/dashboard_data')
+        .then(response => response.json())
+        .then(data => {
+            createHealthTrendsChart(data.health_trends);
+            createAnimalDistributionChart(data.animal_distribution);
+            updateVaccinationReminders(data.upcoming_vaccinations);
+        })
+        .catch(error => console.error('Error loading dashboard data:', error));
+});
+
+function createHealthTrendsChart(healthData) {
+    const ctx = document.getElementById('healthTrendsChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: healthData.map(item => item.date),
+            datasets: [{
+                label: 'Health Confidence',
+                data: healthData.map(item => item.confidence * 100),
+                borderColor: '#2d5a27',
+                backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    ticks: {
+                        callback: function(value) {
+                            return value + '%';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+function createAnimalDistributionChart(animalData) {
+    const ctx = document.getElementById('animalDistributionChart').getContext('2d');
+    
+    const colors = ['#2d5a27', '#4a7c59', '#6b8e6b', '#8ca08c', '#adb2ad'];
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: animalData.map(item => item.type),
+            datasets: [{
+                data: animalData.map(item => item.count),
+                backgroundColor: colors.slice(0, animalData.length),
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+}
+
+function updateVaccinationReminders(count) {
+    const container = document.getElementById('vaccinationReminders');
+    if (count > 0) {
+        container.innerHTML = `
+            <div class="reminder-alert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <div>
+                    <strong>${count} vaccination(s) due soon</strong>
+                    <p>Check your animal records for upcoming vaccinations</p>
+                </div>
+            </div>
+        `;
+    } else {
+        container.innerHTML = `
+            <div class="no-reminders">
+                <i class="fas fa-check-circle"></i>
+                <p>All vaccinations are up to date!</p>
+            </div>
+        `;
+    }
+}
+</script>
+
+<style>
+.dashboard-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.stat-card.alert {
+    border-left: 4px solid #dc3545;
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #2d5a27;
+}
+
+.stat-card.alert .stat-icon {
+    background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
+    color: #dc3545;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2d5a27;
+    margin: 0;
+}
+
+.stat-content p {
+    color: #666;
+    margin: 0;
+    font-weight: 500;
+}
+
+.activity-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.activity-card h4 {
+    color: #2d5a27;
+    margin-bottom: 20px;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2d5a27;
+}
+
+.activity-content strong {
+    color: #2d5a27;
+}
+
+.activity-content p {
+    margin: 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.activity-content small {
+    color: #999;
+    font-size: 0.8rem;
+}
+
+.animal-link {
+    color: #2d5a27;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.animal-link:hover {
+    color: #4a7c59;
+    text-decoration: underline;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px 0;
+    border-bottom: 1px solid #f0f0f0;
+    justify-content: space-between;
+}
+
+.activity-actions {
+    flex-shrink: 0;
+}
+
+.charts-section {
+    margin: 40px 0;
+}
+
+.chart-container {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+.chart-container h4 {
+    color: #2d5a27;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.vaccination-reminders {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-top: 30px;
+}
+
+.vaccination-reminders h3 {
+    color: #2d5a27;
+    margin-bottom: 20px;
+}
+
+.reminder-alert {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 10px;
+    color: #856404;
+}
+
+.reminder-alert i {
+    font-size: 2rem;
+    color: #ffc107;
+}
+
+.reminder-alert strong {
+    color: #856404;
+}
+
+.no-reminders {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 20px;
+    color: #28a745;
+}
+
+.no-reminders i {
+    font-size: 1.5rem;
+}
+</style>
+{% endblock %}

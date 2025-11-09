@@ -1,0 +1,191 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-edit me-3"></i>{{ get_text('edit_animal') }}</h1>
+    <a href="{{ url_for('animal_detail', animal_id=animal.get('id')) }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>{{ get_text('back_to_animal') }}
+    </a>
+</div>
+
+<div class="form-container">
+    <form method="POST" id="editAnimalForm">
+        <div class="section-divider">
+            <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Animal Type</label>
+                    <input type="text" class="form-control" value="{{ animal.get('animal_type') }}" readonly>
+                    <small class="form-text text-muted">Animal type cannot be changed</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Breed</label>
+                    <input type="text" class="form-control" value="{{ animal.get('breed') }}" readonly>
+                    <small class="form-text text-muted">Breed cannot be changed</small>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Animal Name/ID</label>
+                    <input type="text" class="form-control" name="name" value="{{ animal.get('name') or animal.get('animal_id') }}" placeholder="Enter name">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Age (years) *</label>
+                    <input type="number" class="form-control" name="age" step="0.1" min="0" max="50" value="{{ animal.get('age') }}" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Gender</label>
+                    <input type="text" class="form-control" value="{{ animal.get('gender') }}" readonly>
+                    <small class="form-text text-muted">Gender cannot be changed</small>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Weight (kg) *</label>
+                    <input type="number" class="form-control" name="weight" step="0.1" min="0" value="{{ animal.get('weight') }}" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Health Status</label>
+                    <select class="form-select" name="health_status">
+                        <option value="healthy" {{ 'selected' if animal.get('health_status') == 'healthy' }}>Healthy</option>
+                        <option value="sick" {{ 'selected' if animal.get('health_status') == 'sick' }}>Sick</option>
+                        <option value="recovering" {{ 'selected' if animal.get('health_status') == 'recovering' }}>Recovering</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section-divider">
+            <h5><i class="fas fa-calendar me-2"></i>Record Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Animal ID</label>
+                    <input type="text" class="form-control" value="{{ animal.get('animal_id') }}" readonly>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Added Date</label>
+                    <input type="text" class="form-control" value="{{ animal.get('created_at')|format_date }}" readonly>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-save me-2"></i>{{ get_text('update_animal') }}
+            </button>
+            <a href="{{ url_for('animal_detail', animal_id=animal.get('id')) }}" class="btn btn-outline-secondary btn-lg ms-3">
+                <i class="fas fa-times me-2"></i>{{ get_text('cancel') }}
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+document.getElementById('editAnimalForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const data = Object.fromEntries(formData);
+    
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        if (result.success) {
+            showAlert('success', result.message);
+            setTimeout(() => {
+                window.location.href = "{{ url_for('animal_detail', animal_id=animal.get('id')) }}";
+            }, 1500);
+        } else {
+            showAlert('error', result.message || 'Error updating animal');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showAlert('error', 'Error updating animal');
+    });
+});
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.form-container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.form-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    padding: 40px;
+    margin-bottom: 40px;
+}
+
+.section-divider {
+    border-left: 4px solid #2d5a27;
+    padding-left: 20px;
+    margin-bottom: 30px;
+}
+
+.section-divider h5 {
+    color: #2d5a27;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #2d5a27;
+    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.form-control[readonly] {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.form-text {
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.btn-lg {
+    padding: 12px 30px;
+    font-size: 1.1rem;
+}
+</style>
+{% endblock %}

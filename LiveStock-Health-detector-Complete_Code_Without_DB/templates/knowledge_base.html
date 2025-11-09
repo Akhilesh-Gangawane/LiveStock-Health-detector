@@ -1,0 +1,267 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-book-medical me-3"></i>{{ get_text('knowledge_base') }}</h1>
+    <p>Comprehensive information about livestock diseases, prevention, and treatment</p>
+</div>
+
+<!-- Search and Filter -->
+<div class="search-filters mb-4">
+    <div class="row">
+        <div class="col-md-6">
+            <input type="text" class="form-control" placeholder="Search diseases..." id="diseaseSearch">
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="animalFilter">
+                <option value="">All Animals</option>
+                <option value="Cow">Cow</option>
+                <option value="Buffalo">Buffalo</option>
+                <option value="Goat">Goat</option>
+                <option value="Sheep">Sheep</option>
+                <option value="Dog">Dog</option>
+                <option value="Cat">Cat</option>
+                <option value="Horse">Horse</option>
+                <option value="Pig">Pig</option>
+            </select>
+        </div>
+        <div class="col-md-3">
+            <select class="form-select" id="severityFilter">
+                <option value="">All Severities</option>
+                <option value="low">Low</option>
+                <option value="medium">Medium</option>
+                <option value="high">High</option>
+            </select>
+        </div>
+    </div>
+</div>
+
+<!-- Disease Cards -->
+<div class="disease-grid">
+    {% for disease in diseases %}
+    <div class="disease-card" data-animals="{{ disease.get('animal_types') }}" data-severity="{{ disease.get('severity') }}">
+        <div class="disease-header">
+            <h4>{{ disease.get('name') }}</h4>
+            <span class="severity-badge {{ disease.get('severity') }}">
+                {% if disease.get('severity') == 'high' %}
+                    <i class="fas fa-exclamation-triangle"></i> {{ get_text('high_risk') }}
+                {% elif disease.get('severity') == 'medium' %}
+                    <i class="fas fa-exclamation-circle"></i> {{ get_text('medium_risk') }}
+                {% else %}
+                    <i class="fas fa-info-circle"></i> {{ get_text('low_risk') }}
+                {% endif %}
+            </span>
+        </div>
+        
+        <div class="disease-content">
+            <p class="disease-description">{{ disease.get('description') }}</p>
+            
+            <div class="disease-details">
+                <div class="detail-section">
+                    <h6><i class="fas fa-heartbeat me-2"></i>{{ get_text('common_symptoms') }}</h6>
+                    <div class="symptoms-list">
+                        {% set symptoms = disease.get('symptoms')|from_json %}
+                        {% for symptom in symptoms %}
+                            <span class="symptom-tag">{{ symptom }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h6><i class="fas fa-shield-alt me-2"></i>{{ get_text('prevention') }}</h6>
+                    <p class="prevention-text">{{ disease.get('prevention') }}</p>
+                </div>
+                
+                <div class="detail-section">
+                    <h6><i class="fas fa-pills me-2"></i>{{ get_text('treatment') }}</h6>
+                    <p class="treatment-text">{{ disease.get('treatment') }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="disease-footer">
+            <div class="affected-animals">
+                <strong>{{ get_text('affects') }}:</strong>
+                {% set animals = disease.get('animal_types')|from_json %}
+                {% for animal in animals %}
+                    <span class="animal-tag">{{ animal }}</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.page-header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding: 30px;
+    background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+    color: white;
+    border-radius: 15px;
+}
+
+.search-filters {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.disease-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 25px;
+}
+
+.disease-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.disease-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.disease-header {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.disease-header h4 {
+    margin: 0;
+    color: #2d5a27;
+    font-size: 1.3rem;
+}
+
+.severity-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.severity-badge.high {
+    background: #dc3545;
+    color: white;
+}
+
+.severity-badge.medium {
+    background: #ffc107;
+    color: #000;
+}
+
+.severity-badge.low {
+    background: #28a745;
+    color: white;
+}
+
+.disease-content {
+    padding: 20px;
+}
+
+.disease-description {
+    color: #666;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.detail-section {
+    margin-bottom: 20px;
+}
+
+.detail-section h6 {
+    color: #2d5a27;
+    margin-bottom: 10px;
+    font-weight: 600;
+}
+
+.symptoms-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+.symptom-tag {
+    background: #e8f5e8;
+    color: #2d5a27;
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+
+.prevention-text, .treatment-text {
+    color: #666;
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.disease-footer {
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+}
+
+.affected-animals {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.animal-tag {
+    background: #2d5a27;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    margin-left: 5px;
+}
+</style>
+
+<script>
+// Search and filter functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('diseaseSearch');
+    const animalFilter = document.getElementById('animalFilter');
+    const severityFilter = document.getElementById('severityFilter');
+    const diseaseCards = document.querySelectorAll('.disease-card');
+    
+    function filterDiseases() {
+        const searchTerm = searchInput.value.toLowerCase();
+        const selectedAnimal = animalFilter.value;
+        const selectedSeverity = severityFilter.value;
+        
+        diseaseCards.forEach(card => {
+            const diseaseName = card.querySelector('h4').textContent.toLowerCase();
+            const animals = card.dataset.animals;
+            const severity = card.dataset.severity;
+            
+            const matchesSearch = diseaseName.includes(searchTerm);
+            const matchesAnimal = !selectedAnimal || animals.includes(selectedAnimal);
+            const matchesSeverity = !selectedSeverity || severity === selectedSeverity;
+            
+            if (matchesSearch && matchesAnimal && matchesSeverity) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+    
+    searchInput.addEventListener('input', filterDiseases);
+    animalFilter.addEventListener('change', filterDiseases);
+    severityFilter.addEventListener('change', filterDiseases);
+});
+</script>
+{% endblock %}
