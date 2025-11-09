@@ -1,0 +1,294 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-syringe me-3"></i>Vaccination Records</h1>
+    <p>{{ animal.get('name') or animal.get('animal_id') }} - {{ animal.get('animal_type') }} ({{ animal.get('breed') }})</p>
+    <a href="{{ url_for('add_vaccination', animal_id=animal.get('id')) }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add Vaccination
+    </a>
+</div>
+
+<!-- Vaccination Timeline -->
+<div class="vaccination-timeline">
+    {% for vaccination in vaccinations %}
+    <div class="timeline-item">
+        <div class="timeline-marker">
+            <i class="fas fa-syringe"></i>
+        </div>
+        <div class="timeline-content">
+            <div class="vaccination-card">
+                <div class="vaccination-header">
+                    <h5>{{ vaccination.vaccine_name }}</h5>
+                    <span class="vaccination-date">{{ vaccination.vaccination_date|format_date }}</span>
+                </div>
+                <div class="vaccination-details">
+                    {% if vaccination.veterinarian %}
+                        <p><strong>Veterinarian:</strong> {{ vaccination.veterinarian }}</p>
+                    {% endif %}
+                    {% if vaccination.next_due_date %}
+                        <p><strong>Next Due:</strong> 
+                            <span class="due-date {% if vaccination.next_due_date <= date.today() %}overdue{% elif vaccination.next_due_date <= date.today() + timedelta(days=30) %}due-soon{% endif %}">
+                                {{ vaccination.next_due_date|format_date }}
+                            </span>
+                        </p>
+                    {% endif %}
+                    {% if vaccination.notes %}
+                        <p><strong>Notes:</strong> {{ vaccination.notes }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-syringe"></i>
+        <h3>No Vaccination Records</h3>
+        <p>Start tracking vaccinations for {{ animal.get('name') or animal.get('animal_id') }} to maintain proper health records.</p>
+        <a href="{{ url_for('add_vaccination', animal_id=animal.get('id')) }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add First Vaccination
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Vaccination Reminders -->
+{% if vaccinations %}
+<div class="reminders-section">
+    <h3><i class="fas fa-bell me-2"></i>Upcoming Vaccinations</h3>
+    <div class="reminders-grid">
+        {% for vaccination in vaccinations %}
+            {% if vaccination.next_due_date and vaccination.next_due_date <= date.today() + timedelta(days=90) %}
+            <div class="reminder-card {% if vaccination.next_due_date <= date.today() %}overdue{% elif vaccination.next_due_date <= date.today() + timedelta(days=30) %}due-soon{% endif %}">
+                <div class="reminder-icon">
+                    <i class="fas fa-calendar-exclamation"></i>
+                </div>
+                <div class="reminder-content">
+                    <h6>{{ vaccination.vaccine_name }}</h6>
+                    <p>Due: {{ vaccination.next_due_date|format_date }}</p>
+                    {% if vaccination.next_due_date <= date.today() %}
+                        <span class="status-badge overdue">Overdue</span>
+                    {% elif vaccination.next_due_date <= date.today() + timedelta(days=30) %}
+                        <span class="status-badge due-soon">Due Soon</span>
+                    {% else %}
+                        <span class="status-badge upcoming">Upcoming</span>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.vaccination-timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.vaccination-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e8f5e8;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 10px;
+    width: 30px;
+    height: 30px;
+    background: #2d5a27;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.8rem;
+}
+
+.timeline-content {
+    margin-left: 20px;
+}
+
+.vaccination-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.vaccination-header {
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.vaccination-header h5 {
+    margin: 0;
+    color: #2d5a27;
+}
+
+.vaccination-date {
+    color: #666;
+    font-weight: 500;
+}
+
+.vaccination-details {
+    padding: 20px;
+}
+
+.vaccination-details p {
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.due-date.overdue {
+    color: #dc3545;
+    font-weight: bold;
+}
+
+.due-date.due-soon {
+    color: #ffc107;
+    font-weight: bold;
+}
+
+.reminders-section {
+    margin-top: 40px;
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.reminders-section h3 {
+    color: #2d5a27;
+    margin-bottom: 20px;
+}
+
+.reminders-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.reminder-card {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    border-left: 4px solid #28a745;
+}
+
+.reminder-card.due-soon {
+    border-left-color: #ffc107;
+    background: #fff8e1;
+}
+
+.reminder-card.overdue {
+    border-left-color: #dc3545;
+    background: #ffebee;
+}
+
+.reminder-icon {
+    width: 50px;
+    height: 50px;
+    background: #28a745;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+}
+
+.reminder-card.due-soon .reminder-icon {
+    background: #ffc107;
+}
+
+.reminder-card.overdue .reminder-icon {
+    background: #dc3545;
+}
+
+.reminder-content h6 {
+    margin: 0 0 5px 0;
+    color: #2d5a27;
+}
+
+.reminder-content p {
+    margin: 0 0 10px 0;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.status-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.overdue {
+    background: #dc3545;
+    color: white;
+}
+
+.status-badge.due-soon {
+    background: #ffc107;
+    color: #000;
+}
+
+.status-badge.upcoming {
+    background: #28a745;
+    color: white;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #2d5a27;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 30px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,154 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-plus me-3"></i>Add New Animal</h1>
+    <a href="{{ url_for('animals') }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Animals
+    </a>
+</div>
+
+<div class="form-container">
+    <form method="POST" id="addAnimalForm">
+        <div class="section-divider">
+            <h5><i class="fas fa-info-circle me-2"></i>Basic Information</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Animal Type *</label>
+                    <select class="form-select" name="animal_type" id="animal_type" required>
+                        <option value="">Select Animal Type</option>
+                        {% for animal in animals %}
+                            <option value="{{ animal }}">{{ animal }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Breed *</label>
+                    <select class="form-select" name="breed" id="breed" required>
+                        <option value="">First select animal type</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Animal Name/ID</label>
+                    <input type="text" class="form-control" name="name" placeholder="Enter name or leave blank for auto-generated ID">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Age (years) *</label>
+                    <input type="number" class="form-control" name="age" step="0.1" min="0" max="50" required>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Gender *</label>
+                    <select class="form-select" name="gender" required>
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Weight (kg) *</label>
+                    <input type="number" class="form-control" name="weight" step="0.1" min="0" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Health Status</label>
+                    <select class="form-select" name="health_status">
+                        <option value="healthy">Healthy</option>
+                        <option value="sick">Sick</option>
+                        <option value="recovering">Recovering</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>{{ get_text('add_animal') }}
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const animalSelect = document.getElementById('animal_type');
+    const breedSelect = document.getElementById('breed');
+    
+    if (animalSelect && breedSelect) {
+        animalSelect.addEventListener('change', function() {
+            const animalType = this.value;
+            
+            if (animalType) {
+                breedSelect.innerHTML = '<option value="">Loading breeds...</option>';
+                
+                fetch('/get_breeds/' + animalType)
+                    .then(response => response.json())
+                    .then(breeds => {
+                        breedSelect.innerHTML = '<option value="">Select Breed</option>';
+                        breeds.forEach(breed => {
+                            const option = document.createElement('option');
+                            option.value = breed;
+                            option.textContent = breed;
+                            breedSelect.appendChild(option);
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        breedSelect.innerHTML = '<option value="">Error loading breeds</option>';
+                    });
+            } else {
+                breedSelect.innerHTML = '<option value="">First select animal type</option>';
+            }
+        });
+    }
+});
+</script>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.form-container {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    padding: 40px;
+    margin-bottom: 40px;
+}
+
+.section-divider {
+    border-left: 4px solid #2d5a27;
+    padding-left: 20px;
+    margin-bottom: 30px;
+}
+
+.section-divider h5 {
+    color: #2d5a27;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #2d5a27;
+    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+</style>
+{% endblock %}

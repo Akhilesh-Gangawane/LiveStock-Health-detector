@@ -1,0 +1,377 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-stethoscope me-3"></i>Health Check for {{ animal.get('name') or animal.get('animal_id') }}</h1>
+    <a href="{{ url_for('animal_detail', animal_id=animal.get('id')) }}" class="btn btn-outline-primary">
+        <i class="fas fa-arrow-left me-2"></i>Back to Animal
+    </a>
+</div>
+
+<div class="prediction-container">
+    <div class="animal-info-card">
+        <h4><i class="fas fa-paw me-2"></i>Animal Information</h4>
+        <div class="info-grid">
+            <div class="info-item">
+                <strong>Type:</strong> {{ animal.get('animal_type') }}
+            </div>
+            <div class="info-item">
+                <strong>Breed:</strong> {{ animal.get('breed') }}
+            </div>
+            <div class="info-item">
+                <strong>Age:</strong> {{ animal.get('age') }} years
+            </div>
+            <div class="info-item">
+                <strong>Weight:</strong> {{ animal.get('weight') }} kg
+            </div>
+            <div class="info-item">
+                <strong>Gender:</strong> {{ animal.get('gender') }}
+            </div>
+            <div class="info-item">
+                <strong>Current Status:</strong> 
+                <span class="status-badge {{ animal.get('health_status') }}">{{ animal.get('health_status', 'unknown').title() }}</span>
+            </div>
+        </div>
+    </div>
+
+    <form method="POST" id="predictionForm" class="prediction-form">
+        <div class="form-section">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Primary Symptoms</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Primary Symptom *</label>
+                    <select class="form-select" name="symptom1" required>
+                        <option value="">Select Primary Symptom</option>
+                        {% for symptom in symptoms %}
+                            <option value="{{ symptom }}">{{ symptom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Secondary Symptom</label>
+                    <select class="form-select" name="symptom2">
+                        <option value="">Select Secondary Symptom</option>
+                        {% for symptom in symptoms %}
+                            <option value="{{ symptom }}">{{ symptom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Additional Symptom</label>
+                    <select class="form-select" name="symptom3">
+                        <option value="">Select Additional Symptom</option>
+                        {% for symptom in symptoms %}
+                            <option value="{{ symptom }}">{{ symptom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Other Symptom</label>
+                    <select class="form-select" name="symptom4">
+                        <option value="">Select Other Symptom</option>
+                        {% for symptom in symptoms %}
+                            <option value="{{ symptom }}">{{ symptom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Duration (days) *</label>
+                    <input type="number" class="form-control" name="duration" min="1" max="365" value="1" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h5><i class="fas fa-list-check me-2"></i>Observable Symptoms</h5>
+            <p class="text-muted">Select all symptoms you have observed in the animal:</p>
+            <div class="symptoms-grid">
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="appetite_loss" name="appetite_loss" value="yes">
+                    <label for="appetite_loss">Appetite Loss</label>
+                </div>
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="vomiting" name="vomiting" value="yes">
+                    <label for="vomiting">Vomiting</label>
+                </div>
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="diarrhea" name="diarrhea" value="yes">
+                    <label for="diarrhea">Diarrhea</label>
+                </div>
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="coughing" name="coughing" value="yes">
+                    <label for="coughing">Coughing</label>
+                </div>
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="labored_breathing" name="labored_breathing" value="yes">
+                    <label for="labored_breathing">Labored Breathing</label>
+                </div>
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="nasal_discharge" name="nasal_discharge" value="yes">
+                    <label for="nasal_discharge">Nasal Discharge</label>
+                </div>
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="lameness" name="lameness" value="yes">
+                    <label for="lameness">Lameness</label>
+                </div>
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="skin_lesions" name="skin_lesions" value="yes">
+                    <label for="skin_lesions">Skin Lesions</label>
+                </div>
+                <div class="symptom-checkbox">
+                    <input type="checkbox" id="eye_discharge" name="eye_discharge" value="yes">
+                    <label for="eye_discharge">Eye Discharge</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h5><i class="fas fa-heartbeat me-2"></i>Vital Signs</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Body Temperature (°C) *</label>
+                    <input type="number" class="form-control" name="body_temperature" step="0.1" min="35" max="45" value="38.5" required>
+                    <small class="form-text text-muted">Normal range for {{ animal.get('animal_type') }}: varies by species</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">Heart Rate (BPM) *</label>
+                    <input type="number" class="form-control" name="heart_rate" min="20" max="300" value="80" required>
+                    <small class="form-text text-muted">Normal range varies by species and age</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center">
+            <button type="submit" class="btn btn-primary btn-lg" id="analyzeBtn">
+                <i class="fas fa-stethoscope me-2"></i>Analyze with AI
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- Loading Modal -->
+<div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h5>Analyzing Health Data...</h5>
+                <p>Our AI is processing the symptoms and vital signs to provide accurate health insights.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('predictionForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show loading modal
+    const loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+    loadingModal.show();
+    
+    const formData = new FormData(this);
+    
+    // Convert checkboxes to yes/no values
+    const checkboxes = ['appetite_loss', 'vomiting', 'diarrhea', 'coughing', 'labored_breathing', 
+                       'nasal_discharge', 'lameness', 'skin_lesions', 'eye_discharge'];
+    
+    checkboxes.forEach(checkbox => {
+        if (!formData.has(checkbox)) {
+            formData.set(checkbox, 'no');
+        }
+    });
+    
+    const data = Object.fromEntries(formData);
+    
+    fetch(this.action, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(result => {
+        loadingModal.hide();
+        
+        if (result.success) {
+            // Redirect to results or show results inline
+            window.location.href = "{{ url_for('animal_detail', animal_id=animal.get('id')) }}";
+        } else {
+            showAlert('error', result.error || 'Error analyzing health data');
+        }
+    })
+    .catch(error => {
+        loadingModal.hide();
+        console.error('Error:', error);
+        showAlert('error', 'Error analyzing health data');
+    });
+});
+
+function showAlert(type, message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+    alertDiv.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.prediction-container');
+    container.insertBefore(alertDiv, container.firstChild);
+    
+    setTimeout(() => {
+        alertDiv.remove();
+    }, 5000);
+}
+</script>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.prediction-container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+.animal-info-card {
+    background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 15px;
+    margin-bottom: 30px;
+}
+
+.animal-info-card h4 {
+    margin-bottom: 20px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.info-item {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 10px 15px;
+    border-radius: 8px;
+}
+
+.status-badge {
+    padding: 4px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.healthy {
+    background: #28a745;
+    color: white;
+}
+
+.status-badge.sick {
+    background: #dc3545;
+    color: white;
+}
+
+.status-badge.recovering {
+    background: #ffc107;
+    color: #000;
+}
+
+.prediction-form {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 40px rgba(0,0,0,0.1);
+    padding: 40px;
+}
+
+.form-section {
+    margin-bottom: 40px;
+    padding-bottom: 30px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.form-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 30px;
+}
+
+.form-section h5 {
+    color: #2d5a27;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e1e8ed;
+    border-radius: 10px;
+    padding: 12px 15px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #2d5a27;
+    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.symptoms-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.symptom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.symptom-checkbox:hover {
+    background: #e9ecef;
+}
+
+.symptom-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #2d5a27;
+}
+
+.symptom-checkbox label {
+    margin: 0;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-lg {
+    padding: 15px 40px;
+    font-size: 1.2rem;
+    border-radius: 25px;
+}
+
+.form-text {
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+</style>
+{% endblock %}

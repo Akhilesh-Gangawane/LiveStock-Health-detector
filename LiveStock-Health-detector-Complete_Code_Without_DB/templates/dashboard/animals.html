@@ -1,0 +1,175 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-paw me-3"></i>My Animals</h1>
+    <a href="{{ url_for('add_animal') }}" class="btn btn-primary">
+        <i class="fas fa-plus me-2"></i>Add New Animal
+    </a>
+</div>
+
+<div class="animals-grid">
+    {% for animal in animals %}
+    <div class="animal-card">
+        <div class="animal-header">
+            <h4>{{ animal.name or animal.animal_id }}</h4>
+            <span class="status-badge {{ animal.health_status }}">{{ animal.health_status.title() }}</span>
+        </div>
+        <div class="animal-details">
+            <div class="detail-item">
+                <i class="fas fa-tag"></i>
+                <span>{{ animal.animal_type }} - {{ animal.breed }}</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-birthday-cake"></i>
+                <span>{{ animal.age }} years old</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-weight"></i>
+                <span>{{ animal.weight }} kg</span>
+            </div>
+            <div class="detail-item">
+                <i class="fas fa-venus-mars"></i>
+                <span>{{ animal.gender }}</span>
+            </div>
+        </div>
+        <div class="animal-actions">
+            <a href="{{ url_for('animal_detail', animal_id=animal.id) }}" class="btn btn-sm btn-primary">
+                <i class="fas fa-eye"></i> {{ get_text('view_details') }}
+            </a>
+            <a href="{{ url_for('edit_animal', animal_id=animal.id) }}" class="btn btn-sm btn-outline-primary">
+                <i class="fas fa-edit"></i> {{ get_text('edit') }}
+            </a>
+            <a href="{{ url_for('predict_for_animal', animal_id=animal.id) }}" class="btn btn-sm btn-outline-success">
+                <i class="fas fa-stethoscope"></i> Health Check
+            </a>
+        </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-paw"></i>
+        <h3>No Animals Yet</h3>
+        <p>Start by adding your first animal to track their health and manage their records.</p>
+        <a href="{{ url_for('add_animal') }}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Add Your First Animal
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.animals-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 25px;
+}
+
+.animal-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.animal-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.animal-header {
+    background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+    color: white;
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.animal-header h4 {
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.status-badge.healthy {
+    background: #28a745;
+    color: white;
+}
+
+.status-badge.sick {
+    background: #dc3545;
+    color: white;
+}
+
+.status-badge.recovering {
+    background: #ffc107;
+    color: #000;
+}
+
+.animal-details {
+    padding: 20px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    color: #666;
+}
+
+.detail-item i {
+    color: #2d5a27;
+    width: 20px;
+}
+
+.animal-actions {
+    padding: 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    gap: 10px;
+}
+
+.empty-state {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.empty-state i {
+    font-size: 4rem;
+    color: #ccc;
+    margin-bottom: 20px;
+}
+
+.empty-state h3 {
+    color: #2d5a27;
+    margin-bottom: 15px;
+}
+
+.empty-state p {
+    color: #666;
+    margin-bottom: 30px;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,1389 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* ===== ENHANCED MODAL SYSTEM ===== */
+    .health-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        backdrop-filter: blur(10px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        opacity: 0;
+        transition: var(--transition);
+    }
+    
+    .health-modal.show {
+        display: flex;
+        opacity: 1;
+    }
+    
+    .modal-content {
+        background: var(--surface);
+        border-radius: var(--radius-2xl);
+        max-width: 90vw;
+        max-height: 90vh;
+        width: 800px;
+        overflow-y: auto;
+        box-shadow: var(--shadow-strong);
+        transform: scale(0.8) translateY(-50px);
+        transition: var(--transition-bounce);
+        position: relative;
+        border: 3px solid var(--secondary);
+    }
+    
+    .health-modal.show .modal-content {
+        transform: scale(1) translateY(0);
+    }
+    
+    .modal-header {
+        background: var(--gradient-primary);
+        color: var(--white);
+        padding: var(--space-xl);
+        border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .modal-close {
+        background: var(--accent);
+        border: 2px solid var(--accent-light);
+        color: var(--text-primary);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: var(--transition);
+        font-size: 1.25rem;
+        box-shadow: var(--shadow-soft);
+    }
+    
+    .modal-close:hover {
+        background: var(--accent-light);
+        transform: scale(1.1);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .modal-body {
+        padding: var(--space-2xl);
+    }
+    
+    /* ===== ENHANCED HERO SECTION ===== */
+    .hero-section {
+        background: var(--gradient-primary);
+        color: var(--white);
+        padding: var(--space-3xl) 0;
+        margin-bottom: var(--space-2xl);
+        border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 800;
+        margin-bottom: var(--space-lg);
+        text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        color: var(--white);
+        animation: slideInDown 0.8s ease-out;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+        opacity: 0.95;
+        margin-bottom: var(--space-2xl);
+        color: var(--white);
+        animation: slideInUp 0.8s ease-out 0.2s both;
+    }
+    
+    .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: var(--space-lg);
+        flex-wrap: wrap;
+        animation: slideInUp 0.8s ease-out 0.4s both;
+    }
+    
+    .hero-btn {
+        padding: var(--space-lg) var(--space-2xl);
+        font-size: 1.125rem;
+        font-weight: 600;
+        border-radius: var(--radius-full);
+        transition: var(--transition);
+        min-width: 200px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-btn-primary {
+        background: var(--accent);
+        color: var(--text-primary);
+        border: 2px solid var(--accent);
+        font-weight: 700;
+        box-shadow: var(--shadow-soft);
+    }
+    
+    .hero-btn-outline {
+        background: transparent;
+        color: var(--white);
+        border: 2px solid var(--secondary);
+    }
+    
+    .hero-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-strong);
+    }
+    
+    .hero-btn-primary:hover {
+        background: var(--accent-light);
+        color: var(--text-primary);
+        border-color: var(--accent-light);
+    }
+    
+    .hero-btn-outline:hover {
+        background: var(--secondary);
+        color: var(--text-primary);
+        border-color: var(--secondary);
+    }
+    
+    /* ===== ENHANCED FEATURE CARDS ===== */
+    .features-section {
+        margin-bottom: var(--space-3xl);
+    }
+    
+    .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--gray-900);
+        margin-bottom: var(--space-xl);
+    }
+    
+    .section-subtitle {
+        text-align: center;
+        font-size: 1.125rem;
+        color: var(--gray-600);
+        margin-bottom: var(--space-2xl);
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: var(--space-2xl);
+    }
+    
+    .feature-card {
+        background: var(--surface);
+        padding: var(--space-2xl);
+        border-radius: var(--radius-xl);
+        box-shadow: var(--shadow-soft);
+        text-align: center;
+        transition: var(--transition);
+        border: 2px solid var(--border);
+        position: relative;
+        overflow: hidden;
+        cursor: pointer;
+    }
+    
+    .feature-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--gradient-accent);
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-12px);
+        box-shadow: var(--shadow-strong);
+        background: var(--secondary);
+        border-color: var(--accent);
+    }
+    
+    .feature-icon {
+        width: 80px;
+        height: 80px;
+        background: var(--gradient-primary);
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-lg);
+        font-size: 2rem;
+        color: var(--white);
+        transition: var(--transition);
+        box-shadow: var(--shadow-soft);
+        border: 3px solid var(--secondary);
+    }
+    
+    .feature-card:hover .feature-icon {
+        transform: scale(1.1) rotate(5deg);
+        box-shadow: var(--shadow-medium);
+        background: var(--gradient-accent);
+        border-color: var(--accent);
+        color: var(--text-primary);
+    }
+    
+    .feature-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--gray-900);
+        margin-bottom: var(--space-md);
+    }
+    
+    .feature-description {
+        color: var(--gray-600);
+        line-height: 1.6;
+    }
+    
+    /* ===== QUICK ACTIONS SECTION ===== */
+    .quick-actions-section {
+        background: var(--light);
+        padding: var(--space-3xl) 0;
+        border-radius: var(--radius-2xl);
+        margin-bottom: var(--space-3xl);
+    }
+    
+    .actions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: var(--space-xl);
+        margin-top: var(--space-2xl);
+    }
+    
+    .action-card {
+        background: var(--surface);
+        padding: var(--space-xl);
+        border-radius: var(--radius-lg);
+        text-align: center;
+        transition: var(--transition);
+        cursor: pointer;
+        border: 2px solid var(--border);
+        text-decoration: none;
+        color: inherit;
+        box-shadow: var(--shadow-soft);
+    }
+    
+    .action-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-medium);
+        border-color: var(--accent);
+        text-decoration: none;
+        color: inherit;
+        background: var(--secondary);
+    }
+    
+    .action-icon {
+        width: 60px;
+        height: 60px;
+        background: var(--accent);
+        border-radius: var(--radius-full);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto var(--space-md);
+        font-size: 1.5rem;
+        color: var(--text-primary);
+        transition: var(--transition);
+        border: 2px solid var(--accent-light);
+        box-shadow: var(--shadow-soft);
+    }
+    
+    .action-card:hover .action-icon {
+        transform: scale(1.1);
+        background: var(--primary);
+        color: var(--white);
+        border-color: var(--primary-light);
+    }
+    
+    .action-title {
+        font-weight: 600;
+        margin-bottom: var(--space-sm);
+        color: var(--gray-900);
+    }
+    
+    .action-description {
+        font-size: 0.9rem;
+        color: var(--gray-600);
+    }
+    
+    /* ===== STATS SECTION ===== */
+    .stats-section {
+        background: var(--gradient-dark);
+        color: var(--white);
+        padding: var(--space-3xl) 0;
+        border-radius: var(--radius-2xl);
+        margin-bottom: var(--space-3xl);
+        text-align: center;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--space-xl);
+        margin-top: var(--space-2xl);
+    }
+    
+    .stat-item {
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        color: var(--white);
+        margin-bottom: var(--space-sm);
+        display: block;
+    }
+    
+    .stat-label {
+        font-size: 1.125rem;
+        opacity: 0.9;
+        color: var(--white);
+    }
+    
+    /* ===== ANIMATIONS ===== */
+    @keyframes slideInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    /* ===== ECO-TECH BUTTON STYLES ===== */
+    .eco-btn-primary {
+        background: var(--gradient-accent) !important;
+        border: 2px solid var(--accent) !important;
+        color: var(--text-primary) !important;
+        font-weight: 700 !important;
+        padding: 0.75rem 2rem !important;
+        border-radius: 50px !important;
+        box-shadow: var(--shadow-soft) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .eco-btn-primary:hover {
+        background: var(--accent-light) !important;
+        border-color: var(--accent-light) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: var(--shadow-strong) !important;
+    }
+    
+    .eco-btn-secondary {
+        background: var(--gradient-primary) !important;
+        border: 2px solid var(--primary) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        padding: 0.75rem 2rem !important;
+        border-radius: 50px !important;
+        box-shadow: var(--shadow-soft) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .eco-btn-secondary:hover {
+        background: var(--primary-light) !important;
+        border-color: var(--primary-light) !important;
+        transform: translateY(-3px) !important;
+        box-shadow: var(--shadow-strong) !important;
+    }
+    
+    /* ===== ECO-TECH FORM STYLES ===== */
+    .form-control, .form-select {
+        border: 2px solid var(--border) !important;
+        border-radius: 12px !important;
+        padding: 0.75rem 1rem !important;
+        background: var(--surface) !important;
+        color: var(--text-primary) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--accent) !important;
+        box-shadow: 0 0 0 3px rgba(251, 192, 45, 0.1) !important;
+        background: var(--secondary) !important;
+    }
+    
+    .form-label {
+        color: var(--text-primary) !important;
+        font-weight: 600 !important;
+        margin-bottom: 0.5rem !important;
+    }
+    
+    /* ===== SYMPTOM CARDS ECO-TECH STYLE ===== */
+    .symptom-card {
+        background: var(--surface) !important;
+        border: 2px solid var(--border) !important;
+        border-radius: 12px !important;
+        padding: 1rem !important;
+        margin: 0.5rem !important;
+        transition: all 0.3s ease !important;
+        cursor: pointer !important;
+        box-shadow: var(--shadow-soft) !important;
+    }
+    
+    .symptom-card:hover {
+        border-color: var(--accent) !important;
+        background: var(--secondary) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: var(--shadow-medium) !important;
+    }
+    
+    .symptom-card.selected {
+        background: var(--accent) !important;
+        border-color: var(--accent-dark) !important;
+        color: var(--text-primary) !important;
+        box-shadow: var(--shadow-medium) !important;
+    }
+    
+    .symptom-grid {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        gap: 0.5rem !important;
+        margin-top: 1rem !important;
+    }
+
+    /* ===== 🌾 MODERN AGRITECH DARK MODE ===== */
+    
+    /* 🌑 Dark Mode Body & Background */
+    .dark-theme body {
+        background: var(--background) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    /* 🌿 Dark Mode Hero Section */
+    .dark-theme .hero-section {
+        background: var(--gradient-surface) !important;
+        border-bottom: 3px solid var(--primary);
+    }
+    
+    .dark-theme .hero-title {
+        color: var(--primary) !important;
+        text-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
+    }
+    
+    .dark-theme .hero-subtitle {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* 🌱 Dark Mode Feature Cards */
+    .dark-theme .feature-card {
+        background: var(--surface) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .feature-card::before {
+        background: var(--gradient-primary) !important;
+    }
+    
+    .dark-theme .feature-card:hover {
+        background: rgba(0, 230, 118, 0.1) !important;
+        border-color: var(--primary) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .feature-title {
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .feature-description {
+        color: var(--text-secondary) !important;
+    }
+    
+    .dark-theme .feature-card:hover .feature-title {
+        color: var(--primary) !important;
+    }
+    
+    /* ☀️ Dark Mode Action Cards */
+    .dark-theme .action-card {
+        background: var(--surface) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .action-card:hover {
+        background: rgba(0, 230, 118, 0.1) !important;
+        border-color: var(--primary) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .action-title {
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .action-description {
+        color: var(--text-secondary) !important;
+    }
+    
+    .dark-theme .action-icon {
+        background: var(--accent) !important;
+        color: var(--background) !important;
+        border-color: var(--accent) !important;
+    }
+    
+    .dark-theme .action-card:hover .action-icon {
+        background: var(--primary) !important;
+        color: var(--background) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    /* 🌾 Dark Mode Quick Actions Section */
+    .dark-theme .quick-actions-section {
+        background: rgba(30, 45, 47, 0.3) !important;
+    }
+    
+    .dark-theme .section-title {
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .section-subtitle {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* 🌌 Dark Mode Stats Section */
+    .dark-theme .stats-section {
+        background: var(--gradient-surface) !important;
+        border-top: 3px solid var(--primary);
+    }
+    
+    .dark-theme .stat-number {
+        color: var(--accent) !important;
+        text-shadow: 0 0 15px rgba(253, 216, 53, 0.4);
+    }
+    
+    .dark-theme .stat-label {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* 🌿 Dark Mode Modal */
+    .dark-theme .modal-content {
+        background: var(--surface) !important;
+        border-color: var(--primary) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .modal-header {
+        background: var(--gradient-surface) !important;
+        border-bottom: 2px solid var(--primary);
+    }
+    
+    .dark-theme .modal-close {
+        background: var(--accent) !important;
+        color: var(--background) !important;
+        border-color: var(--accent) !important;
+    }
+    
+    .dark-theme .modal-close:hover {
+        background: #FFEB3B !important;
+        box-shadow: var(--shadow-accent) !important;
+    }
+    
+    /* 🌱 Dark Mode Forms */
+    .dark-theme .form-control,
+    .dark-theme .form-select {
+        background: rgba(30, 45, 47, 0.8) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .form-control:focus,
+    .dark-theme .form-select:focus {
+        background: rgba(0, 230, 118, 0.1) !important;
+        border-color: var(--primary) !important;
+        box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.15) !important;
+    }
+    
+    .dark-theme .form-label {
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .form-text {
+        color: var(--text-secondary) !important;
+    }
+    
+    /* ☀️ Dark Mode Buttons */
+    .dark-theme .eco-btn-primary {
+        background: var(--gradient-accent) !important;
+        border-color: var(--accent) !important;
+        color: var(--background) !important;
+        box-shadow: var(--shadow-accent) !important;
+    }
+    
+    .dark-theme .eco-btn-primary:hover {
+        background: #FFEB3B !important;
+        box-shadow: 0 8px 30px rgba(253, 216, 53, 0.3) !important;
+    }
+    
+    .dark-theme .eco-btn-secondary {
+        background: var(--gradient-primary) !important;
+        border-color: var(--primary) !important;
+        color: var(--background) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .eco-btn-secondary:hover {
+        background: #00C853 !important;
+        box-shadow: 0 8px 30px rgba(0, 230, 118, 0.3) !important;
+    }
+    
+    /* 🌿 Dark Mode Symptom Cards */
+    .dark-theme .symptom-card {
+        background: var(--surface) !important;
+        border-color: var(--border) !important;
+        color: var(--text-primary) !important;
+    }
+    
+    .dark-theme .symptom-card:hover {
+        border-color: var(--primary) !important;
+        background: rgba(0, 230, 118, 0.1) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .symptom-card.selected {
+        background: var(--primary) !important;
+        border-color: #00C853 !important;
+        color: var(--background) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    /* 🌾 Dark Mode Section Dividers */
+    .dark-theme .section-divider h5 {
+        color: var(--primary) !important;
+    }
+    
+    /* 🌌 Dark Mode Scroll to Top */
+    .dark-theme .scroll-to-top {
+        background: var(--gradient-primary) !important;
+        box-shadow: var(--shadow-glow) !important;
+    }
+    
+    .dark-theme .scroll-to-top:hover {
+        box-shadow: 0 8px 30px rgba(0, 230, 118, 0.4) !important;
+    }
+
+    /* ===== RESPONSIVE DESIGN ===== */
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-buttons {
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .hero-btn {
+            width: 100%;
+            max-width: 300px;
+        }
+        
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .actions-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .modal-content {
+            width: 95vw;
+            margin: var(--space-md);
+        }
+        
+        .modal-body {
+            padding: var(--space-lg);
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .hero-title {
+            font-size: 2rem;
+        }
+        
+        .section-title {
+            font-size: 2rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Enhanced Hero Section -->
+<div class="hero-section">
+    <div class="container">
+        <div class="hero-content">
+            <h1 class="hero-title">
+                <i class="fas fa-paw me-3"></i>{{ get_text('app_name') }}
+            </h1>
+            <p class="hero-subtitle">
+                {{ get_text('ai_prediction') }}
+            </p>
+            <div class="hero-buttons">
+                <button class="btn hero-btn hero-btn-primary" onclick="openHealthModal()">
+                    <i class="fas fa-stethoscope me-2"></i>{{ get_text('health_check') }}
+                </button>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="btn hero-btn hero-btn-outline">
+                        <i class="fas fa-tachometer-alt me-2"></i>{{ get_text('go_to_dashboard') }}
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn hero-btn hero-btn-outline">
+                        <i class="fas fa-sign-in-alt me-2"></i>{{ get_text('login') }} / {{ get_text('register') }}
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Features Section -->
+<div class="container features-section">
+    <h2 class="section-title">{{ get_text('powerful_ai_features') }}</h2>
+    <p class="section-subtitle">
+        {{ get_text('advanced_technology') }}
+    </p>
+    
+    <div class="features-grid">
+        <div class="feature-card" onclick="openHealthModal()">
+            <div class="feature-icon">
+                <i class="fas fa-robot"></i>
+            </div>
+            <h4 class="feature-title">{{ get_text('ai_disease_detection') }}</h4>
+            <p class="feature-description">
+                {{ get_text('ai_disease_desc') }}
+            </p>
+        </div>
+        
+        <div class="feature-card" onclick="showVoicePrediction()">
+            <div class="feature-icon">
+                <i class="fas fa-microphone"></i>
+            </div>
+            <h4 class="feature-title">{{ get_text('voice_analysis') }}</h4>
+            <p class="feature-description">
+                {{ get_text('voice_analysis_desc') }}
+            </p>
+        </div>
+        
+        <div class="feature-card" onclick="window.location.href='{{ url_for('knowledge_base') }}'">
+            <div class="feature-icon">
+                <i class="fas fa-book-medical"></i>
+            </div>
+            <h4 class="feature-title">{{ get_text('knowledge_base') }}</h4>
+            <p class="feature-description">
+                {{ get_text('knowledge_base_desc') }}
+            </p>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions Section -->
+<div class="quick-actions-section">
+    <div class="container">
+        <h2 class="section-title">{{ get_text('quick_actions') }}</h2>
+        <p class="section-subtitle">
+            {{ get_text('quick_actions_desc') }}
+        </p>
+        
+        <div class="actions-grid">
+            <div class="action-card" onclick="openHealthModal()">
+                <div class="action-icon">
+                    <i class="fas fa-stethoscope"></i>
+                </div>
+                <h5 class="action-title">{{ get_text('health_assessment') }}</h5>
+                <p class="action-description">{{ get_text('health_assessment_desc') }}</p>
+            </div>
+            
+            {% if current_user.is_authenticated %}
+                <a href="{{ url_for('add_animal') }}" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-paw"></i>
+                    </div>
+                    <h5 class="action-title">{{ get_text('add_animal') }}</h5>
+                    <p class="action-description">{{ get_text('add_animal_desc') }}</p>
+                </a>
+                
+                <a href="{{ url_for('dashboard') }}" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <h5 class="action-title">{{ get_text('view_analytics') }}</h5>
+                    <p class="action-description">{{ get_text('view_analytics_desc') }}</p>
+                </a>
+            {% else %}
+                <a href="{{ url_for('register') }}" class="action-card">
+                    <div class="action-icon">
+                        <i class="fas fa-user-plus"></i>
+                    </div>
+                    <h5 class="action-title">{{ get_text('create_account') }}</h5>
+                    <p class="action-description">{{ get_text('create_account_desc') }}</p>
+                </a>
+            {% endif %}
+            
+            <a href="{{ url_for('veterinarians') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-user-md"></i>
+                </div>
+                <h5 class="action-title">{{ get_text('find_veterinarian') }}</h5>
+                <p class="action-description">{{ get_text('find_veterinarian_desc') }}</p>
+            </a>
+            
+            <a href="{{ url_for('subsidies') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <h5 class="action-title">{{ get_text('government_schemes') }}</h5>
+                <p class="action-description">{{ get_text('government_schemes_desc') }}</p>
+            </a>
+            
+            <a href="{{ url_for('knowledge_base') }}" class="action-card">
+                <div class="action-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h5 class="action-title">{{ get_text('learn_educate') }}</h5>
+                <p class="action-description">{{ get_text('learn_educate_desc') }}</p>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stats Section -->
+<div class="stats-section">
+    <div class="container">
+        <h2 class="section-title" style="color: white;">{{ get_text('trusted_by_farmers') }}</h2>
+        <p class="section-subtitle" style="color: rgba(255,255,255,0.9);">
+            {{ get_text('trusted_desc') }}
+        </p>
+        
+        <div class="stats-grid">
+            <div class="stat-item">
+                <span class="stat-number">8</span>
+                <span class="stat-label">{{ get_text('animal_species_supported') }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">100%</span>
+                <span class="stat-label">{{ get_text('ai_model_accuracy') }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">24/7</span>
+                <span class="stat-label">{{ get_text('available_support') }}</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-number">150+</span>
+                <span class="stat-label">{{ get_text('disease_patterns') }}</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Health Assessment Modal -->
+<div class="health-modal" id="healthModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <div>
+                <h2><i class="fas fa-stethoscope me-3"></i>{{ get_text('animal_health_assessment') }}</h2>
+                <p class="mb-0 opacity-90">{{ get_text('comprehensive_ai_analysis') }}</p>
+            </div>
+            <button class="modal-close" onclick="closeHealthModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="modal-body">
+            <form action="/predict" method="POST" id="healthForm">
+                <!-- Animal Basic Information -->
+                <div class="section-divider">
+                    <h5><i class="fas fa-info-circle me-2"></i>{{ get_text('basic_information') }}</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ get_text('animal_type') }} *</label>
+                            <select class="form-select" id="animal_type" name="animal_type" required>
+                                <option value="">{{ get_text('select_animal_type') }}</option>
+                                {% for animal in animals %}
+                                    <option value="{{ animal }}">{{ animal }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ get_text('breed') }} *</label>
+                            <select class="form-select" id="breed" name="breed" required>
+                                <option value="">{{ get_text('first_select_animal') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">{{ get_text('age') }} ({{ get_text('years') }}) *</label>
+                            <input type="number" class="form-control" name="age" step="0.1" min="0" max="50" required value="5">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">{{ get_text('gender') }} *</label>
+                            <select class="form-select" name="gender" required>
+                                <option value="">{{ get_text('select_gender') }}</option>
+                                <option value="Male" selected>{{ get_text('male') }}</option>
+                                <option value="Female">{{ get_text('female') }}</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">{{ get_text('weight') }} ({{ get_text('kg') }}) *</label>
+                            <input type="number" class="form-control" name="weight" step="0.1" min="0" required value="25">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label class="form-label">Duration ({{ get_text('days') }}) *</label>
+                            <input type="number" class="form-control" name="duration" min="0" required value="3">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Primary Symptoms -->
+                <div class="section-divider">
+                    <h5><i class="fas fa-heartbeat me-2"></i>{{ get_text('primary_symptoms') }}</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ get_text('primary_symptom') }} *</label>
+                            <select class="form-select" name="symptom1" required>
+                                <option value="">{{ get_text('select_primary_symptom') }}</option>
+                                {% for symptom in symptoms %}
+                                    <option value="{{ symptom }}" {% if symptom == 'Cough' %}selected{% endif %}>{{ symptom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ get_text('secondary_symptom') }} *</label>
+                            <select class="form-select" name="symptom2" required>
+                                <option value="">{{ get_text('select_secondary_symptom') }}</option>
+                                {% for symptom in symptoms %}
+                                    <option value="{{ symptom }}" {% if symptom == 'Lethargy' %}selected{% endif %}>{{ symptom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ get_text('additional_symptom') }} *</label>
+                            <select class="form-select" name="symptom3" required>
+                                <option value="">{{ get_text('select_additional_symptom') }}</option>
+                                {% for symptom in symptoms %}
+                                    <option value="{{ symptom }}" {% if symptom == 'Loss of appetite' %}selected{% endif %}>{{ symptom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ get_text('other_symptom') }} *</label>
+                            <select class="form-select" name="symptom4" required>
+                                <option value="">{{ get_text('select_other_symptom') }}</option>
+                                {% for symptom in symptoms %}
+                                    <option value="{{ symptom }}" {% if symptom == 'Nasal discharge' %}selected{% endif %}>{{ symptom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Observable Symptoms -->
+                <div class="section-divider">
+                    <h5><i class="fas fa-eye me-2"></i>{{ get_text('observable_symptoms') }}</h5>
+                    <p class="text-muted mb-3">{{ get_text('select_all_observed') }}</p>
+                    <div class="symptom-grid">
+                        <div class="symptom-card" onclick="toggleSymptom(this, 'appetite_loss')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="appetite_loss" value="yes" id="appetite_loss" checked>
+                                <label class="form-check-label" for="appetite_loss">
+                                    <i class="fas fa-utensils me-2"></i>{{ get_text('appetite_loss') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="symptom-card" onclick="toggleSymptom(this, 'vomiting')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="vomiting" value="yes" id="vomiting">
+                                <label class="form-check-label" for="vomiting">
+                                    <i class="fas fa-dizzy me-2"></i>{{ get_text('vomiting') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="symptom-card" onclick="toggleSymptom(this, 'diarrhea')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="diarrhea" value="yes" id="diarrhea">
+                                <label class="form-check-label" for="diarrhea">
+                                    <i class="fas fa-tint me-2"></i>{{ get_text('diarrhea') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="symptom-card selected" onclick="toggleSymptom(this, 'coughing')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="coughing" value="yes" id="coughing" checked>
+                                <label class="form-check-label" for="coughing">
+                                    <i class="fas fa-lungs me-2"></i>{{ get_text('coughing') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="symptom-card selected" onclick="toggleSymptom(this, 'labored_breathing')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="labored_breathing" value="yes" id="labored_breathing" checked>
+                                <label class="form-check-label" for="labored_breathing">
+                                    <i class="fas fa-wind me-2"></i>{{ get_text('labored_breathing') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="symptom-card selected" onclick="toggleSymptom(this, 'nasal_discharge')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="nasal_discharge" value="yes" id="nasal_discharge" checked>
+                                <label class="form-check-label" for="nasal_discharge">
+                                    <i class="fas fa-nose me-2"></i>{{ get_text('nasal_discharge') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="symptom-card" onclick="toggleSymptom(this, 'lameness')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="lameness" value="yes" id="lameness">
+                                <label class="form-check-label" for="lameness">
+                                    <i class="fas fa-walking me-2"></i>{{ get_text('lameness') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="symptom-card" onclick="toggleSymptom(this, 'skin_lesions')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="skin_lesions" value="yes" id="skin_lesions">
+                                <label class="form-check-label" for="skin_lesions">
+                                    <i class="fas fa-band-aid me-2"></i>{{ get_text('skin_lesions') }}
+                                </label>
+                            </div>
+                        </div>
+                        <div class="symptom-card" onclick="toggleSymptom(this, 'eye_discharge')">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="eye_discharge" value="yes" id="eye_discharge">
+                                <label class="form-check-label" for="eye_discharge">
+                                    <i class="fas fa-eye me-2"></i>{{ get_text('eye_discharge') }}
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vital Signs -->
+                <div class="section-divider">
+                    <h5><i class="fas fa-thermometer-half me-2"></i>{{ get_text('vital_signs') }}</h5>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ get_text('body_temperature') }} *</label>
+                            <input type="number" class="form-control" name="body_temperature" step="0.1" min="30" max="45" required value="39.8">
+                            <small class="form-text text-muted">{{ get_text('normal_range_temp') }}</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">{{ get_text('heart_rate') }} *</label>
+                            <input type="number" class="form-control" name="heart_rate" min="20" max="300" required value="110">
+                            <small class="form-text text-muted">{{ get_text('normal_range_hr') }}</small>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-lg eco-btn-primary">
+                        <i class="fas fa-robot me-2"></i>
+                        {{ get_text('analyze_with_ai') }}
+                    </button>
+                    <button type="button" class="btn btn-lg eco-btn-secondary ms-3" onclick="showVoicePrediction()">
+                        <i class="fas fa-microphone me-2"></i>
+                        {{ get_text('voice_analysis_btn') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Enhanced PashuCare JavaScript
+class PashuCareEnhanced {
+    constructor() {
+        this.init();
+        this.setupAnimations();
+        this.setupFormHandling();
+    }
+
+    init() {
+        console.log('🚀 PashuCare Enhanced UI Loaded');
+        this.setupAnimalBreedHandler();
+        this.setupScrollAnimations();
+    }
+
+    setupAnimalBreedHandler() {
+        const animalSelect = document.getElementById('animal_type');
+        const breedSelect = document.getElementById('breed');
+        
+        if (animalSelect && breedSelect) {
+            animalSelect.addEventListener('change', async (e) => {
+                const animalType = e.target.value;
+                
+                if (animalType) {
+                    this.showLoadingState(breedSelect);
+                    
+                    try {
+                        const response = await fetch(`/get_breeds/${animalType}`);
+                        const breeds = await response.json();
+                        
+                        this.populateBreeds(breedSelect, breeds);
+                        this.showNotification(`Loaded ${breeds.length} breeds for ${animalType}`, 'success');
+                    } catch (error) {
+                        console.error('Error loading breeds:', error);
+                        breedSelect.innerHTML = '<option value="">Error loading breeds</option>';
+                        this.showNotification('Error loading breeds', 'error');
+                    }
+                } else {
+                    breedSelect.innerHTML = '<option value="">First select animal type</option>';
+                }
+            });
+            
+            // Auto-select Dog for demo
+            setTimeout(() => {
+                animalSelect.value = 'Dog';
+                animalSelect.dispatchEvent(new Event('change'));
+            }, 1000);
+        }
+    }
+
+    showLoadingState(element) {
+        element.innerHTML = '<option value="">🔄 Loading breeds...</option>';
+        element.classList.add('loading');
+    }
+
+    populateBreeds(breedSelect, breeds) {
+        breedSelect.innerHTML = '<option value="">Select Breed</option>';
+        breeds.forEach(breed => {
+            const option = document.createElement('option');
+            option.value = breed;
+            option.textContent = breed;
+            breedSelect.appendChild(option);
+        });
+        breedSelect.classList.remove('loading');
+    }
+
+    setupScrollAnimations() {
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry, index) => {
+                if (entry.isIntersecting) {
+                    setTimeout(() => {
+                        entry.target.classList.add('animate-in');
+                    }, index * 100);
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animatable elements
+        document.querySelectorAll('.feature-card, .action-card, .stat-item').forEach(el => {
+            observer.observe(el);
+        });
+    }
+
+    setupAnimations() {
+        // Add entrance animations to elements
+        setTimeout(() => {
+            document.querySelectorAll('.feature-card').forEach((card, index) => {
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 200);
+            });
+        }, 500);
+    }
+
+    setupFormHandling() {
+        const form = document.getElementById('healthForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                if (!this.validateForm(form)) {
+                    e.preventDefault();
+                    this.showNotification('Please fill in all required fields', 'warning');
+                } else {
+                    this.showLoadingOverlay();
+                }
+            });
+        }
+    }
+
+    validateForm(form) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                field.classList.add('is-invalid');
+                isValid = false;
+            } else {
+                field.classList.remove('is-invalid');
+                field.classList.add('is-valid');
+            }
+        });
+
+        return isValid;
+    }
+
+    showLoadingOverlay() {
+        const overlay = document.createElement('div');
+        overlay.className = 'loading-overlay';
+        overlay.innerHTML = `
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h3>🤖 AI Analysis in Progress</h3>
+                <p>Analyzing symptoms and vital signs...</p>
+                <div class="loading-progress">
+                    <div class="progress-bar"></div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(overlay);
+    }
+
+    showNotification(message, type = 'info') {
+        // Use the existing notification system from the main CSS
+        if (window.farmCareUI && window.farmCareUI.showNotification) {
+            window.farmCareUI.showNotification(message, type);
+        } else {
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
+    }
+
+    showVoicePrediction() {
+        // Voice prediction modal (same as before)
+        const modal = document.createElement('div');
+        modal.className = 'voice-modal';
+        modal.innerHTML = `
+            <div class="voice-modal-content">
+                <div class="voice-modal-header">
+                    <h3><i class="fas fa-microphone"></i> Voice Health Assessment</h3>
+                    <button class="voice-modal-close">&times;</button>
+                </div>
+                <div class="voice-modal-body">
+                    <div class="voice-animation">
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                        <div class="voice-wave"></div>
+                    </div>
+                    <p>Describe your animal's symptoms clearly...</p>
+                    <button class="btn btn-primary" id="startRecording">
+                        <i class="fas fa-microphone"></i> Start Recording
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+        
+        modal.querySelector('.voice-modal-close').addEventListener('click', () => {
+            modal.remove();
+        });
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+}
+
+// Modal Functions
+function openHealthModal() {
+    const modal = document.getElementById('healthModal');
+    modal.classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeHealthModal() {
+    const modal = document.getElementById('healthModal');
+    modal.classList.remove('show');
+    document.body.style.overflow = 'auto';
+}
+
+// Global functions for backward compatibility
+function toggleSymptom(card, checkboxName) {
+    const checkbox = card.querySelector('input[type="checkbox"]');
+    checkbox.checked = !checkbox.checked;
+    
+    if (checkbox.checked) {
+        card.classList.add('selected');
+    } else {
+        card.classList.remove('selected');
+    }
+}
+
+function showVoicePrediction() {
+    window.farmCareEnhanced.showVoicePrediction();
+}
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    window.farmCareEnhanced = new PashuCareEnhanced();
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeHealthModal();
+        }
+    });
+});
+</script>
+
+{% endblock %}
