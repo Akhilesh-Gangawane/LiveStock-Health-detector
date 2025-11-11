@@ -11,10 +11,10 @@
             <i class="fas fa-edit me-2"></i>{{ get_text('edit') }}
         </a>
         <a href="{{ url_for('predict_for_animal', animal_id=animal.get('id')) }}" class="btn btn-primary">
-            <i class="fas fa-stethoscope me-2"></i>Health Check
+            <i class="fas fa-stethoscope me-2"></i>{{ get_text('health_check') }}
         </a>
         <a href="{{ url_for('animals') }}" class="btn btn-outline-secondary">
-            <i class="fas fa-arrow-left me-2"></i>Back to Animals
+            <i class="fas fa-arrow-left me-2"></i>{{ get_text('back_to_animals') }}
         </a>
     </div>
 </div>
@@ -26,7 +26,7 @@
             <i class="fas fa-heartbeat"></i>
         </div>
         <div class="card-content">
-            <h4>Health Status</h4>
+            <h4>{{ get_text('health_status') }}</h4>
             <span class="status-badge {{ animal.get('health_status') }}">{{ animal.get('health_status', 'unknown').title() }}</span>
         </div>
     </div>
@@ -35,8 +35,8 @@
             <i class="fas fa-weight"></i>
         </div>
         <div class="card-content">
-            <h4>Weight</h4>
-            <p>{{ animal.get('weight') }} kg</p>
+            <h4>{{ get_text('weight') }}</h4>
+            <p>{{ animal.get('weight') }} {{ get_text('kg') }}</p>
         </div>
     </div>
     <div class="overview-card">
@@ -44,7 +44,7 @@
             <i class="fas fa-venus-mars"></i>
         </div>
         <div class="card-content">
-            <h4>Gender</h4>
+            <h4>{{ get_text('gender') }}</h4>
             <p>{{ animal.get('gender') }}</p>
         </div>
     </div>
@@ -53,7 +53,7 @@
             <i class="fas fa-calendar-alt"></i>
         </div>
         <div class="card-content">
-            <h4>Added</h4>
+            <h4>{{ get_text('add') }}</h4>
             <p>{{ animal.get('created_at')|format_date }}</p>
         </div>
     </div>
@@ -64,17 +64,17 @@
     <ul class="nav nav-tabs" id="animalTabs" role="tablist">
         <li class="nav-item" role="presentation">
             <button class="nav-link active" id="predictions-tab" data-bs-toggle="tab" data-bs-target="#predictions" type="button" role="tab">
-                <i class="fas fa-chart-line me-2"></i>Health History
+                <i class="fas fa-chart-line me-2"></i>{{ get_text('prediction_history') }}
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="vaccinations-tab" data-bs-toggle="tab" data-bs-target="#vaccinations" type="button" role="tab">
-                <i class="fas fa-syringe me-2"></i>Vaccinations
+                <i class="fas fa-syringe me-2"></i>{{ get_text('vaccination_records') }}
             </button>
         </li>
         <li class="nav-item" role="presentation">
             <button class="nav-link" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics" type="button" role="tab">
-                <i class="fas fa-chart-bar me-2"></i>Analytics
+                <i class="fas fa-chart-bar me-2"></i>{{ get_text('view_analytics') }}
             </button>
         </li>
     </ul>
@@ -84,9 +84,9 @@
         <div class="tab-pane fade show active" id="predictions" role="tabpanel">
             <div class="predictions-section">
                 <div class="section-header">
-                    <h4><i class="fas fa-stethoscope me-2"></i>Recent Health Checks</h4>
+                    <h4><i class="fas fa-stethoscope me-2"></i>{{ get_text('predictions') }}</h4>
                     <a href="{{ url_for('predict_for_animal', animal_id=animal.get('id')) }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus me-2"></i>New Health Check
+                        <i class="fas fa-plus me-2"></i>{{ get_text('health_check') }}
                     </a>
                 </div>
                 
@@ -132,9 +132,9 @@
         <div class="tab-pane fade" id="vaccinations" role="tabpanel">
             <div class="vaccinations-section">
                 <div class="section-header">
-                    <h4><i class="fas fa-syringe me-2"></i>Vaccination Records</h4>
+                    <h4><i class="fas fa-syringe me-2"></i>{{ get_text('vaccination_records') }}</h4>
                     <a href="{{ url_for('add_vaccination', animal_id=animal.get('id')) }}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-plus me-2"></i>Add Vaccination
+                        <i class="fas fa-plus me-2"></i>{{ get_text('add_vaccination') }}
                     </a>
                 </div>
                 
@@ -177,7 +177,7 @@
         <!-- Analytics Tab -->
         <div class="tab-pane fade" id="analytics" role="tabpanel">
             <div class="analytics-section">
-                <h4><i class="fas fa-chart-bar me-2"></i>Health Analytics</h4>
+                <h4><i class="fas fa-chart-bar me-2"></i>{{ get_text('land_analytics') }}</h4>
                 <div class="row">
                     <div class="col-md-8">
                         <div class="chart-container">
@@ -188,11 +188,11 @@
                     <div class="col-md-4">
                         <div class="stats-summary">
                             <div class="stat-item">
-                                <h6>Total Health Checks</h6>
+                                <h6>{{ get_text('predictions') }}</h6>
                                 <span class="stat-value">{{ predictions|length }}</span>
                             </div>
                             <div class="stat-item">
-                                <h6>Average Confidence</h6>
+                                <h6>{{ get_text('confidence') }}</h6>
                                 <span class="stat-value">
                                     {% if predictions %}
                                         {{ "%.1f"|format((predictions|sum(attribute='confidence')|float / predictions|length) * 100) }}%
@@ -202,7 +202,7 @@
                                 </span>
                             </div>
                             <div class="stat-item">
-                                <h6>Vaccinations</h6>
+                                <h6>{{ get_text('vaccination_records') }}</h6>
                                 <span class="stat-value">{{ vaccinations|length }}</span>
                             </div>
                         </div>

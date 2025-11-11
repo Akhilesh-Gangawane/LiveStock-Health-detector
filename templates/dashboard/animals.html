@@ -2,9 +2,9 @@
 
 {% block content %}
 <div class="page-header">
-    <h1><i class="fas fa-paw me-3"></i>My Animals</h1>
+    <h1><i class="fas fa-paw me-3"></i>{{ get_text('my_animals') }}</h1>
     <a href="{{ url_for('add_animal') }}" class="btn btn-primary">
-        <i class="fas fa-plus me-2"></i>Add New Animal
+        <i class="fas fa-plus me-2"></i>{{ get_text('add_animal_title') }}
     </a>
 </div>
 
@@ -22,11 +22,11 @@
             </div>
             <div class="detail-item">
                 <i class="fas fa-birthday-cake"></i>
-                <span>{{ animal.age }} years old</span>
+                <span>{{ animal.age }} {{ get_text('years') }}</span>
             </div>
             <div class="detail-item">
                 <i class="fas fa-weight"></i>
-                <span>{{ animal.weight }} kg</span>
+                <span>{{ animal.weight }} {{ get_text('kg') }}</span>
             </div>
             <div class="detail-item">
                 <i class="fas fa-venus-mars"></i>
@@ -41,17 +41,17 @@
                 <i class="fas fa-edit"></i> {{ get_text('edit') }}
             </a>
             <a href="{{ url_for('predict_for_animal', animal_id=animal.id) }}" class="btn btn-sm btn-outline-success">
-                <i class="fas fa-stethoscope"></i> Health Check
+                <i class="fas fa-stethoscope"></i> {{ get_text('health_check') }}
             </a>
         </div>
     </div>
     {% else %}
     <div class="empty-state">
         <i class="fas fa-paw"></i>
-        <h3>No Animals Yet</h3>
-        <p>Start by adding your first animal to track their health and manage their records.</p>
+        <h3>{{ get_text('animals') }}</h3>
+        <p>{{ get_text('add_animal_desc') }}</p>
         <a href="{{ url_for('add_animal') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Add Your First Animal
+            <i class="fas fa-plus me-2"></i>{{ get_text('add_animal') }}
         </a>
     </div>
     {% endfor %}

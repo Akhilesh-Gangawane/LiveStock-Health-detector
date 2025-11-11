@@ -1,0 +1,133 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <h1><i class="fas fa-edit me-3"></i>{{ get_text('edit_land') }}</h1>
+    <a href="{{ url_for('lands') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>{{ get_text('back_to_lands') }}
+    </a>
+</div>
+
+<div class="form-container">
+    <form method="POST" action="{{ url_for('edit_land', land_id=land.id) }}">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ get_text('land_name') }} *</label>
+                <input type="text" class="form-control" name="land_name" value="{{ land.land_name }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ get_text('size_acres') }} *</label>
+                <input type="number" step="0.01" class="form-control" name="size_acres" value="{{ land.size_acres }}" required>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ get_text('location') }} *</label>
+                <input type="text" class="form-control" name="location" value="{{ land.location }}" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">{{ get_text('soil_type') }}</label>
+                <select class="form-select" name="soil_type">
+                    <option value="">Select Soil Type</option>
+                    <option value="Clay" {% if land.soil_type == 'Clay' %}selected{% endif %}>Clay</option>
+                    <option value="Sandy" {% if land.soil_type == 'Sandy' %}selected{% endif %}>Sandy</option>
+                    <option value="Loamy" {% if land.soil_type == 'Loamy' %}selected{% endif %}>Loamy</option>
+                    <option value="Silt" {% if land.soil_type == 'Silt' %}selected{% endif %}>Silt</option>
+                    <option value="Peaty" {% if land.soil_type == 'Peaty' %}selected{% endif %}>Peaty</option>
+                    <option value="Chalky" {% if land.soil_type == 'Chalky' %}selected{% endif %}>Chalky</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ get_text('crops_grown') }}</label>
+            <input type="text" class="form-control" name="crops_grown" value="{{ land.crops_grown or '' }}" placeholder="e.g., Wheat, Rice, Corn">
+            <small class="form-text text-muted">Separate multiple crops with commas</small>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ get_text('irrigation') }}</label>
+            <select class="form-select" name="irrigation_type">
+                <option value="">Select Irrigation Type</option>
+                <option value="Drip" {% if land.irrigation_type == 'Drip' %}selected{% endif %}>Drip Irrigation</option>
+                <option value="Sprinkler" {% if land.irrigation_type == 'Sprinkler' %}selected{% endif %}>Sprinkler</option>
+                <option value="Surface" {% if land.irrigation_type == 'Surface' %}selected{% endif %}>Surface Irrigation</option>
+                <option value="Rainfed" {% if land.irrigation_type == 'Rainfed' %}selected{% endif %}>Rainfed</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">{{ get_text('notes') }}</label>
+            <textarea class="form-control" name="notes" rows="4">{{ land.notes or '' }}</textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>{{ get_text('update_land') }}
+            </button>
+            <a href="{{ url_for('lands') }}" class="btn btn-outline-secondary">
+                {{ get_text('cancel') }}
+            </a>
+        </div>
+    </form>
+</div>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.form-container {
+    background: white;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.form-label {
+    font-weight: 600;
+    color: #2d5a27;
+    margin-bottom: 8px;
+}
+
+.form-control, .form-select {
+    border: 2px solid #e8f5e8;
+    border-radius: 10px;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #2d5a27;
+    box-shadow: 0 0 0 3px rgba(45, 90, 39, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e8f5e8;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2d5a27 0%, #4a7c59 100%);
+    border: none;
+    padding: 12px 30px;
+    font-weight: 600;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(45, 90, 39, 0.3);
+}
+</style>
+{% endblock %}

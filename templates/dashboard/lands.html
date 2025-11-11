@@ -2,9 +2,9 @@
 
 {% block content %}
 <div class="page-header">
-    <h1><i class="fas fa-map-marked-alt me-3"></i>My Farm Lands</h1>
+    <h1><i class="fas fa-map-marked-alt me-3"></i>{{ get_text('my_farm_lands') }}</h1>
     <a href="{{ url_for('add_land') }}" class="btn btn-primary">
-        <i class="fas fa-plus me-2"></i>Add New Land
+        <i class="fas fa-plus me-2"></i>{{ get_text('add_land_title') }}
     </a>
 </div>
 
@@ -13,7 +13,7 @@
     <div class="land-card">
         <div class="land-header">
             <h4>{{ land.land_name }}</h4>
-            <span class="size-badge">{{ land.size_acres }} acres</span>
+            <span class="size-badge">{{ land.size_acres }} {{ get_text('size_acres') }}</span>
         </div>
         <div class="land-details">
             <div class="detail-item">
@@ -22,33 +22,33 @@
             </div>
             <div class="detail-item">
                 <i class="fas fa-seedling"></i>
-                <span>{{ land.soil_type or 'Not specified' }}</span>
+                <span>{{ land.soil_type or get_text('not_specified') }}</span>
             </div>
             <div class="detail-item">
                 <i class="fas fa-leaf"></i>
-                <span>{{ land.crops_grown or 'No crops specified' }}</span>
+                <span>{{ land.crops_grown or get_text('not_specified') }}</span>
             </div>
             <div class="detail-item">
                 <i class="fas fa-calendar"></i>
-                <span>Added {{ land.created_at|format_date }}</span>
+                <span>{{ land.created_at|format_date }}</span>
             </div>
         </div>
         <div class="land-actions">
-            <button class="btn btn-sm btn-outline-primary">
+            <a href="{{ url_for('edit_land', land_id=land.id) }}" class="btn btn-sm btn-outline-primary">
                 <i class="fas fa-edit"></i> {{ get_text('edit') }}
-            </button>
-            <button class="btn btn-sm btn-outline-info">
-                <i class="fas fa-chart-line"></i> Analytics
-            </button>
+            </a>
+            <a href="{{ url_for('land_analytics', land_id=land.id) }}" class="btn btn-sm btn-outline-info">
+                <i class="fas fa-chart-line"></i> {{ get_text('view_analytics') }}
+            </a>
         </div>
     </div>
     {% else %}
     <div class="empty-state">
         <i class="fas fa-map-marked-alt"></i>
-        <h3>No Farm Lands Yet</h3>
-        <p>Start by adding your farm lands to track and manage your agricultural properties.</p>
+        <h3>{{ get_text('lands') }}</h3>
+        <p>{{ get_text('add_land_title') }}</p>
         <a href="{{ url_for('add_land') }}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Add Your First Land
+            <i class="fas fa-plus me-2"></i>{{ get_text('add_land') }}
         </a>
     </div>
     {% endfor %}

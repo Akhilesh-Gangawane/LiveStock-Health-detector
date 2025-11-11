@@ -255,6 +255,24 @@ class DB:
         except Exception as e:
             print(f"Error: {e}")
             return None
+    
+    @staticmethod
+    def get_land(land_id, user_id):
+        try:
+            response = supabase.table('farm_lands').select('*').eq('id', land_id).eq('user_id', user_id).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    @staticmethod
+    def update_land(land_id, user_id, data):
+        try:
+            response = supabase.table('farm_lands').update(data).eq('id', land_id).eq('user_id', user_id).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
 
 # Load user callback for Flask-Login
 @login_manager.user_loader
@@ -439,6 +457,23 @@ LANGUAGES = {
         'crop_type': 'Crop Type',
         'irrigation': 'Irrigation',
         'soil_type': 'Soil Type',
+        'edit_land': 'Edit Farm Land',
+        'update_land': 'Update Land',
+        'back_to_lands': 'Back to Lands',
+        'land_name': 'Land Name',
+        'size_acres': 'Size (Acres)',
+        'crops_grown': 'Crops Grown',
+        'land_analytics': 'Land Analytics',
+        'productivity': 'Productivity',
+        'crop_yield': 'Crop Yield',
+        'soil_health': 'Soil Health',
+        'water_usage': 'Water Usage',
+        'fertilizer_usage': 'Fertilizer Usage',
+        'recent_activities': 'Recent Activities',
+        'land_overview': 'Land Overview',
+        'performance_metrics': 'Performance Metrics',
+        'yield_trends': 'Yield Trends',
+        'resource_utilization': 'Resource Utilization',
         
         # Veterinarians
         'specialization': 'Specialization',
@@ -675,6 +710,23 @@ LANGUAGES = {
         'crop_type': 'पिकाचा प्रकार',
         'irrigation': 'सिंचन',
         'soil_type': 'मातीचा प्रकार',
+        'edit_land': 'शेतजमीन संपादित करा',
+        'update_land': 'जमीन अद्यतनित करा',
+        'back_to_lands': 'जमिनींकडे परत',
+        'land_name': 'जमिनीचे नाव',
+        'size_acres': 'आकार (एकर)',
+        'crops_grown': 'पिके',
+        'land_analytics': 'जमीन विश्लेषणे',
+        'productivity': 'उत्पादकता',
+        'crop_yield': 'पीक उत्पन्न',
+        'soil_health': 'मातीचे आरोग्य',
+        'water_usage': 'पाण्याचा वापर',
+        'fertilizer_usage': 'खताचा वापर',
+        'recent_activities': 'अलीकडील क्रियाकलाप',
+        'land_overview': 'जमिनीचे विहंगावलोकन',
+        'performance_metrics': 'कामगिरी मेट्रिक्स',
+        'yield_trends': 'उत्पन्न ट्रेंड',
+        'resource_utilization': 'संसाधन वापर',
         
         # Veterinarians
         'specialization': 'विशेषज्ञता',
@@ -1623,6 +1675,47 @@ def add_land():
         return redirect(url_for('lands'))
     
     return render_template('dashboard/add_land.html')
+
+@app.route('/land/<int:land_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_land(land_id):
+    land = DB.get_land(land_id, current_user.id)
+    
+    if not land:
+        flash('Land not found', 'error')
+        return redirect(url_for('lands'))
+    
+    if request.method == 'POST':
+        data = {
+            'land_name': request.form.get('land_name'),
+            'size_acres': float(request.form.get('size_acres')),
+            'location': request.form.get('location'),
+            'soil_type': request.form.get('soil_type'),
+            'crops_grown': request.form.get('crops_grown'),
+            'irrigation_type': request.form.get('irrigation_type'),
+            'notes': request.form.get('notes')
+        }
+        
+        result = DB.update_land(land_id, current_user.id, data)
+        
+        if result:
+            flash('Farm land updated successfully!', 'success')
+            return redirect(url_for('lands'))
+        else:
+            flash('Failed to update land', 'error')
+    
+    return render_template('dashboard/edit_land.html', land=land)
+
+@app.route('/land/<int:land_id>/analytics')
+@login_required
+def land_analytics(land_id):
+    land = DB.get_land(land_id, current_user.id)
+    
+    if not land:
+        flash('Land not found', 'error')
+        return redirect(url_for('lands'))
+    
+    return render_template('dashboard/land_analytics.html', land=land)
 
 @app.route('/profile')
 @login_required
