@@ -16,6 +16,10 @@ from datetime import datetime
 import warnings
 from supabase import create_client, Client
 from dotenv import load_dotenv
+import pyttsx3
+import speech_recognition as sr
+import threading
+import time
 
 warnings.filterwarnings('ignore')
 
@@ -331,8 +335,8 @@ LANGUAGES = {
         'advanced_technology': 'Advanced technology meets veterinary expertise to provide comprehensive livestock health management',
         'ai_disease_detection': 'AI Disease Detection',
         'ai_disease_desc': 'Advanced machine learning algorithms analyze symptoms to detect potential illnesses with high accuracy and provide instant results.',
-        'voice_analysis': 'Voice Analysis',
-        'voice_analysis_desc': 'Describe symptoms verbally and let our AI analyze the audio for comprehensive health assessment and recommendations.',
+        'voice_analysis': 'Voice Quiz',
+        'voice_analysis_desc': 'Interactive 15-question voice-based health assessment. Answer using voice, buttons, or text for instant AI-powered disease prediction.',
         'knowledge_base_desc': 'Access comprehensive information about common livestock diseases, treatments, and prevention methods from experts.',
         'quick_actions': 'Quick Actions',
         'quick_actions_desc': 'Access essential farm management tools and services with just one click',
@@ -395,7 +399,7 @@ LANGUAGES = {
         'heart_rate': 'Heart Rate (BPM)',
         'normal_range_hr': 'Normal range varies by species and age',
         'analyze_with_ai': 'Analyze with AI',
-        'voice_analysis_btn': 'Voice Analysis',
+        'voice_analysis_btn': 'Voice Quiz',
         
         # Navigation items
         'services': 'Services',
@@ -584,8 +588,8 @@ LANGUAGES = {
         'advanced_technology': 'प्रगत तंत्रज्ञान पशुवैद्यकीय तज्ञांसह मिळून व्यापक पशुधन आरोग्य व्यवस्थापन प्रदान करते',
         'ai_disease_detection': 'AI रोग शोध',
         'ai_disease_desc': 'प्रगत मशीन लर्निंग अल्गोरिदम लक्षणांचे विश्लेषण करून संभाव्य आजारांचा उच्च अचूकतेने शोध लावतात आणि तत्काळ परिणाम देतात.',
-        'voice_analysis': 'आवाज विश्लेषण',
-        'voice_analysis_desc': 'लक्षणांचे मौखिक वर्णन करा आणि आमच्या AI ला व्यापक आरोग्य मूल्यांकन आणि शिफारसींसाठी ऑडिओचे विश्लेषण करू द्या.',
+        'voice_analysis': 'आवाज प्रश्नमंजुषा',
+        'voice_analysis_desc': 'परस्पर १५ प्रश्न आवाज-आधारित आरोग्य मूल्यांकन. तत्काळ AI-चालित रोग अंदाज साठी आवाज, बटणे किंवा मजकूर वापरून उत्तर द्या.',
         'knowledge_base_desc': 'तज्ञांकडून सामान्य पशुधन रोग, उपचार आणि प्रतिबंधक पद्धतींबद्दल व्यापक माहिती मिळवा.',
         'quick_actions': 'द्रुत क्रिया',
         'quick_actions_desc': 'फक्त एका क्लिकसह आवश्यक शेत व्यवस्थापन साधने आणि सेवांमध्ये प्रवेश करा',
@@ -648,7 +652,7 @@ LANGUAGES = {
         'heart_rate': 'हृदयाचे ठोके',
         'normal_range_hr': 'सामान्य श्रेणी प्रजाती आणि वयानुसार बदलते',
         'analyze_with_ai': 'AI सह विश्लेषण करा',
-        'voice_analysis_btn': 'आवाज विश्लेषण',
+        'voice_analysis_btn': 'आवाज प्रश्नमंजुषा',
         
         # Navigation items
         'services': 'सेवा',
@@ -1184,6 +1188,109 @@ class AnimalSpecificDiseasePredictor:
 predictor = None
 breed_data = {}
 
+# Voice quiz variables
+voice_quiz_sessions = {}
+tts_lock = threading.Lock()
+recognizer = sr.Recognizer()
+
+# Voice quiz questions (English and Marathi)
+VOICE_QUIZ_QUESTIONS = [
+    {
+        "id": 1, "key": "animal_type", 
+        "question": "Which animal do you want to check?",
+        "question_mr": "तुम्हाला कोणत्या प्राण्याची तपासणी करायची आहे?",
+        "type": "choice",
+        "options": ["Cow", "Buffalo", "Goat", "Sheep", "Pig", "Dog", "Cat", "Horse"],
+        "options_mr": ["गाय", "म्हैस", "शेळी", "मेंढी", "डुकर", "कुत्रा", "मांजर", "घोडा"]
+    },
+    {
+        "id": 2, "key": "age", 
+        "question": "What is the age of the animal in years?",
+        "question_mr": "प्राण्याचे वय किती वर्षे आहे?",
+        "type": "number"
+    },
+    {
+        "id": 3, "key": "gender", 
+        "question": "Is it male or female?",
+        "question_mr": "तो नर आहे की मादी?",
+        "type": "choice",
+        "options": ["Male", "Female"],
+        "options_mr": ["नर", "मादी"]
+    },
+    {
+        "id": 4, "key": "appetite_loss", 
+        "question": "Is the animal eating normally?",
+        "question_mr": "प्राणी सामान्यपणे खात आहे का?",
+        "type": "yesno"
+    },
+    {
+        "id": 5, "key": "vomiting", 
+        "question": "Has the animal been vomiting?",
+        "question_mr": "प्राण्याला उलट्या होत आहेत का?",
+        "type": "yesno"
+    },
+    {
+        "id": 6, "key": "diarrhea", 
+        "question": "Does the animal have diarrhea?",
+        "question_mr": "प्राण्याला अतिसार आहे का?",
+        "type": "yesno"
+    },
+    {
+        "id": 7, "key": "coughing", 
+        "question": "Is the animal coughing?",
+        "question_mr": "प्राण्याला खोकला येतो का?",
+        "type": "yesno"
+    },
+    {
+        "id": 8, "key": "labored_breathing", 
+        "question": "Does the animal have difficulty breathing?",
+        "question_mr": "प्राण्याला श्वास घेण्यात अडचण येते का?",
+        "type": "yesno"
+    },
+    {
+        "id": 9, "key": "lameness", 
+        "question": "Is the animal limping or lame?",
+        "question_mr": "प्राणी लंगडत आहे का?",
+        "type": "yesno"
+    },
+    {
+        "id": 10, "key": "skin_lesions", 
+        "question": "Are there any skin lesions or wounds?",
+        "question_mr": "त्वचेवर जखम किंवा घाव आहेत का?",
+        "type": "yesno"
+    },
+    {
+        "id": 11, "key": "nasal_discharge", 
+        "question": "Is there any nasal discharge?",
+        "question_mr": "नाकातून स्राव येतो का?",
+        "type": "yesno"
+    },
+    {
+        "id": 12, "key": "eye_discharge", 
+        "question": "Is there any eye discharge?",
+        "question_mr": "डोळ्यातून स्राव येतो का?",
+        "type": "yesno"
+    },
+    {
+        "id": 13, "key": "fever", 
+        "question": "Does the animal have fever or feel hot?",
+        "question_mr": "प्राण्याला ताप आहे का किंवा गरम वाटतो का?",
+        "type": "yesno"
+    },
+    {
+        "id": 14, "key": "duration", 
+        "question": "For how many days has the animal been showing these symptoms?",
+        "question_mr": "प्राण्याला ही लक्षणे किती दिवसांपासून आहेत?",
+        "type": "number"
+    },
+    {
+        "id": 15, "key": "body_temperature", 
+        "question": "What is the body temperature in Celsius? Normal is 38 to 39 degrees.",
+        "question_mr": "शरीराचे तापमान सेल्सिअसमध्ये किती आहे? सामान्य ३८ ते ३९ अंश आहे.",
+        "type": "number"
+    }
+]
+
 def load_and_train_model():
     """Load data and train the model"""
     global predictor, breed_data
@@ -1201,7 +1308,7 @@ def load_and_train_model():
             breeds = df[df['Animal_Type'] == animal]['Breed'].unique().tolist()
             breed_data[animal] = sorted(breeds)
         
-        print("📊 Loaded breeds from CSV:")
+        print("Loaded breeds from CSV:")
         for animal, breeds in breed_data.items():
             print(f"   {animal}: {len(breeds)} breeds")
         
@@ -1220,14 +1327,14 @@ def load_and_train_model():
         df['Body_Temperature'] = df['Body_Temperature'].str.replace('°', '').str.replace('C', '').str.strip().astype(float)
         df['Heart_Rate'] = df['Heart_Rate'].astype(float)
 
-        print("📊 Analyzing animal-specific disease patterns...")
+        print("Analyzing animal-specific disease patterns...")
         animal_counts = df['Animal_Type'].value_counts()
         print(f"Animals in dataset: {len(animal_counts)}")
         for animal, count in animal_counts.items():
             unique_diseases = df[df['Animal_Type'] == animal]['Disease_Prediction'].nunique()
             print(f"  {animal}: {count} samples, {unique_diseases} diseases")
 
-        print("\n🎯 Creating animal-specific medical features...")
+        print("\nCreating animal-specific medical features...")
 
         # Create comprehensive medical features
         df = create_species_specific_features(df)
@@ -1240,7 +1347,7 @@ def load_and_train_model():
         return True
         
     except Exception as e:
-        print(f"❌ Error loading/training model: {e}")
+        print(f"ERROR: Error loading/training model: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -1316,6 +1423,181 @@ def initialize_database():
     """Database is initialized via supabase_setup.sql - this function is kept for compatibility"""
     print("Using Supabase - run supabase_setup.sql in Supabase Dashboard to initialize database")
     return True
+
+# Voice Quiz Helper Functions
+def speak_text_voice_quiz(text, language='en'):
+    """Speak text using pyttsx3 with thread safety"""
+    def _speak():
+        with tts_lock:
+            engine = None
+            try:
+                engine = pyttsx3.init()
+                if language == 'mr':
+                    voices = engine.getProperty('voices')
+                    for voice in voices:
+                        if 'hindi' in voice.name.lower() or 'indian' in voice.name.lower():
+                            try:
+                                engine.setProperty('voice', voice.id)
+                                break
+                            except:
+                                pass
+                    engine.setProperty('rate', 130)
+                else:
+                    engine.setProperty('rate', 150)
+                engine.setProperty('volume', 0.9)
+                engine.say(text)
+                engine.runAndWait()
+            except Exception as e:
+                print(f"[TTS ERROR] {e}")
+            finally:
+                if engine:
+                    try:
+                        engine.stop()
+                        del engine
+                    except:
+                        pass
+    thread = threading.Thread(target=_speak)
+    thread.daemon = True
+    thread.start()
+
+def listen_for_voice_answer():
+    """Listen to microphone and return transcribed text"""
+    try:
+        with sr.Microphone() as source:
+            recognizer.adjust_for_ambient_noise(source, duration=0.3)
+            audio = recognizer.listen(source, timeout=8, phrase_time_limit=8)
+            text = recognizer.recognize_google(audio)
+            return {"success": True, "text": text}
+    except sr.WaitTimeoutError:
+        return {"success": False, "error": "No speech detected. Please try again."}
+    except sr.UnknownValueError:
+        return {"success": False, "error": "Could not understand audio. Please speak clearly."}
+    except Exception as e:
+        return {"success": False, "error": f"Error: {str(e)}"}
+
+def predict_from_voice_answers(answers):
+    """Convert voice quiz answers to prediction using ML model"""
+    try:
+        animal_type = answers.get('animal_type', 'Cow')
+        age = float(answers.get('age', 3))
+        gender = answers.get('gender', 'Male')
+        
+        # Get breed for animal type
+        breed = 'Mixed'
+        if animal_type in breed_data and len(breed_data[animal_type]) > 0:
+            breed = breed_data[animal_type][0]
+        
+        # Convert Yes/No answers
+        appetite_loss = 'no' if answers.get('appetite_loss', 'Yes') == 'Yes' else 'yes'
+        vomiting = 'yes' if answers.get('vomiting', 'No') == 'Yes' else 'no'
+        diarrhea = 'yes' if answers.get('diarrhea', 'No') == 'Yes' else 'no'
+        coughing = 'yes' if answers.get('coughing', 'No') == 'Yes' else 'no'
+        labored_breathing = 'yes' if answers.get('labored_breathing', 'No') == 'Yes' else 'no'
+        lameness = 'yes' if answers.get('lameness', 'No') == 'Yes' else 'no'
+        skin_lesions = 'yes' if answers.get('skin_lesions', 'No') == 'Yes' else 'no'
+        nasal_discharge = 'yes' if answers.get('nasal_discharge', 'No') == 'Yes' else 'no'
+        eye_discharge = 'yes' if answers.get('eye_discharge', 'No') == 'Yes' else 'no'
+        fever = answers.get('fever', 'No') == 'Yes'
+        
+        # Get temperature
+        try:
+            body_temp = float(answers.get('body_temperature', 38.5))
+        except:
+            body_temp = 38.5
+        
+        # Estimate weight based on animal type and age
+        weight_estimates = {
+            'Cow': 400 + (age * 50), 'Buffalo': 450 + (age * 50),
+            'Goat': 30 + (age * 5), 'Sheep': 40 + (age * 5),
+            'Pig': 80 + (age * 20), 'Dog': 20 + (age * 2),
+            'Cat': 4 + (age * 0.5), 'Horse': 400 + (age * 50)
+        }
+        weight = weight_estimates.get(animal_type, 300)
+        
+        # Estimate heart rate
+        heart_rate_estimates = {
+            'Cow': 60, 'Buffalo': 60, 'Goat': 80, 'Sheep': 80,
+            'Pig': 70, 'Dog': 90, 'Cat': 140, 'Horse': 40
+        }
+        heart_rate = heart_rate_estimates.get(animal_type, 70)
+        
+        # Build symptom list
+        symptoms = []
+        if fever: symptoms.append('Fever')
+        if coughing == 'yes': symptoms.append('Coughing')
+        if diarrhea == 'yes': symptoms.append('Diarrhea')
+        if vomiting == 'yes': symptoms.append('Vomiting')
+        if appetite_loss == 'yes': symptoms.append('Appetite Loss')
+        if labored_breathing == 'yes': symptoms.append('Labored Breathing')
+        if lameness == 'yes': symptoms.append('Lameness')
+        if skin_lesions == 'yes': symptoms.append('Skin Lesions')
+        
+        # Pad symptoms to 4
+        while len(symptoms) < 4:
+            symptoms.append('None')
+        
+        # Use ML predictor
+        result = predictor.predict_disease(
+            animal_type=animal_type,
+            breed=breed,
+            age=age,
+            gender=gender,
+            weight=weight,
+            symptom1=symptoms[0],
+            symptom2=symptoms[1],
+            symptom3=symptoms[2],
+            symptom4=symptoms[3],
+            duration=int(answers.get('duration', 3)),
+            appetite_loss=appetite_loss,
+            vomiting=vomiting,
+            diarrhea=diarrhea,
+            coughing=coughing,
+            labored_breathing=labored_breathing,
+            lameness=lameness,
+            skin_lesions=skin_lesions,
+            nasal_discharge=nasal_discharge,
+            eye_discharge=eye_discharge,
+            body_temperature=body_temp,
+            heart_rate=heart_rate
+        )
+        
+        # Add recommendations and symptoms_detected if not present
+        if result and 'recommendations' not in result:
+            result['recommendations'] = [
+                'Consult a veterinarian for proper diagnosis',
+                'Monitor the animal closely',
+                'Keep detailed records of symptoms'
+            ]
+        
+        if result and 'symptoms_detected' not in result:
+            result['symptoms_detected'] = {
+                'coughing': coughing == 'yes',
+                'labored_breathing': labored_breathing == 'yes',
+                'nasal_discharge': nasal_discharge == 'yes',
+                'diarrhea': diarrhea == 'yes',
+                'vomiting': vomiting == 'yes',
+                'appetite_loss': appetite_loss == 'yes',
+                'fever': fever,
+                'lameness': lameness == 'yes',
+                'skin_lesions': skin_lesions == 'yes',
+                'eye_discharge': eye_discharge == 'yes'
+            }
+        
+        return result
+        
+    except Exception as e:
+        print(f"[VOICE PREDICTION ERROR] {e}")
+        import traceback
+        traceback.print_exc()
+        return {
+            'predicted_disease': 'Unable to predict',
+            'confidence': 0.0,
+            'top_3_predictions': [],
+            'syndrome_analysis': {},
+            'vital_signs_status': {},
+            'recommendations': ['Please consult a veterinarian for proper diagnosis'],
+            'symptoms_detected': {}
+        }
 
 def initialize_database_old():
     """Old SQLite initialization - kept for reference only"""
@@ -1479,6 +1761,11 @@ def initialize_database_old():
 # Routes
 @app.route('/')
 def index():
+    return render_template('index.html')
+
+@app.route('/health_assessment')
+def health_assessment():
+    """Health assessment page"""
     animals = list(breed_data.keys()) if breed_data else ['Dog', 'Cat', 'Cow', 'Horse']
     symptoms = [
         'Fever', 'Cough', 'Lethargy', 'Loss of appetite', 'Vomiting', 'Diarrhea',
@@ -1486,7 +1773,7 @@ def index():
         'Skin lesions', 'Swelling', 'Excessive drooling', 'Seizures'
     ]
     
-    return render_template('index.html', animals=animals, symptoms=symptoms)
+    return render_template('health_assessment.html', animals=animals, symptoms=symptoms)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -1791,7 +2078,7 @@ def predict():
         body_temperature = float(request.form['body_temperature'])
         heart_rate = float(request.form['heart_rate'])
         
-        print(f"🎯 Making prediction for {animal_type}...")
+        print(f"Making prediction for {animal_type}...")
         
         # Make prediction using the trained model
         raw_result = predictor.predict_disease(
@@ -1834,7 +2121,7 @@ def predict():
     
     except Exception as e:
         error_msg = f"Prediction error: {str(e)}"
-        print(f"❌ {error_msg}")
+        print(f"ERROR: {error_msg}")
         return render_template('result.html', error=error_msg, form_data=request.form)
 
 @app.route('/get_breeds/<animal_type>')
@@ -2142,6 +2429,146 @@ def set_language(language):
     if language in LANGUAGES:
         session['language'] = language
     return redirect(request.referrer or url_for('index'))
+
+# Voice Quiz Routes
+@app.route('/voice_quiz')
+def voice_quiz():
+    """Voice quiz page"""
+    return render_template('voice_quiz.html', questions=VOICE_QUIZ_QUESTIONS)
+
+@app.route('/voice_quiz_start', methods=['POST'])
+def voice_quiz_start():
+    """Start a new voice quiz session"""
+    data = request.json or {}
+    language = data.get('language', 'en')
+    
+    session_id = str(int(time.time() * 1000))
+    voice_quiz_sessions[session_id] = {
+        "current_question": 0,
+        "answers": {},
+        "started_at": time.time(),
+        "language": language
+    }
+    
+    first_question = VOICE_QUIZ_QUESTIONS[0].copy()
+    if language == 'mr':
+        first_question['question'] = first_question.get('question_mr', first_question['question'])
+        if 'options_mr' in first_question:
+            first_question['options'] = first_question['options_mr']
+    
+    speak_text_voice_quiz(first_question["question"], language)
+    
+    return jsonify({
+        "success": True,
+        "session_id": session_id,
+        "question": first_question,
+        "total_questions": len(VOICE_QUIZ_QUESTIONS)
+    })
+
+@app.route('/voice_quiz_listen', methods=['POST'])
+def voice_quiz_listen():
+    """Listen for voice answer"""
+    result = listen_for_voice_answer()
+    return jsonify(result)
+
+@app.route('/voice_quiz_submit', methods=['POST'])
+def voice_quiz_submit():
+    """Submit all answers and get prediction"""
+    data = request.json
+    session_id = data.get('session_id')
+    answers = data.get('answers', {})
+    
+    if session_id not in voice_quiz_sessions:
+        return jsonify({"success": False, "error": "Invalid session"}), 400
+    
+    session_data = voice_quiz_sessions[session_id]
+    session_data["answers"] = answers
+    language = session_data.get("language", "en")
+    
+    try:
+        # Use ML predictor to get disease prediction
+        result = predict_from_voice_answers(answers)
+        
+        # Ensure result has required fields
+        if not result or 'predicted_disease' not in result:
+            result = {
+                'predicted_disease': 'Unable to predict',
+                'confidence': 0.5,
+                'top_3_predictions': [],
+                'syndrome_analysis': {},
+                'vital_signs_analysis': {},
+                'symptoms_detected': {},
+                'recommendations': ['Please consult a veterinarian for proper diagnosis']
+            }
+        
+        # Store result in session
+        session_data['result'] = result
+        
+        if language == 'mr':
+            prediction_text = f"लक्षणांवर आधारित, अंदाज आहे: {result.get('predicted_disease', 'अज्ञात')}. विश्वास पातळी {int(result.get('confidence', 0) * 100)} टक्के आहे."
+        else:
+            prediction_text = f"Based on the symptoms, the prediction is: {result.get('predicted_disease', 'Unknown')}. Confidence level is {int(result.get('confidence', 0) * 100)} percent."
+        
+        speak_text_voice_quiz(prediction_text, language)
+        
+    except Exception as e:
+        print(f"[VOICE QUIZ ERROR] {e}")
+        import traceback
+        traceback.print_exc()
+        result = {
+            'predicted_disease': 'Error in prediction',
+            'confidence': 0.0,
+            'top_3_predictions': [],
+            'syndrome_analysis': {},
+            'vital_signs_analysis': {},
+            'symptoms_detected': {},
+            'recommendations': ['Please try again or consult a veterinarian']
+        }
+        session_data['result'] = result
+    
+    return jsonify({
+        "success": True,
+        "session_id": session_id
+    })
+
+@app.route('/voice_quiz_speak', methods=['POST'])
+def voice_quiz_speak():
+    """Speak text"""
+    data = request.json
+    text = data.get('text', '')
+    language = data.get('language', 'en')
+    
+    if text:
+        speak_text_voice_quiz(text, language)
+        return jsonify({"success": True})
+    
+    return jsonify({"success": False, "error": "No text provided"}), 400
+
+@app.route('/voice_quiz_result')
+def voice_quiz_result():
+    """Display voice quiz result"""
+    session_id = request.args.get('session_id')
+    
+    if not session_id or session_id not in voice_quiz_sessions:
+        flash('Session expired or invalid', 'error')
+        return redirect(url_for('voice_quiz'))
+    
+    session_data = voice_quiz_sessions[session_id]
+    result = session_data.get('result', {})
+    answers = session_data.get('answers', {})
+    
+    # Clean up session after displaying result
+    if session_id in voice_quiz_sessions:
+        del voice_quiz_sessions[session_id]
+    
+    # Create form_data dict for result template compatibility
+    form_data = {
+        'animal_type': answers.get('animal_type', 'Unknown'),
+        'age': answers.get('age', 'N/A'),
+        'gender': answers.get('gender', 'N/A')
+    }
+    
+    return render_template('result.html', result=result, form_data=form_data, from_voice_quiz=True)
 
 
 

@@ -537,8 +537,13 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/" onclick="openHealthModal(); return false;">
+                            <a class="nav-link" href="{{ url_for('health_assessment') }}">
                                 <i class="fas fa-stethoscope me-1"></i>{{ get_text('health_check') }}
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ url_for('voice_quiz') }}">
+                                <i class="fas fa-microphone-alt me-1"></i>{{ get_text('voice_analysis') }}
                             </a>
                         </li>
                         <li class="nav-item dropdown">
@@ -585,7 +590,7 @@
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="#" onclick="openHealthModal(); return false;">
+                            <a class="nav-link" href="{{ url_for('health_assessment') }}">
                                 <i class="fas fa-stethoscope me-1"></i>{{ get_text('health_check') }}
                             </a>
                         </li>
@@ -789,25 +794,7 @@
             }
         }
         
-        // Global modal functions
-        function openHealthModal() {
-            const modal = document.getElementById('healthModal');
-            if (modal) {
-                modal.classList.add('show');
-                document.body.style.overflow = 'hidden';
-            } else {
-                // If modal doesn't exist on this page, redirect to home
-                window.location.href = '/';
-            }
-        }
-        
-        function closeHealthModal() {
-            const modal = document.getElementById('healthModal');
-            if (modal) {
-                modal.classList.remove('show');
-                document.body.style.overflow = 'auto';
-            }
-        }
+        // Removed modal functions - now using dedicated health assessment page
         
         // Global notification system
         window.showNotification = function(message, type = 'info') {
