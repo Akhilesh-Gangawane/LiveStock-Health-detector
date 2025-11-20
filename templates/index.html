@@ -137,10 +137,32 @@
         font-size: 1.125rem;
         font-weight: 600;
         border-radius: var(--radius-full);
-        transition: var(--transition);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         min-width: 200px;
         position: relative;
         overflow: hidden;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .hero-btn::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+    }
+    
+    .hero-btn:hover::after {
+        width: 300px;
+        height: 300px;
     }
     
     .hero-btn-primary {
@@ -148,30 +170,47 @@
         color: var(--text-primary);
         border: 2px solid var(--accent);
         font-weight: 700;
-        box-shadow: var(--shadow-soft);
+        box-shadow: 0 8px 25px rgba(251, 192, 45, 0.5), 
+                    0 4px 12px rgba(251, 192, 45, 0.4),
+                    0 2px 6px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
     
     .hero-btn-outline {
-        background: transparent;
+        background: rgba(255, 255, 255, 0.1);
         color: var(--white);
         border: 2px solid var(--secondary);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 6px 20px rgba(167, 255, 235, 0.3), 
+                    0 3px 10px rgba(167, 255, 235, 0.2),
+                    0 1px 4px rgba(0, 0, 0, 0.1);
     }
     
     .hero-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: var(--shadow-strong);
+        transform: translateY(-4px) scale(1.03);
     }
     
     .hero-btn-primary:hover {
         background: var(--accent-light);
         color: var(--text-primary);
         border-color: var(--accent-light);
+        box-shadow: 0 12px 40px rgba(251, 192, 45, 0.6), 
+                    0 6px 18px rgba(251, 192, 45, 0.5),
+                    0 3px 10px rgba(0, 0, 0, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4);
     }
     
     .hero-btn-outline:hover {
         background: var(--secondary);
         color: var(--text-primary);
         border-color: var(--secondary);
+        box-shadow: 0 10px 35px rgba(167, 255, 235, 0.5), 
+                    0 5px 15px rgba(167, 255, 235, 0.4),
+                    0 2px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .hero-btn:active {
+        transform: translateY(-1px) scale(0.98);
     }
     
     /* ===== ENHANCED FEATURE CARDS ===== */
@@ -207,9 +246,12 @@
         background: var(--surface);
         padding: var(--space-2xl);
         border-radius: var(--radius-xl);
-        box-shadow: var(--shadow-soft);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1), 
+                    0 4px 12px rgba(0, 0, 0, 0.08),
+                    0 2px 6px rgba(0, 0, 0, 0.05),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5);
         text-align: center;
-        transition: var(--transition);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         border: 2px solid var(--border);
         position: relative;
         overflow: hidden;
@@ -224,13 +266,39 @@
         width: 100%;
         height: 4px;
         background: var(--gradient-accent);
+        box-shadow: 0 2px 8px rgba(251, 192, 45, 0.5);
+    }
+    
+    .feature-card::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(251, 192, 45, 0.1) 0%, transparent 70%);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s ease, height 0.6s ease;
+    }
+    
+    .feature-card:hover::after {
+        width: 500px;
+        height: 500px;
     }
     
     .feature-card:hover {
-        transform: translateY(-12px);
-        box-shadow: var(--shadow-strong);
+        transform: translateY(-15px) scale(1.03);
+        box-shadow: 0 20px 60px rgba(251, 192, 45, 0.25), 
+                    0 10px 30px rgba(251, 192, 45, 0.2),
+                    0 5px 15px rgba(0, 0, 0, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.6);
         background: var(--secondary);
         border-color: var(--accent);
+    }
+    
+    .feature-card:active {
+        transform: translateY(-10px) scale(0.98);
     }
     
     .feature-icon {
@@ -244,14 +312,38 @@
         margin: 0 auto var(--space-lg);
         font-size: 2rem;
         color: var(--white);
-        transition: var(--transition);
-        box-shadow: var(--shadow-soft);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 8px 25px rgba(22, 160, 133, 0.4), 
+                    0 4px 12px rgba(22, 160, 133, 0.3),
+                    0 2px 6px rgba(0, 0, 0, 0.1),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.2);
         border: 3px solid var(--secondary);
+        position: relative;
+        z-index: 1;
+    }
+    
+    .feature-icon::before {
+        content: '';
+        position: absolute;
+        inset: -5px;
+        border-radius: var(--radius-full);
+        background: conic-gradient(from 0deg, var(--primary), var(--accent), var(--primary));
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        z-index: -1;
+        animation: rotate 3s linear infinite;
+    }
+    
+    .feature-card:hover .feature-icon::before {
+        opacity: 0.6;
     }
     
     .feature-card:hover .feature-icon {
-        transform: scale(1.1) rotate(5deg);
-        box-shadow: var(--shadow-medium);
+        transform: scale(1.2) rotate(10deg);
+        box-shadow: 0 15px 45px rgba(251, 192, 45, 0.6), 
+                    0 8px 20px rgba(251, 192, 45, 0.5),
+                    0 3px 10px rgba(0, 0, 0, 0.15),
+                    inset 0 2px 0 rgba(255, 255, 255, 0.4);
         background: var(--gradient-accent);
         border-color: var(--accent);
         color: var(--text-primary);
@@ -289,21 +381,50 @@
         padding: var(--space-xl);
         border-radius: var(--radius-lg);
         text-align: center;
-        transition: var(--transition);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         cursor: pointer;
         border: 2px solid var(--border);
         text-decoration: none;
         color: inherit;
-        box-shadow: var(--shadow-soft);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08), 
+                    0 3px 10px rgba(0, 0, 0, 0.06),
+                    0 1px 4px rgba(0, 0, 0, 0.04),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.5);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .action-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 4px;
+        background: var(--gradient-primary);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
+    }
+    
+    .action-card:hover::before {
+        transform: scaleX(1);
     }
     
     .action-card:hover {
-        transform: translateY(-8px);
-        box-shadow: var(--shadow-medium);
+        transform: translateY(-10px) scale(1.02);
+        box-shadow: 0 15px 45px rgba(22, 160, 133, 0.2), 
+                    0 8px 20px rgba(22, 160, 133, 0.15),
+                    0 3px 10px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.6);
         border-color: var(--accent);
         text-decoration: none;
         color: inherit;
         background: var(--secondary);
+    }
+    
+    .action-card:active {
+        transform: translateY(-6px) scale(0.98);
+        box-shadow: 0 8px 25px rgba(22, 160, 133, 0.15);
     }
     
     .action-icon {
@@ -317,16 +438,46 @@
         margin: 0 auto var(--space-md);
         font-size: 1.5rem;
         color: var(--text-primary);
-        transition: var(--transition);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         border: 2px solid var(--accent-light);
-        box-shadow: var(--shadow-soft);
+        box-shadow: 0 6px 20px rgba(251, 192, 45, 0.4), 
+                    0 3px 10px rgba(251, 192, 45, 0.3),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        position: relative;
+    }
+    
+    .action-icon::before {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: var(--radius-full);
+        padding: 2px;
+        background: linear-gradient(135deg, var(--accent), var(--accent-light));
+        -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+        -webkit-mask-composite: xor;
+        mask-composite: exclude;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .action-card:hover .action-icon::before {
+        opacity: 1;
+        animation: rotate 2s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
     }
     
     .action-card:hover .action-icon {
-        transform: scale(1.1);
+        transform: scale(1.15) rotate(5deg);
         background: var(--primary);
         color: var(--white);
         border-color: var(--primary-light);
+        box-shadow: 0 10px 35px rgba(22, 160, 133, 0.5), 
+                    0 5px 15px rgba(22, 160, 133, 0.4),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4);
     }
     
     .action-title {
@@ -403,7 +554,7 @@
         50% { transform: translateY(-10px); }
     }
     
-    /* ===== ECO-TECH BUTTON STYLES ===== */
+    /* ===== ECO-TECH BUTTON STYLES WITH ENHANCED SHADOWS ===== */
     .eco-btn-primary {
         background: var(--gradient-accent) !important;
         border: 2px solid var(--accent) !important;
@@ -411,15 +562,43 @@
         font-weight: 700 !important;
         padding: 0.75rem 2rem !important;
         border-radius: 50px !important;
-        box-shadow: var(--shadow-soft) !important;
-        transition: all 0.3s ease !important;
+        box-shadow: 0 6px 20px rgba(251, 192, 45, 0.4), 
+                    0 3px 10px rgba(251, 192, 45, 0.3),
+                    0 1px 4px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .eco-btn-primary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .eco-btn-primary:hover::before {
+        left: 100%;
     }
     
     .eco-btn-primary:hover {
         background: var(--accent-light) !important;
         border-color: var(--accent-light) !important;
-        transform: translateY(-3px) !important;
-        box-shadow: var(--shadow-strong) !important;
+        transform: translateY(-4px) scale(1.02) !important;
+        box-shadow: 0 12px 35px rgba(251, 192, 45, 0.5), 
+                    0 6px 15px rgba(251, 192, 45, 0.4),
+                    0 2px 8px rgba(0, 0, 0, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.4) !important;
+    }
+    
+    .eco-btn-primary:active {
+        transform: translateY(-1px) scale(0.98) !important;
+        box-shadow: 0 4px 12px rgba(251, 192, 45, 0.4) !important;
     }
     
     .eco-btn-secondary {
@@ -429,15 +608,43 @@
         font-weight: 600 !important;
         padding: 0.75rem 2rem !important;
         border-radius: 50px !important;
-        box-shadow: var(--shadow-soft) !important;
-        transition: all 0.3s ease !important;
+        box-shadow: 0 6px 20px rgba(22, 160, 133, 0.4), 
+                    0 3px 10px rgba(22, 160, 133, 0.3),
+                    0 1px 4px rgba(0, 0, 0, 0.1),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .eco-btn-secondary::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s ease;
+    }
+    
+    .eco-btn-secondary:hover::before {
+        left: 100%;
     }
     
     .eco-btn-secondary:hover {
         background: var(--primary-light) !important;
         border-color: var(--primary-light) !important;
-        transform: translateY(-3px) !important;
-        box-shadow: var(--shadow-strong) !important;
+        transform: translateY(-4px) scale(1.02) !important;
+        box-shadow: 0 12px 35px rgba(22, 160, 133, 0.5), 
+                    0 6px 15px rgba(22, 160, 133, 0.4),
+                    0 2px 8px rgba(0, 0, 0, 0.15),
+                    inset 0 1px 0 rgba(255, 255, 255, 0.3) !important;
+    }
+    
+    .eco-btn-secondary:active {
+        transform: translateY(-1px) scale(0.98) !important;
+        box-shadow: 0 4px 12px rgba(22, 160, 133, 0.4) !important;
     }
     
     /* ===== ECO-TECH FORM STYLES ===== */
@@ -778,9 +985,9 @@
                 {{ get_text('ai_prediction') }}
             </p>
             <div class="hero-buttons">
-                <button class="btn hero-btn hero-btn-primary" onclick="openHealthModal()">
+                <a href="{{ url_for('health_assessment') }}" class="btn hero-btn hero-btn-primary">
                     <i class="fas fa-stethoscope me-2"></i>{{ get_text('health_check') }}
-                </button>
+                </a>
                 {% if current_user.is_authenticated %}
                     <a href="{{ url_for('dashboard') }}" class="btn hero-btn hero-btn-outline">
                         <i class="fas fa-tachometer-alt me-2"></i>{{ get_text('go_to_dashboard') }}
@@ -803,7 +1010,7 @@
     </p>
     
     <div class="features-grid">
-        <div class="feature-card" onclick="openHealthModal()">
+        <a href="{{ url_for('health_assessment') }}" class="feature-card" style="text-decoration: none; color: inherit;">
             <div class="feature-icon">
                 <i class="fas fa-robot"></i>
             </div>
@@ -811,9 +1018,9 @@
             <p class="feature-description">
                 {{ get_text('ai_disease_desc') }}
             </p>
-        </div>
+        </a>
         
-        <div class="feature-card" onclick="showVoicePrediction()">
+        <div class="feature-card" onclick="window.location.href='{{ url_for('voice_quiz') }}'">
             <div class="feature-icon">
                 <i class="fas fa-microphone"></i>
             </div>
@@ -844,13 +1051,13 @@
         </p>
         
         <div class="actions-grid">
-            <div class="action-card" onclick="openHealthModal()">
+            <a href="{{ url_for('health_assessment') }}" class="action-card">
                 <div class="action-icon">
                     <i class="fas fa-stethoscope"></i>
                 </div>
                 <h5 class="action-title">{{ get_text('health_assessment') }}</h5>
                 <p class="action-description">{{ get_text('health_assessment_desc') }}</p>
-            </div>
+            </a>
             
             {% if current_user.is_authenticated %}
                 <a href="{{ url_for('add_animal') }}" class="action-card">
@@ -934,454 +1141,31 @@
     </div>
 </div>
 
-<!-- Health Assessment Modal -->
-<div class="health-modal" id="healthModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <div>
-                <h2><i class="fas fa-stethoscope me-3"></i>{{ get_text('animal_health_assessment') }}</h2>
-                <p class="mb-0 opacity-90">{{ get_text('comprehensive_ai_analysis') }}</p>
-            </div>
-            <button class="modal-close" onclick="closeHealthModal()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-        
-        <div class="modal-body">
-            <form action="/predict" method="POST" id="healthForm">
-                <!-- Animal Basic Information -->
-                <div class="section-divider">
-                    <h5><i class="fas fa-info-circle me-2"></i>{{ get_text('basic_information') }}</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ get_text('animal_type') }} *</label>
-                            <select class="form-select" id="animal_type" name="animal_type" required>
-                                <option value="">{{ get_text('select_animal_type') }}</option>
-                                {% for animal in animals %}
-                                    <option value="{{ animal }}">{{ animal }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ get_text('breed') }} *</label>
-                            <select class="form-select" id="breed" name="breed" required>
-                                <option value="">{{ get_text('first_select_animal') }}</option>
-                            </select>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">{{ get_text('age') }} ({{ get_text('years') }}) *</label>
-                            <input type="number" class="form-control" name="age" step="0.1" min="0" max="50" required value="5">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">{{ get_text('gender') }} *</label>
-                            <select class="form-select" name="gender" required>
-                                <option value="">{{ get_text('select_gender') }}</option>
-                                <option value="Male" selected>{{ get_text('male') }}</option>
-                                <option value="Female">{{ get_text('female') }}</option>
-                            </select>
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">{{ get_text('weight') }} ({{ get_text('kg') }}) *</label>
-                            <input type="number" class="form-control" name="weight" step="0.1" min="0" required value="25">
-                        </div>
-                        <div class="col-md-3 mb-3">
-                            <label class="form-label">Duration ({{ get_text('days') }}) *</label>
-                            <input type="number" class="form-control" name="duration" min="0" required value="3">
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Primary Symptoms -->
-                <div class="section-divider">
-                    <h5><i class="fas fa-heartbeat me-2"></i>{{ get_text('primary_symptoms') }}</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ get_text('primary_symptom') }} *</label>
-                            <select class="form-select" name="symptom1" required>
-                                <option value="">{{ get_text('select_primary_symptom') }}</option>
-                                {% for symptom in symptoms %}
-                                    <option value="{{ symptom }}" {% if symptom == 'Cough' %}selected{% endif %}>{{ symptom }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ get_text('secondary_symptom') }} *</label>
-                            <select class="form-select" name="symptom2" required>
-                                <option value="">{{ get_text('select_secondary_symptom') }}</option>
-                                {% for symptom in symptoms %}
-                                    <option value="{{ symptom }}" {% if symptom == 'Lethargy' %}selected{% endif %}>{{ symptom }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ get_text('additional_symptom') }} *</label>
-                            <select class="form-select" name="symptom3" required>
-                                <option value="">{{ get_text('select_additional_symptom') }}</option>
-                                {% for symptom in symptoms %}
-                                    <option value="{{ symptom }}" {% if symptom == 'Loss of appetite' %}selected{% endif %}>{{ symptom }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ get_text('other_symptom') }} *</label>
-                            <select class="form-select" name="symptom4" required>
-                                <option value="">{{ get_text('select_other_symptom') }}</option>
-                                {% for symptom in symptoms %}
-                                    <option value="{{ symptom }}" {% if symptom == 'Nasal discharge' %}selected{% endif %}>{{ symptom }}</option>
-                                {% endfor %}
-                            </select>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Observable Symptoms -->
-                <div class="section-divider">
-                    <h5><i class="fas fa-eye me-2"></i>{{ get_text('observable_symptoms') }}</h5>
-                    <p class="text-muted mb-3">{{ get_text('select_all_observed') }}</p>
-                    <div class="symptom-grid">
-                        <div class="symptom-card" onclick="toggleSymptom(this, 'appetite_loss')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="appetite_loss" value="yes" id="appetite_loss" checked>
-                                <label class="form-check-label" for="appetite_loss">
-                                    <i class="fas fa-utensils me-2"></i>{{ get_text('appetite_loss') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="symptom-card" onclick="toggleSymptom(this, 'vomiting')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="vomiting" value="yes" id="vomiting">
-                                <label class="form-check-label" for="vomiting">
-                                    <i class="fas fa-dizzy me-2"></i>{{ get_text('vomiting') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="symptom-card" onclick="toggleSymptom(this, 'diarrhea')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="diarrhea" value="yes" id="diarrhea">
-                                <label class="form-check-label" for="diarrhea">
-                                    <i class="fas fa-tint me-2"></i>{{ get_text('diarrhea') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="symptom-card selected" onclick="toggleSymptom(this, 'coughing')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="coughing" value="yes" id="coughing" checked>
-                                <label class="form-check-label" for="coughing">
-                                    <i class="fas fa-lungs me-2"></i>{{ get_text('coughing') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="symptom-card selected" onclick="toggleSymptom(this, 'labored_breathing')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="labored_breathing" value="yes" id="labored_breathing" checked>
-                                <label class="form-check-label" for="labored_breathing">
-                                    <i class="fas fa-wind me-2"></i>{{ get_text('labored_breathing') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="symptom-card selected" onclick="toggleSymptom(this, 'nasal_discharge')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="nasal_discharge" value="yes" id="nasal_discharge" checked>
-                                <label class="form-check-label" for="nasal_discharge">
-                                    <i class="fas fa-nose me-2"></i>{{ get_text('nasal_discharge') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="symptom-card" onclick="toggleSymptom(this, 'lameness')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="lameness" value="yes" id="lameness">
-                                <label class="form-check-label" for="lameness">
-                                    <i class="fas fa-walking me-2"></i>{{ get_text('lameness') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="symptom-card" onclick="toggleSymptom(this, 'skin_lesions')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="skin_lesions" value="yes" id="skin_lesions">
-                                <label class="form-check-label" for="skin_lesions">
-                                    <i class="fas fa-band-aid me-2"></i>{{ get_text('skin_lesions') }}
-                                </label>
-                            </div>
-                        </div>
-                        <div class="symptom-card" onclick="toggleSymptom(this, 'eye_discharge')">
-                            <div class="form-check">
-                                <input class="form-check-input" type="checkbox" name="eye_discharge" value="yes" id="eye_discharge">
-                                <label class="form-check-label" for="eye_discharge">
-                                    <i class="fas fa-eye me-2"></i>{{ get_text('eye_discharge') }}
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Vital Signs -->
-                <div class="section-divider">
-                    <h5><i class="fas fa-thermometer-half me-2"></i>{{ get_text('vital_signs') }}</h5>
-                    <div class="row">
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ get_text('body_temperature') }} *</label>
-                            <input type="number" class="form-control" name="body_temperature" step="0.1" min="30" max="45" required value="39.8">
-                            <small class="form-text text-muted">{{ get_text('normal_range_temp') }}</small>
-                        </div>
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label">{{ get_text('heart_rate') }} *</label>
-                            <input type="number" class="form-control" name="heart_rate" min="20" max="300" required value="110">
-                            <small class="form-text text-muted">{{ get_text('normal_range_hr') }}</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="text-center mt-4">
-                    <button type="submit" class="btn btn-lg eco-btn-primary">
-                        <i class="fas fa-robot me-2"></i>
-                        {{ get_text('analyze_with_ai') }}
-                    </button>
-                    <button type="button" class="btn btn-lg eco-btn-secondary ms-3" onclick="showVoicePrediction()">
-                        <i class="fas fa-microphone me-2"></i>
-                        {{ get_text('voice_analysis_btn') }}
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <script>
-// Enhanced PashuCare JavaScript
-class PashuCareEnhanced {
-    constructor() {
-        this.init();
-        this.setupAnimations();
-        this.setupFormHandling();
-    }
-
-    init() {
-        console.log('🚀 PashuCare Enhanced UI Loaded');
-        this.setupAnimalBreedHandler();
-        this.setupScrollAnimations();
-    }
-
-    setupAnimalBreedHandler() {
-        const animalSelect = document.getElementById('animal_type');
-        const breedSelect = document.getElementById('breed');
-        
-        if (animalSelect && breedSelect) {
-            animalSelect.addEventListener('change', async (e) => {
-                const animalType = e.target.value;
-                
-                if (animalType) {
-                    this.showLoadingState(breedSelect);
-                    
-                    try {
-                        const response = await fetch(`/get_breeds/${animalType}`);
-                        const breeds = await response.json();
-                        
-                        this.populateBreeds(breedSelect, breeds);
-                        this.showNotification(`Loaded ${breeds.length} breeds for ${animalType}`, 'success');
-                    } catch (error) {
-                        console.error('Error loading breeds:', error);
-                        breedSelect.innerHTML = '<option value="">Error loading breeds</option>';
-                        this.showNotification('Error loading breeds', 'error');
-                    }
-                } else {
-                    breedSelect.innerHTML = '<option value="">First select animal type</option>';
-                }
-            });
-            
-            // Auto-select Dog for demo
-            setTimeout(() => {
-                animalSelect.value = 'Dog';
-                animalSelect.dispatchEvent(new Event('change'));
-            }, 1000);
-        }
-    }
-
-    showLoadingState(element) {
-        element.innerHTML = '<option value="">🔄 Loading breeds...</option>';
-        element.classList.add('loading');
-    }
-
-    populateBreeds(breedSelect, breeds) {
-        breedSelect.innerHTML = '<option value="">Select Breed</option>';
-        breeds.forEach(breed => {
-            const option = document.createElement('option');
-            option.value = breed;
-            option.textContent = breed;
-            breedSelect.appendChild(option);
-        });
-        breedSelect.classList.remove('loading');
-    }
-
-    setupScrollAnimations() {
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach((entry, index) => {
-                if (entry.isIntersecting) {
-                    setTimeout(() => {
-                        entry.target.classList.add('animate-in');
-                    }, index * 100);
-                }
-            });
-        }, observerOptions);
-
-        // Observe all animatable elements
-        document.querySelectorAll('.feature-card, .action-card, .stat-item').forEach(el => {
-            observer.observe(el);
-        });
-    }
-
-    setupAnimations() {
-        // Add entrance animations to elements
-        setTimeout(() => {
-            document.querySelectorAll('.feature-card').forEach((card, index) => {
-                setTimeout(() => {
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, index * 200);
-            });
-        }, 500);
-    }
-
-    setupFormHandling() {
-        const form = document.getElementById('healthForm');
-        if (form) {
-            form.addEventListener('submit', (e) => {
-                if (!this.validateForm(form)) {
-                    e.preventDefault();
-                    this.showNotification('Please fill in all required fields', 'warning');
-                } else {
-                    this.showLoadingOverlay();
-                }
-            });
-        }
-    }
-
-    validateForm(form) {
-        const requiredFields = form.querySelectorAll('[required]');
-        let isValid = true;
-
-        requiredFields.forEach(field => {
-            if (!field.value.trim()) {
-                field.classList.add('is-invalid');
-                isValid = false;
-            } else {
-                field.classList.remove('is-invalid');
-                field.classList.add('is-valid');
-            }
-        });
-
-        return isValid;
-    }
-
-    showLoadingOverlay() {
-        const overlay = document.createElement('div');
-        overlay.className = 'loading-overlay';
-        overlay.innerHTML = `
-            <div class="loading-content">
-                <div class="loading-spinner"></div>
-                <h3>🤖 AI Analysis in Progress</h3>
-                <p>Analyzing symptoms and vital signs...</p>
-                <div class="loading-progress">
-                    <div class="progress-bar"></div>
-                </div>
-            </div>
-        `;
-        document.body.appendChild(overlay);
-    }
-
-    showNotification(message, type = 'info') {
-        // Use the existing notification system from the main CSS
-        if (window.farmCareUI && window.farmCareUI.showNotification) {
-            window.farmCareUI.showNotification(message, type);
-        } else {
-            console.log(`${type.toUpperCase()}: ${message}`);
-        }
-    }
-
-    showVoicePrediction() {
-        // Voice prediction modal (same as before)
-        const modal = document.createElement('div');
-        modal.className = 'voice-modal';
-        modal.innerHTML = `
-            <div class="voice-modal-content">
-                <div class="voice-modal-header">
-                    <h3><i class="fas fa-microphone"></i> Voice Health Assessment</h3>
-                    <button class="voice-modal-close">&times;</button>
-                </div>
-                <div class="voice-modal-body">
-                    <div class="voice-animation">
-                        <div class="voice-wave"></div>
-                        <div class="voice-wave"></div>
-                        <div class="voice-wave"></div>
-                        <div class="voice-wave"></div>
-                    </div>
-                    <p>Describe your animal's symptoms clearly...</p>
-                    <button class="btn btn-primary" id="startRecording">
-                        <i class="fas fa-microphone"></i> Start Recording
-                    </button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        modal.querySelector('.voice-modal-close').addEventListener('click', () => {
-            modal.remove();
-        });
-        
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-                modal.remove();
-            }
-        });
-    }
-}
-
-// Modal Functions
-function openHealthModal() {
-    const modal = document.getElementById('healthModal');
-    modal.classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeHealthModal() {
-    const modal = document.getElementById('healthModal');
-    modal.classList.remove('show');
-    document.body.style.overflow = 'auto';
-}
-
-// Global functions for backward compatibility
-function toggleSymptom(card, checkboxName) {
-    const checkbox = card.querySelector('input[type="checkbox"]');
-    checkbox.checked = !checkbox.checked;
-    
-    if (checkbox.checked) {
-        card.classList.add('selected');
-    } else {
-        card.classList.remove('selected');
-    }
-}
-
-function showVoicePrediction() {
-    window.farmCareEnhanced.showVoicePrediction();
-}
-
-// Initialize when DOM is loaded
+// Simplified JavaScript for homepage
 document.addEventListener('DOMContentLoaded', function() {
-    window.farmCareEnhanced = new PashuCareEnhanced();
+    console.log('🚀 PashuCare Homepage Loaded');
     
-    // Close modal on Escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            closeHealthModal();
-        }
+    // Scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add('animate-in');
+                }, index * 100);
+            }
+        });
+    }, observerOptions);
+
+    // Observe all animatable elements
+    document.querySelectorAll('.feature-card, .action-card, .stat-item').forEach(el => {
+        observer.observe(el);
     });
 });
 </script>

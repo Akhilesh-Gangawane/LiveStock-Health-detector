@@ -1,0 +1,467 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    /* ===== ECO-TECH HEALTH ASSESSMENT PAGE ===== */
+    .assessment-header {
+        background: var(--gradient-primary);
+        color: var(--white);
+        padding: var(--space-3xl) 0;
+        border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+        margin-bottom: var(--space-2xl);
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .assessment-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-10px); }
+    }
+    
+    .assessment-header h1 {
+        font-size: 3rem;
+        font-weight: 800;
+        margin-bottom: var(--space-lg);
+        color: var(--white);
+        position: relative;
+        z-index: 2;
+    }
+    
+    .assessment-header p {
+        font-size: 1.25rem;
+        opacity: 0.95;
+        color: var(--white);
+        position: relative;
+        z-index: 2;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .assessment-container {
+        max-width: 900px;
+        margin: 0 auto;
+    }
+    
+    .assessment-form {
+        background: var(--surface);
+        border-radius: var(--radius-2xl);
+        box-shadow: var(--shadow-strong);
+        padding: var(--space-2xl);
+        border: 2px solid var(--border);
+    }
+    
+    .form-section {
+        margin-bottom: var(--space-2xl);
+        padding-bottom: var(--space-xl);
+        border-bottom: 2px solid var(--border);
+    }
+    
+    .form-section:last-of-type {
+        border-bottom: none;
+        margin-bottom: var(--space-xl);
+    }
+    
+    .form-section h5 {
+        color: var(--primary);
+        margin-bottom: var(--space-lg);
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        font-size: 1.5rem;
+    }
+    
+    .symptom-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: var(--space-md);
+        margin-top: var(--space-lg);
+    }
+    
+    .symptom-card {
+        background: var(--surface);
+        border: 2px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: var(--space-md);
+        transition: var(--transition);
+        cursor: pointer;
+        position: relative;
+    }
+    
+    .symptom-card:hover {
+        border-color: var(--accent);
+        background: var(--secondary);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .symptom-card.selected {
+        background: var(--accent);
+        border-color: var(--accent-dark);
+        color: var(--text-primary);
+        box-shadow: var(--shadow-medium);
+    }
+    
+    .symptom-card .form-check {
+        margin: 0;
+    }
+    
+    .symptom-card .form-check-label {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        cursor: pointer;
+        font-weight: 500;
+        width: 100%;
+    }
+    
+    .symptom-card.selected .form-check-label {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+    
+    /* Dark Mode Support */
+    .dark-theme .assessment-header {
+        background: var(--gradient-surface);
+        border-bottom: 3px solid var(--primary);
+    }
+    
+    .dark-theme .assessment-header h1 {
+        color: var(--primary);
+        text-shadow: 0 0 20px rgba(0, 230, 118, 0.4);
+    }
+    
+    .dark-theme .assessment-form {
+        background: var(--surface);
+        border-color: var(--border);
+    }
+    
+    .dark-theme .symptom-card {
+        background: var(--surface);
+        border-color: var(--border);
+    }
+    
+    .dark-theme .symptom-card:hover {
+        border-color: var(--primary);
+        background: rgba(0, 230, 118, 0.1);
+        box-shadow: var(--shadow-glow);
+    }
+    
+    .dark-theme .symptom-card.selected {
+        background: var(--primary);
+        border-color: #00C853;
+        color: var(--background);
+        box-shadow: var(--shadow-glow);
+    }
+    
+    .dark-theme .symptom-card.selected .form-check-label {
+        color: var(--background);
+    }
+    
+    /* Responsive */
+    @media (max-width: 768px) {
+        .assessment-header h1 {
+            font-size: 2rem;
+        }
+        
+        .assessment-form {
+            padding: var(--space-lg);
+        }
+        
+        .symptom-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+
+<!-- Assessment Header -->
+<div class="assessment-header">
+    <div class="container">
+        <h1><i class="fas fa-stethoscope me-3"></i>{{ get_text('animal_health_assessment') }}</h1>
+        <p>{{ get_text('comprehensive_ai_analysis') }}</p>
+    </div>
+</div>
+
+<!-- Assessment Form -->
+<div class="container assessment-container">
+    <form action="/predict" method="POST" id="healthForm" class="assessment-form">
+        
+        <!-- Basic Information -->
+        <div class="form-section">
+            <h5><i class="fas fa-info-circle me-2"></i>{{ get_text('basic_information') }}</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ get_text('animal_type') }} *</label>
+                    <select class="form-select" id="animal_type" name="animal_type" required>
+                        <option value="">{{ get_text('select_animal_type') }}</option>
+                        {% for animal in animals %}
+                            <option value="{{ animal }}">{{ animal }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ get_text('breed') }} *</label>
+                    <select class="form-select" id="breed" name="breed" required>
+                        <option value="">{{ get_text('first_select_animal') }}</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">{{ get_text('age') }} ({{ get_text('years') }}) *</label>
+                    <input type="number" class="form-control" name="age" step="0.1" min="0" max="50" required value="5">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">{{ get_text('gender') }} *</label>
+                    <select class="form-select" name="gender" required>
+                        <option value="">{{ get_text('select_gender') }}</option>
+                        <option value="Male" selected>{{ get_text('male') }}</option>
+                        <option value="Female">{{ get_text('female') }}</option>
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">{{ get_text('weight') }} ({{ get_text('kg') }}) *</label>
+                    <input type="number" class="form-control" name="weight" step="0.1" min="0" required value="25">
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Duration ({{ get_text('days') }}) *</label>
+                    <input type="number" class="form-control" name="duration" min="0" required value="3">
+                </div>
+            </div>
+        </div>
+
+        <!-- Primary Symptoms -->
+        <div class="form-section">
+            <h5><i class="fas fa-heartbeat me-2"></i>{{ get_text('primary_symptoms') }}</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ get_text('primary_symptom') }} *</label>
+                    <select class="form-select" name="symptom1" required>
+                        <option value="">{{ get_text('select_primary_symptom') }}</option>
+                        {% for symptom in symptoms %}
+                            <option value="{{ symptom }}" {% if symptom == 'Cough' %}selected{% endif %}>{{ symptom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ get_text('secondary_symptom') }} *</label>
+                    <select class="form-select" name="symptom2" required>
+                        <option value="">{{ get_text('select_secondary_symptom') }}</option>
+                        {% for symptom in symptoms %}
+                            <option value="{{ symptom }}" {% if symptom == 'Lethargy' %}selected{% endif %}>{{ symptom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ get_text('additional_symptom') }} *</label>
+                    <select class="form-select" name="symptom3" required>
+                        <option value="">{{ get_text('select_additional_symptom') }}</option>
+                        {% for symptom in symptoms %}
+                            <option value="{{ symptom }}" {% if symptom == 'Loss of appetite' %}selected{% endif %}>{{ symptom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ get_text('other_symptom') }} *</label>
+                    <select class="form-select" name="symptom4" required>
+                        <option value="">{{ get_text('select_other_symptom') }}</option>
+                        {% for symptom in symptoms %}
+                            <option value="{{ symptom }}" {% if symptom == 'Nasal discharge' %}selected{% endif %}>{{ symptom }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Observable Symptoms -->
+        <div class="form-section">
+            <h5><i class="fas fa-eye me-2"></i>{{ get_text('observable_symptoms') }}</h5>
+            <p class="text-muted mb-3">{{ get_text('select_all_observed') }}</p>
+            <div class="symptom-grid">
+                <div class="symptom-card" onclick="toggleSymptom(this, 'appetite_loss')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="appetite_loss" value="yes" id="appetite_loss" checked>
+                        <label class="form-check-label" for="appetite_loss">
+                            <i class="fas fa-utensils me-2"></i>{{ get_text('appetite_loss') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="symptom-card" onclick="toggleSymptom(this, 'vomiting')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="vomiting" value="yes" id="vomiting">
+                        <label class="form-check-label" for="vomiting">
+                            <i class="fas fa-dizzy me-2"></i>{{ get_text('vomiting') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="symptom-card" onclick="toggleSymptom(this, 'diarrhea')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="diarrhea" value="yes" id="diarrhea">
+                        <label class="form-check-label" for="diarrhea">
+                            <i class="fas fa-tint me-2"></i>{{ get_text('diarrhea') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="symptom-card selected" onclick="toggleSymptom(this, 'coughing')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="coughing" value="yes" id="coughing" checked>
+                        <label class="form-check-label" for="coughing">
+                            <i class="fas fa-lungs me-2"></i>{{ get_text('coughing') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="symptom-card selected" onclick="toggleSymptom(this, 'labored_breathing')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="labored_breathing" value="yes" id="labored_breathing" checked>
+                        <label class="form-check-label" for="labored_breathing">
+                            <i class="fas fa-wind me-2"></i>{{ get_text('labored_breathing') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="symptom-card selected" onclick="toggleSymptom(this, 'nasal_discharge')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="nasal_discharge" value="yes" id="nasal_discharge" checked>
+                        <label class="form-check-label" for="nasal_discharge">
+                            <i class="fas fa-nose me-2"></i>{{ get_text('nasal_discharge') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="symptom-card" onclick="toggleSymptom(this, 'lameness')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="lameness" value="yes" id="lameness">
+                        <label class="form-check-label" for="lameness">
+                            <i class="fas fa-walking me-2"></i>{{ get_text('lameness') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="symptom-card" onclick="toggleSymptom(this, 'skin_lesions')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="skin_lesions" value="yes" id="skin_lesions">
+                        <label class="form-check-label" for="skin_lesions">
+                            <i class="fas fa-band-aid me-2"></i>{{ get_text('skin_lesions') }}
+                        </label>
+                    </div>
+                </div>
+                <div class="symptom-card" onclick="toggleSymptom(this, 'eye_discharge')">
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="eye_discharge" value="yes" id="eye_discharge">
+                        <label class="form-check-label" for="eye_discharge">
+                            <i class="fas fa-eye me-2"></i>{{ get_text('eye_discharge') }}
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Vital Signs -->
+        <div class="form-section">
+            <h5><i class="fas fa-thermometer-half me-2"></i>{{ get_text('vital_signs') }}</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ get_text('body_temperature') }} *</label>
+                    <input type="number" class="form-control" name="body_temperature" step="0.1" min="30" max="45" required value="39.8">
+                    <small class="form-text text-muted">{{ get_text('normal_range_temp') }}</small>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label class="form-label">{{ get_text('heart_rate') }} *</label>
+                    <input type="number" class="form-control" name="heart_rate" min="20" max="300" required value="110">
+                    <small class="form-text text-muted">{{ get_text('normal_range_hr') }}</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-4">
+            <button type="submit" class="btn btn-lg eco-btn-primary">
+                <i class="fas fa-robot me-2"></i>
+                {{ get_text('analyze_with_ai') }}
+            </button>
+            <a href="{{ url_for('voice_quiz') }}" class="btn btn-lg eco-btn-secondary ms-3">
+                <i class="fas fa-microphone me-2"></i>
+                {{ get_text('voice_analysis_btn') }}
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+// Toggle symptom card selection
+function toggleSymptom(card, checkboxName) {
+    const checkbox = card.querySelector('input[type="checkbox"]');
+    checkbox.checked = !checkbox.checked;
+    
+    if (checkbox.checked) {
+        card.classList.add('selected');
+    } else {
+        card.classList.remove('selected');
+    }
+}
+
+// Initialize the page
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup animal breed handler (reuse from scripts.js)
+    if (window.farmCareUI) {
+        window.farmCareUI.setupAnimalBreedHandler();
+    } else {
+        // Fallback if farmCareUI not loaded
+        const animalSelect = document.getElementById('animal_type');
+        const breedSelect = document.getElementById('breed');
+        
+        if (animalSelect && breedSelect) {
+            animalSelect.addEventListener('change', async (e) => {
+                const animalType = e.target.value;
+                
+                if (animalType) {
+                    breedSelect.innerHTML = '<option value="">🔄 Loading breeds...</option>';
+                    
+                    try {
+                        const response = await fetch(`/get_breeds/${animalType}`);
+                        const breeds = await response.json();
+                        
+                        breedSelect.innerHTML = '<option value="">Select Breed</option>';
+                        breeds.forEach(breed => {
+                            const option = document.createElement('option');
+                            option.value = breed;
+                            option.textContent = breed;
+                            breedSelect.appendChild(option);
+                        });
+                    } catch (error) {
+                        console.error('Error loading breeds:', error);
+                        breedSelect.innerHTML = '<option value="">Error loading breeds</option>';
+                    }
+                } else {
+                    breedSelect.innerHTML = '<option value="">First select animal type</option>';
+                }
+            });
+            
+            // Auto-select Dog for demo
+            setTimeout(() => {
+                animalSelect.value = 'Dog';
+                animalSelect.dispatchEvent(new Event('change'));
+            }, 500);
+        }
+    }
+    
+    // Form submission with loading state
+    const form = document.getElementById('healthForm');
+    form.addEventListener('submit', function() {
+        const submitBtn = form.querySelector('button[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Analyzing...';
+    });
+});
+</script>
+
+{% endblock %}

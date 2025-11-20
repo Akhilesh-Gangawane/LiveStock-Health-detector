@@ -1,0 +1,446 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1><i class="fas fa-chart-line me-3"></i>{{ get_text('land_analytics') }}</h1>
+        <p class="text-muted">{{ land.land_name }} - {{ land.size_acres }} acres</p>
+    </div>
+    <a href="{{ url_for('lands') }}" class="btn btn-outline-secondary">
+        <i class="fas fa-arrow-left me-2"></i>{{ get_text('back_to_lands') }}
+    </a>
+</div>
+
+<!-- Land Overview Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-map-marked-alt"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ land.size_acres }}</h3>
+            <p>{{ get_text('size_acres') }}</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-seedling"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ land.crops_grown or 'N/A' }}</h3>
+            <p>{{ get_text('crops_grown') }}</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-tint"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ land.irrigation_type or 'N/A' }}</h3>
+            <p>{{ get_text('irrigation') }}</p>
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">
+            <i class="fas fa-mountain"></i>
+        </div>
+        <div class="stat-content">
+            <h3>{{ land.soil_type or 'N/A' }}</h3>
+            <p>{{ get_text('soil_type') }}</p>
+        </div>
+    </div>
+</div>
+
+<!-- Charts Section -->
+<div class="charts-section">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="chart-container">
+                <h4><i class="fas fa-chart-area me-2"></i>{{ get_text('yield_trends') }}</h4>
+                <canvas id="yieldTrendsChart"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-container">
+                <h4><i class="fas fa-chart-pie me-2"></i>{{ get_text('resource_utilization') }}</h4>
+                <canvas id="resourceChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Performance Metrics -->
+<div class="metrics-section">
+    <h3><i class="fas fa-tachometer-alt me-2"></i>{{ get_text('performance_metrics') }}</h3>
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-header">
+                <i class="fas fa-leaf"></i>
+                <h5>{{ get_text('productivity') }}</h5>
+            </div>
+            <div class="metric-value">85%</div>
+            <div class="metric-trend positive">
+                <i class="fas fa-arrow-up"></i> 12% from last season
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-header">
+                <i class="fas fa-seedling"></i>
+                <h5>{{ get_text('crop_yield') }}</h5>
+            </div>
+            <div class="metric-value">2.5 tons/acre</div>
+            <div class="metric-trend positive">
+                <i class="fas fa-arrow-up"></i> 8% increase
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-header">
+                <i class="fas fa-mountain"></i>
+                <h5>{{ get_text('soil_health') }}</h5>
+            </div>
+            <div class="metric-value">Good</div>
+            <div class="metric-trend neutral">
+                <i class="fas fa-minus"></i> Stable
+            </div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-header">
+                <i class="fas fa-tint"></i>
+                <h5>{{ get_text('water_usage') }}</h5>
+            </div>
+            <div class="metric-value">450 L/day</div>
+            <div class="metric-trend negative">
+                <i class="fas fa-arrow-down"></i> 5% reduction
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activities -->
+<div class="activities-section">
+    <h3><i class="fas fa-history me-2"></i>{{ get_text('recent_activities') }}</h3>
+    <div class="activity-timeline">
+        <div class="timeline-item">
+            <div class="timeline-icon">
+                <i class="fas fa-seedling"></i>
+            </div>
+            <div class="timeline-content">
+                <h5>Planting Season Started</h5>
+                <p>Wheat seeds planted across 5 acres</p>
+                <small>2 days ago</small>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-icon">
+                <i class="fas fa-tint"></i>
+            </div>
+            <div class="timeline-content">
+                <h5>Irrigation System Activated</h5>
+                <p>Drip irrigation system turned on for optimal water distribution</p>
+                <small>5 days ago</small>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-icon">
+                <i class="fas fa-flask"></i>
+            </div>
+            <div class="timeline-content">
+                <h5>Soil Testing Completed</h5>
+                <p>pH level: 6.5, Nitrogen: Good, Phosphorus: Moderate</p>
+                <small>1 week ago</small>
+            </div>
+        </div>
+        <div class="timeline-item">
+            <div class="timeline-icon">
+                <i class="fas fa-spray-can"></i>
+            </div>
+            <div class="timeline-content">
+                <h5>Fertilizer Applied</h5>
+                <p>Organic fertilizer applied - 50kg per acre</p>
+                <small>2 weeks ago</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Yield Trends Chart
+    const yieldCtx = document.getElementById('yieldTrendsChart').getContext('2d');
+    new Chart(yieldCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Crop Yield (tons/acre)',
+                data: [1.8, 2.0, 2.2, 2.5, 2.8, 3.0, 2.9, 2.7, 2.5, 2.3, 2.1, 2.0],
+                borderColor: '#2d5a27',
+                backgroundColor: 'rgba(45, 90, 39, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' tons';
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Resource Utilization Chart
+    const resourceCtx = document.getElementById('resourceChart').getContext('2d');
+    new Chart(resourceCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Water', 'Fertilizer', 'Seeds', 'Labor', 'Equipment'],
+            datasets: [{
+                data: [30, 25, 20, 15, 10],
+                backgroundColor: ['#2d5a27', '#4a7c59', '#6b8e6b', '#8ca08c', '#adb2ad'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding: 20px 0;
+    border-bottom: 2px solid #e8f5e8;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 25px;
+    margin-bottom: 40px;
+}
+
+.stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+}
+
+.stat-icon {
+    width: 60px;
+    height: 60px;
+    background: linear-gradient(135deg, #e8f5e8 0%, #d4f1d4 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: #2d5a27;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2d5a27;
+    margin: 0;
+}
+
+.stat-content p {
+    color: #666;
+    margin: 0;
+    font-weight: 500;
+}
+
+.charts-section {
+    margin: 40px 0;
+}
+
+.chart-container {
+    background: white;
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+.chart-container h4 {
+    color: #2d5a27;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.metrics-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.metrics-section h3 {
+    color: #2d5a27;
+    margin-bottom: 25px;
+}
+
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.metric-card {
+    background: linear-gradient(135deg, #f8fdf8 0%, #e8f5e8 100%);
+    padding: 25px;
+    border-radius: 12px;
+    border: 2px solid #d4f1d4;
+}
+
+.metric-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.metric-header i {
+    color: #2d5a27;
+    font-size: 1.3rem;
+}
+
+.metric-header h5 {
+    margin: 0;
+    color: #2d5a27;
+    font-size: 1rem;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #2d5a27;
+    margin-bottom: 10px;
+}
+
+.metric-trend {
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.metric-trend.positive {
+    color: #28a745;
+}
+
+.metric-trend.negative {
+    color: #dc3545;
+}
+
+.metric-trend.neutral {
+    color: #6c757d;
+}
+
+.activities-section {
+    background: white;
+    padding: 30px;
+    border-radius: 15px;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+}
+
+.activities-section h3 {
+    color: #2d5a27;
+    margin-bottom: 25px;
+}
+
+.activity-timeline {
+    position: relative;
+    padding-left: 40px;
+}
+
+.activity-timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #e8f5e8;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+    display: flex;
+    gap: 20px;
+}
+
+.timeline-icon {
+    position: absolute;
+    left: -40px;
+    width: 32px;
+    height: 32px;
+    background: white;
+    border: 3px solid #2d5a27;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #2d5a27;
+    font-size: 0.9rem;
+}
+
+.timeline-content {
+    flex: 1;
+    background: #f8fdf8;
+    padding: 20px;
+    border-radius: 10px;
+    border-left: 3px solid #2d5a27;
+}
+
+.timeline-content h5 {
+    color: #2d5a27;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+
+.timeline-content p {
+    color: #666;
+    margin-bottom: 8px;
+}
+
+.timeline-content small {
+    color: #999;
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}

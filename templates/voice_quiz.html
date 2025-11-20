@@ -1,0 +1,546 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<style>
+    .voice-quiz-container {
+        max-width: 900px;
+        margin: 2rem auto;
+        padding: 2rem;
+    }
+    
+    .quiz-card {
+        background: var(--surface);
+        border-radius: var(--radius-xl);
+        padding: 3rem;
+        box-shadow: var(--shadow-xl);
+        border: 2px solid var(--secondary);
+        margin-bottom: 2rem;
+    }
+    
+    .quiz-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    
+    .quiz-header h1 {
+        font-family: var(--font-display);
+        font-size: 2.5rem;
+        font-weight: 800;
+        background: var(--gradient-primary);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 1rem;
+    }
+    
+    .quiz-progress {
+        margin-bottom: 2rem;
+    }
+    
+    .progress {
+        height: 12px;
+        border-radius: var(--radius-full);
+        background: var(--background);
+        overflow: hidden;
+    }
+    
+    .progress-bar {
+        background: var(--gradient-primary);
+        transition: width 0.5s ease;
+    }
+    
+    .question-container {
+        margin-bottom: 2rem;
+    }
+    
+    .question-text {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .answer-options {
+        display: grid;
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+    
+    .answer-btn {
+        padding: 1.25rem;
+        border: 2px solid var(--secondary);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        color: var(--text-primary);
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        text-align: left;
+    }
+    
+    .answer-btn:hover {
+        background: var(--secondary);
+        border-color: var(--primary);
+        transform: translateX(8px);
+    }
+    
+    .answer-btn.selected {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+    }
+    
+    .voice-controls {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 2rem;
+    }
+    
+    .voice-btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .voice-btn-primary {
+        background: var(--gradient-primary);
+        color: white;
+    }
+    
+    .voice-btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .voice-btn-secondary {
+        background: var(--accent);
+        color: var(--text-primary);
+    }
+    
+    .voice-btn-secondary:hover {
+        background: var(--accent-light);
+        transform: translateY(-2px);
+    }
+    
+    .voice-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .listening-indicator {
+        display: none;
+        text-align: center;
+        padding: 2rem;
+        background: var(--secondary);
+        border-radius: var(--radius-lg);
+        margin-bottom: 2rem;
+    }
+    
+    .listening-indicator.active {
+        display: block;
+    }
+    
+    .pulse-animation {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1rem;
+        background: var(--primary);
+        border-radius: 50%;
+        animation: pulse 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.2);
+            opacity: 0.7;
+        }
+    }
+    
+    .text-input-container {
+        margin-bottom: 2rem;
+    }
+    
+    .text-input {
+        width: 100%;
+        padding: 1rem;
+        border: 2px solid var(--secondary);
+        border-radius: var(--radius-lg);
+        background: var(--background);
+        color: var(--text-primary);
+        font-size: 1.1rem;
+    }
+    
+    .navigation-buttons {
+        display: flex;
+        gap: 1rem;
+        justify-content: space-between;
+    }
+    
+    .nav-btn {
+        padding: 1rem 2rem;
+        border: none;
+        border-radius: var(--radius-full);
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+    
+    .nav-btn-back {
+        background: var(--surface);
+        border: 2px solid var(--secondary);
+        color: var(--text-primary);
+    }
+    
+    .nav-btn-next {
+        background: var(--gradient-primary);
+        color: white;
+    }
+    
+    .nav-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .result-container {
+        display: none;
+    }
+    
+    .result-container.active {
+        display: block;
+    }
+</style>
+
+<div class="voice-quiz-container">
+    <div class="quiz-card">
+        <div class="quiz-header">
+            <h1><i class="fas fa-microphone-alt me-2"></i>{{ get_text('voice_analysis') }}</h1>
+            <p class="text-muted">{{ get_text('voice_analysis_desc') }}</p>
+        </div>
+        
+        <div id="quizContent">
+            <div class="quiz-progress">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>{{ get_text('question') if current_language == 'en' else 'प्रश्न' }} <span id="currentQuestion">1</span> / <span id="totalQuestions">15</span></span>
+                    <span id="progressPercent">7%</span>
+                </div>
+                <div class="progress">
+                    <div class="progress-bar" id="progressBar" role="progressbar" style="width: 7%"></div>
+                </div>
+            </div>
+            
+            <div class="question-container">
+                <div class="question-text" id="questionText"></div>
+                
+                <div class="listening-indicator" id="listeningIndicator">
+                    <div class="pulse-animation"></div>
+                    <h4>{{ get_text('listening') if current_language == 'en' else 'ऐकत आहे...' }}</h4>
+                    <p class="text-muted">{{ get_text('speak_now') if current_language == 'en' else 'आता बोला...' }}</p>
+                </div>
+                
+                <div id="answerContainer"></div>
+                
+                <div class="voice-controls">
+                    <button class="voice-btn voice-btn-primary" id="voiceBtn" onclick="startListening()">
+                        <i class="fas fa-microphone"></i>
+                        {{ get_text('speak_answer') if current_language == 'en' else 'उत्तर बोला' }}
+                    </button>
+                    <button class="voice-btn voice-btn-secondary" id="speakQuestionBtn" onclick="speakQuestion()">
+                        <i class="fas fa-volume-up"></i>
+                        {{ get_text('repeat_question') if current_language == 'en' else 'प्रश्न पुन्हा ऐका' }}
+                    </button>
+                </div>
+            </div>
+            
+            <div class="navigation-buttons">
+                <button class="nav-btn nav-btn-back" id="backBtn" onclick="previousQuestion()" disabled>
+                    <i class="fas fa-arrow-left me-2"></i>{{ get_text('back') }}
+                </button>
+                <button class="nav-btn nav-btn-next" id="nextBtn" onclick="nextQuestion()">
+                    {{ get_text('next') if current_language == 'en' else 'पुढे' }}<i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div id="resultContainer" class="result-container">
+            <div class="text-center">
+                <div class="spinner-border text-primary mb-3" role="status" style="width: 3rem; height: 3rem;">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <h3>{{ get_text('analyzing') if current_language == 'en' else 'विश्लेषण करत आहे...' }}</h3>
+                <p class="text-muted">{{ get_text('please_wait') if current_language == 'en' else 'कृपया प्रतीक्षा करा...' }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentQuestionIndex = 0;
+let answers = {};
+let sessionId = null;
+let currentLanguage = '{{ current_language }}';
+
+const questions = {{ questions|tojson }};
+
+// Initialize quiz
+document.addEventListener('DOMContentLoaded', function() {
+    startQuiz();
+});
+
+function startQuiz() {
+    // Start quiz session
+    fetch('/voice_quiz_start', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({language: currentLanguage})
+    })
+    .then(response => response.json())
+    .then(data => {
+        sessionId = data.session_id;
+        displayQuestion();
+    });
+}
+
+function displayQuestion() {
+    const question = questions[currentQuestionIndex];
+    const questionText = currentLanguage === 'mr' ? question.question_mr : question.question;
+    
+    document.getElementById('questionText').textContent = questionText;
+    document.getElementById('currentQuestion').textContent = currentQuestionIndex + 1;
+    document.getElementById('totalQuestions').textContent = questions.length;
+    
+    const progress = ((currentQuestionIndex + 1) / questions.length) * 100;
+    document.getElementById('progressBar').style.width = progress + '%';
+    document.getElementById('progressPercent').textContent = Math.round(progress) + '%';
+    
+    // Update back button
+    document.getElementById('backBtn').disabled = currentQuestionIndex === 0;
+    
+    // Display answer options based on question type
+    const answerContainer = document.getElementById('answerContainer');
+    answerContainer.innerHTML = '';
+    
+    if (question.type === 'choice') {
+        const options = currentLanguage === 'mr' ? question.options_mr : question.options;
+        const optionsDiv = document.createElement('div');
+        optionsDiv.className = 'answer-options';
+        
+        options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.textContent = option;
+            btn.onclick = () => selectOption(option, btn);
+            if (answers[question.key] === option) {
+                btn.classList.add('selected');
+            }
+            optionsDiv.appendChild(btn);
+        });
+        
+        answerContainer.appendChild(optionsDiv);
+    } else if (question.type === 'yesno') {
+        const optionsDiv = document.createElement('div');
+        optionsDiv.className = 'answer-options';
+        optionsDiv.style.gridTemplateColumns = '1fr 1fr';
+        
+        const yesText = currentLanguage === 'mr' ? 'होय' : 'Yes';
+        const noText = currentLanguage === 'mr' ? 'नाही' : 'No';
+        
+        [yesText, noText].forEach(option => {
+            const btn = document.createElement('button');
+            btn.className = 'answer-btn';
+            btn.textContent = option;
+            btn.onclick = () => selectOption(option, btn);
+            if (answers[question.key] === option) {
+                btn.classList.add('selected');
+            }
+            optionsDiv.appendChild(btn);
+        });
+        
+        answerContainer.appendChild(optionsDiv);
+    } else if (question.type === 'number') {
+        const inputDiv = document.createElement('div');
+        inputDiv.className = 'text-input-container';
+        
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'text-input';
+        input.placeholder = currentLanguage === 'mr' ? 'संख्या प्रविष्ट करा' : 'Enter number';
+        input.value = answers[question.key] || '';
+        input.oninput = (e) => {
+            answers[question.key] = e.target.value;
+        };
+        
+        inputDiv.appendChild(input);
+        answerContainer.appendChild(inputDiv);
+    }
+    
+    // Speak question automatically
+    speakQuestion();
+}
+
+function selectOption(option, btn) {
+    const question = questions[currentQuestionIndex];
+    answers[question.key] = option;
+    
+    // Update UI
+    document.querySelectorAll('.answer-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+}
+
+function speakQuestion() {
+    const question = questions[currentQuestionIndex];
+    const questionText = currentLanguage === 'mr' ? question.question_mr : question.question;
+    
+    fetch('/voice_quiz_speak', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            text: questionText,
+            language: currentLanguage
+        })
+    });
+}
+
+function startListening() {
+    const indicator = document.getElementById('listeningIndicator');
+    const voiceBtn = document.getElementById('voiceBtn');
+    
+    indicator.classList.add('active');
+    voiceBtn.disabled = true;
+    
+    fetch('/voice_quiz_listen', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    })
+    .then(response => response.json())
+    .then(data => {
+        indicator.classList.remove('active');
+        voiceBtn.disabled = false;
+        
+        if (data.success) {
+            processVoiceAnswer(data.text);
+        } else {
+            alert(data.error || 'Could not understand. Please try again.');
+        }
+    })
+    .catch(error => {
+        indicator.classList.remove('active');
+        voiceBtn.disabled = false;
+        alert('Error: ' + error.message);
+    });
+}
+
+function processVoiceAnswer(text) {
+    const question = questions[currentQuestionIndex];
+    
+    if (question.type === 'choice') {
+        const options = currentLanguage === 'mr' ? question.options_mr : question.options;
+        const lowerText = text.toLowerCase();
+        
+        // Find matching option
+        const match = options.find(opt => 
+            lowerText.includes(opt.toLowerCase()) || 
+            opt.toLowerCase().includes(lowerText)
+        );
+        
+        if (match) {
+            answers[question.key] = match;
+            const btn = Array.from(document.querySelectorAll('.answer-btn')).find(b => b.textContent === match);
+            if (btn) {
+                selectOption(match, btn);
+            }
+        }
+    } else if (question.type === 'yesno') {
+        const lowerText = text.toLowerCase();
+        const yesWords = ['yes', 'yeah', 'yep', 'होय', 'हो'];
+        const noWords = ['no', 'nope', 'नाही', 'ना'];
+        
+        if (yesWords.some(word => lowerText.includes(word))) {
+            const yesText = currentLanguage === 'mr' ? 'होय' : 'Yes';
+            answers[question.key] = yesText;
+            const btn = Array.from(document.querySelectorAll('.answer-btn')).find(b => b.textContent === yesText);
+            if (btn) selectOption(yesText, btn);
+        } else if (noWords.some(word => lowerText.includes(word))) {
+            const noText = currentLanguage === 'mr' ? 'नाही' : 'No';
+            answers[question.key] = noText;
+            const btn = Array.from(document.querySelectorAll('.answer-btn')).find(b => b.textContent === noText);
+            if (btn) selectOption(noText, btn);
+        }
+    } else if (question.type === 'number') {
+        const numbers = text.match(/\d+/);
+        if (numbers) {
+            answers[question.key] = numbers[0];
+            const input = document.querySelector('.text-input');
+            if (input) input.value = numbers[0];
+        }
+    }
+}
+
+function previousQuestion() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        displayQuestion();
+    }
+}
+
+function nextQuestion() {
+    const question = questions[currentQuestionIndex];
+    
+    // Validate answer
+    if (!answers[question.key]) {
+        alert(currentLanguage === 'mr' ? 'कृपया उत्तर द्या' : 'Please provide an answer');
+        return;
+    }
+    
+    if (currentQuestionIndex < questions.length - 1) {
+        currentQuestionIndex++;
+        displayQuestion();
+    } else {
+        // Submit quiz
+        submitQuiz();
+    }
+}
+
+function submitQuiz() {
+    document.getElementById('quizContent').style.display = 'none';
+    document.getElementById('resultContainer').classList.add('active');
+    
+    // Submit to backend for prediction
+    fetch('/voice_quiz_submit', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({
+            session_id: sessionId,
+            answers: answers
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect to result page
+            window.location.href = '/voice_quiz_result?session_id=' + sessionId;
+        } else {
+            alert('Error: ' + data.message);
+            document.getElementById('quizContent').style.display = 'block';
+            document.getElementById('resultContainer').classList.remove('active');
+        }
+    })
+    .catch(error => {
+        alert('Error: ' + error.message);
+        document.getElementById('quizContent').style.display = 'block';
+        document.getElementById('resultContainer').classList.remove('active');
+    });
+}
+</script>
+{% endblock %}
