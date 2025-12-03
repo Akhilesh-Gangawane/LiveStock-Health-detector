@@ -1,0 +1,431 @@
+{% extends "layout.html" %}
+
+{% block title %}Animal Details - {{ animal.name }} - {{ get_text('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Back Button -->
+    <div class="mb-3">
+        <a href="{{ url_for('vet_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- Animal Profile Card -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-paw"></i> Animal Profile</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Animal ID:</strong> #{{ animal.id }}</p>
+                            <p><strong>Name:</strong> {{ animal.name }}</p>
+                            <p><strong>Type:</strong> <span class="badge bg-secondary">{{ animal.animal_type }}</span></p>
+                            <p><strong>Breed:</strong> {{ animal.breed }}</p>
+                            <p><strong>Age:</strong> {{ animal.age }} years</p>
+                            <p><strong>Gender:</strong> {{ animal.gender }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Weight:</strong> {{ animal.weight }} kg</p>
+                            <p><strong>Health Status:</strong> 
+                                <span class="badge {% if animal.health_status == 'healthy' %}bg-success{% elif animal.health_status == 'sick' %}bg-danger{% else %}bg-warning{% endif %}">
+                                    {{ animal.health_status|title }}
+                                </span>
+                            </p>
+                            {% if animal.date_of_birth %}
+                            <p><strong>Date of Birth:</strong> {{ animal.date_of_birth | format_date('%Y-%m-%d') }}</p>
+                            {% endif %}
+                            {% if animal.notes %}
+                            <p><strong>Notes:</strong> {{ animal.notes }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Owner Information -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-user"></i> Owner Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if animal.users %}
+                    <p><strong>Name:</strong> {{ animal.users.name }}</p>
+                    <p><strong>Email:</strong> <a href="mailto:{{ animal.users.email }}">{{ animal.users.email }}</a></p>
+                    {% if animal.users.phone %}
+                    <p><strong>Phone:</strong> <a href="tel:{{ animal.users.phone }}">{{ animal.users.phone }}</a></p>
+                    {% endif %}
+                    {% if animal.users.location %}
+                    <p><strong>Location:</strong> {{ animal.users.location }}</p>
+                    {% endif %}
+                    {% if animal.users.farm_name %}
+                    <p><strong>Farm:</strong> {{ animal.users.farm_name }}</p>
+                    {% endif %}
+                    {% else %}
+                    <p class="text-muted">Owner information not available</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vaccination History -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-syringe text-success"></i> Vaccination History</h5>
+                    <button class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addVaccinationModal">
+                        <i class="fas fa-plus"></i> Add Vaccination
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    {% if vaccinations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Vaccine Name</th>
+                                    <th>Dose</th>
+                                    <th>Batch #</th>
+                                    <th>Administered By</th>
+                                    <th>Next Due</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vac in vaccinations %}
+                                <tr>
+                                    <td>{{ vac.vaccination_date | format_date('%Y-%m-%d') }}</td>
+                                    <td><strong>{{ vac.vaccine_name }}</strong></td>
+                                    <td>{{ vac.dose or 'N/A' }}</td>
+                                    <td>{{ vac.batch_number or 'N/A' }}</td>
+                                    <td>{{ vac.administered_by or 'N/A' }}</td>
+                                    <td>
+                                        {% if vac.next_due_date %}
+                                            {{ vac.next_due_date | format_date('%Y-%m-%d') }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if vac.vet_id == current_user.id %}
+                                        <button class="btn btn-sm btn-outline-primary" onclick="editVaccination({{ vac.id }}, '{{ vac.vaccine_name }}', '{{ vac.dose }}', '{{ vac.batch_number }}', '{{ vac.vaccination_date }}', '{{ vac.next_due_date }}', '{{ vac.notes }}')">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        <form action="{{ url_for('vet_delete_vaccination', vac_id=vac.id) }}" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this vaccination record?');">
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% if vac.notes %}
+                                <tr>
+                                    <td colspan="7" class="bg-light"><small><strong>Notes:</strong> {{ vac.notes }}</small></td>
+                                </tr>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-syringe fa-3x mb-3 opacity-25"></i>
+                        <p>No vaccination records yet</p>
+                        <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addVaccinationModal">
+                            <i class="fas fa-plus"></i> Add First Vaccination
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Disease/Diagnosis History -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-stethoscope text-danger"></i> Diagnosis History</h5>
+                    <button class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#addDiagnosisModal">
+                        <i class="fas fa-plus"></i> Add Diagnosis
+                    </button>
+                </div>
+                <div class="card-body p-0">
+                    {% if diagnoses %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Disease</th>
+                                    <th>Severity</th>
+                                    <th>Status</th>
+                                    <th>Diagnosed By</th>
+                                    <th>Treatment</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for diag in diagnoses %}
+                                <tr>
+                                    <td>{{ diag.date_diagnosed | format_date('%Y-%m-%d') }}</td>
+                                    <td><strong>{{ diag.diseases.name }}</strong></td>
+                                    <td>
+                                        <span class="badge {% if diag.severity == 'critical' %}bg-danger{% elif diag.severity == 'high' %}bg-warning{% else %}bg-info{% endif %}">
+                                            {{ diag.severity|title }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge {% if diag.status == 'recovered' %}bg-success{% elif diag.status == 'active' %}bg-danger{% else %}bg-warning{% endif %}">
+                                            {{ diag.status|title }}
+                                        </span>
+                                    </td>
+                                    <td>{{ diag.users.name }}</td>
+                                    <td>{{ diag.treatment_given[:50] if diag.treatment_given else 'N/A' }}...</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-outline-info" data-bs-toggle="modal" data-bs-target="#viewDiagnosisModal{{ diag.id }}">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if diag.diagnosed_by_vet_id == current_user.id %}
+                                        <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#updateDiagnosisModal{{ diag.id }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                
+                                <!-- View Diagnosis Modal -->
+                                <div class="modal fade" id="viewDiagnosisModal{{ diag.id }}" tabindex="-1">
+                                    <div class="modal-dialog modal-lg">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">Diagnosis Details - {{ diag.diseases.name }}</h5>
+                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p><strong>Disease:</strong> {{ diag.diseases.name }}</p>
+                                                <p><strong>Description:</strong> {{ diag.diseases.description }}</p>
+                                                <p><strong>Symptoms Observed:</strong> {{ diag.symptoms_observed or 'Not specified' }}</p>
+                                                <p><strong>Treatment Given:</strong> {{ diag.treatment_given or 'Not specified' }}</p>
+                                                <p><strong>Recommended Treatment:</strong> {{ diag.diseases.recommended_treatment }}</p>
+                                                <p><strong>Notes:</strong> {{ diag.notes or 'None' }}</p>
+                                                {% if diag.follow_up_date %}
+                                                <p><strong>Follow-up Date:</strong> {{ diag.follow_up_date | format_date('%Y-%m-%d') }}</p>
+                                                {% endif %}
+                                                {% if diag.recovery_date %}
+                                                <p><strong>Recovery Date:</strong> {{ diag.recovery_date | format_date('%Y-%m-%d') }}</p>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Update Diagnosis Modal -->
+                                {% if diag.diagnosed_by_vet_id == current_user.id %}
+                                <div class="modal fade" id="updateDiagnosisModal{{ diag.id }}" tabindex="-1">
+                                    <div class="modal-dialog">
+                                        <div class="modal-content">
+                                            <form action="{{ url_for('vet_update_diagnosis', diagnosis_id=diag.id) }}" method="POST">
+                                                <div class="modal-header">
+                                                    <h5 class="modal-title">Update Diagnosis</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                </div>
+                                                <div class="modal-body">
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Status</label>
+                                                        <select class="form-select" name="status" required>
+                                                            <option value="active" {% if diag.status == 'active' %}selected{% endif %}>Active</option>
+                                                            <option value="recovering" {% if diag.status == 'recovering' %}selected{% endif %}>Recovering</option>
+                                                            <option value="recovered" {% if diag.status == 'recovered' %}selected{% endif %}>Recovered</option>
+                                                            <option value="chronic" {% if diag.status == 'chronic' %}selected{% endif %}>Chronic</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Treatment Given</label>
+                                                        <textarea class="form-control" name="treatment_given" rows="3">{{ diag.treatment_given }}</textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Notes</label>
+                                                        <textarea class="form-control" name="notes" rows="2">{{ diag.notes }}</textarea>
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label class="form-label">Recovery Date (if recovered)</label>
+                                                        <input type="date" class="form-control" name="recovery_date" value="{{ diag.recovery_date }}">
+                                                    </div>
+                                                </div>
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                    <button type="submit" class="btn btn-primary">Update</button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-stethoscope fa-3x mb-3 opacity-25"></i>
+                        <p>No diagnosis records yet</p>
+                        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#addDiagnosisModal">
+                            <i class="fas fa-plus"></i> Add First Diagnosis
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Vaccination Modal -->
+<div class="modal fade" id="addVaccinationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form action="{{ url_for('vet_add_vaccination') }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Vaccination Record</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="animal_id" value="{{ animal.id }}">
+                    <div class="mb-3">
+                        <label class="form-label">Vaccine Name *</label>
+                        <input type="text" class="form-control" name="vaccine_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Dose</label>
+                        <input type="text" class="form-control" name="dose" placeholder="e.g., 2ml, 1 dose">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Batch Number</label>
+                        <input type="text" class="form-control" name="batch_number">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Vaccination Date *</label>
+                        <input type="date" class="form-control" name="vaccination_date" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Next Due Date</label>
+                        <input type="date" class="form-control" name="next_due_date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-success">Add Vaccination</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Add Diagnosis Modal -->
+<div class="modal fade" id="addDiagnosisModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <form action="{{ url_for('vet_add_diagnosis') }}" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Diagnosis</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="animal_id" value="{{ animal.id }}">
+                    <div class="mb-3">
+                        <label class="form-label">Disease *</label>
+                        <select class="form-select" name="disease_id" required id="diseaseSelect">
+                            <option value="">Select Disease</option>
+                            {% for disease in all_diseases %}
+                            <option value="{{ disease.id }}" data-description="{{ disease.description }}" data-treatment="{{ disease.recommended_treatment }}">
+                                {{ disease.name }} ({{ disease.severity|title }})
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <small class="text-muted" id="diseaseInfo"></small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date Diagnosed *</label>
+                        <input type="date" class="form-control" name="date_diagnosed" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Severity *</label>
+                            <select class="form-select" name="severity" required>
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status *</label>
+                            <select class="form-select" name="status" required>
+                                <option value="active" selected>Active</option>
+                                <option value="recovering">Recovering</option>
+                                <option value="recovered">Recovered</option>
+                                <option value="chronic">Chronic</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Symptoms Observed</label>
+                        <textarea class="form-control" name="symptoms_observed" rows="2"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Treatment Given</label>
+                        <textarea class="form-control" name="treatment_given" rows="3" id="treatmentGiven"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Follow-up Date</label>
+                        <input type="date" class="form-control" name="follow_up_date">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Notes</label>
+                        <textarea class="form-control" name="notes" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">Add Diagnosis</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-fill treatment recommendation when disease is selected
+document.getElementById('diseaseSelect').addEventListener('change', function() {
+    const selectedOption = this.options[this.selectedIndex];
+    const description = selectedOption.getAttribute('data-description');
+    const treatment = selectedOption.getAttribute('data-treatment');
+    
+    if (description) {
+        document.getElementById('diseaseInfo').textContent = description;
+    }
+    if (treatment) {
+        document.getElementById('treatmentGiven').value = treatment;
+    }
+});
+</script>
+
+<style>
+.opacity-25 { opacity: 0.25; }
+</style>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}Search Animal - {{ get_text('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0"><i class="fas fa-search"></i> Animal Lookup</h3>
+                </div>
+                <div class="card-body p-5">
+                    <form action="{{ url_for('vet_animal_search') }}" method="POST">
+                        <div class="mb-4">
+                            <label class="form-label h5">Enter Animal ID, Name, or Type</label>
+                            <input type="text" class="form-control form-control-lg" name="search_query" 
+                                   placeholder="e.g., 1001, Bella, Cow..." required autofocus>
+                            <small class="text-muted">
+                                <i class="fas fa-info-circle"></i> You can search by Animal ID, Name, or Animal Type
+                            </small>
+                        </div>
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-search"></i> Search Animal
+                            </button>
+                            <a href="{{ url_for('vet_dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Tips -->
+            <div class="card mt-4 border-info">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fas fa-lightbulb text-warning"></i> Quick Tips</h5>
+                    <ul class="mb-0">
+                        <li>Search by <strong>Animal ID</strong> for exact match (e.g., 1001)</li>
+                        <li>Search by <strong>Name</strong> to find animals by their name</li>
+                        <li>Search by <strong>Type</strong> to see all animals of that species (e.g., Cow, Dog)</li>
+                        <li>Search is case-insensitive and supports partial matches</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

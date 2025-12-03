@@ -1,0 +1,252 @@
+{% extends "layout.html" %}
+
+{% block title %}Veterinarian Dashboard - {{ get_text('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="mb-2">
+                <i class="fas fa-user-md text-primary"></i> {{ get_text('vet_dashboard') }}
+            </h1>
+            <p class="text-muted">{{ get_text('welcome') }}, Dr. {{ current_user.name }}!</p>
+            {% if current_user.clinic_name %}
+            <p class="mb-0"><i class="fas fa-hospital"></i> {{ current_user.clinic_name }}</p>
+            {% endif %}
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('vet_animal_search') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-search"></i> {{ get_text('search_animal') }}
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">{{ get_text('animals_treated') }}</h6>
+                            <h2 class="mb-0 mt-2">{{ stats.unique_animals }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-paw fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card text-white bg-success mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">{{ get_text('vaccinations_given') }}</h6>
+                            <h2 class="mb-0 mt-2">{{ stats.total_vaccinations }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-syringe fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card text-white bg-info mb-3 shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="card-title mb-0">{{ get_text('diagnoses_made') }}</h6>
+                            <h2 class="mb-0 mt-2">{{ stats.total_diagnoses }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-stethoscope fa-3x opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Animal ID Search Box - Prominent -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-lg border-primary" style="border-width: 2px;">
+                <div class="card-body p-4">
+                    <div class="text-center mb-3">
+                        <h4 class="mb-2">
+                            <i class="fas fa-search text-primary"></i> 
+                            {{ get_text('search_animal_by_id') }}
+                        </h4>
+                        <p class="text-muted mb-0">{{ get_text('view_complete_profile') }}</p>
+                    </div>
+                    <form action="{{ url_for('vet_animal_search') }}" method="POST">
+                        <div class="row g-3 align-items-center justify-content-center">
+                            <div class="col-md-6">
+                                <div class="input-group input-group-lg">
+                                    <span class="input-group-text bg-primary text-white">
+                                        <i class="fas fa-hashtag"></i>
+                                    </span>
+                                    <input type="text" 
+                                           class="form-control form-control-lg" 
+                                           name="search_query" 
+                                           placeholder="{{ get_text('enter_animal_id') }} ({{ get_text('e.g.') }}, 1, 2, 3...)" 
+                                           required 
+                                           autofocus
+                                           title="{{ get_text('enter_numbers_only') }}">
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle"></i> 
+                                    {{ get_text('you_can_also_search') }}
+                                </small>
+                            </div>
+                            <div class="col-md-3">
+                                <button type="submit" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-search"></i> {{ get_text('search_animal_btn') }}
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Vaccinations -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-syringe text-success"></i> {{ get_text('recent_vaccinations') }}</h5>
+                        <a href="{{ url_for('vet_vaccinations_list') }}" class="btn btn-sm btn-outline-primary">
+                            {{ get_text('view_all') }}
+                        </a>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    {% if recent_vaccinations %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{{ get_text('date') }}</th>
+                                    <th>{{ get_text('animal_type') }}</th>
+                                    <th>{{ get_text('vaccine') }}</th>
+                                    <th>{{ get_text('dose') }}</th>
+                                    <th>{{ get_text('next_due') }}</th>
+                                    <th>{{ get_text('action') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for vac in recent_vaccinations %}
+                                <tr>
+                                    <td>{{ vac.vaccination_date | format_date('%Y-%m-%d') }}</td>
+                                    <td>
+                                        <a href="{{ url_for('vet_animal_detail', animal_id=vac.animal_id) }}" class="text-decoration-none">
+                                            {{ vac.animals.name }} ({{ vac.animals.animal_type }})
+                                        </a>
+                                    </td>
+                                    <td>{{ vac.vaccine_name }}</td>
+                                    <td>{{ vac.dose or 'N/A' }}</td>
+                                    <td>
+                                        {% if vac.next_due_date %}
+                                            {{ vac.next_due_date | format_date('%Y-%m-%d') }}
+                                        {% else %}
+                                            <span class="text-muted">Not set</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('vet_animal_detail', animal_id=vac.animal_id) }}" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-syringe fa-3x mb-3 opacity-25"></i>
+                        <p>No vaccinations recorded yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Animals -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0"><i class="fas fa-list text-primary"></i> {{ get_text('recent_animals') }}</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if all_animals %}
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>{{ get_text('id') }}</th>
+                                    <th>{{ get_text('name') }}</th>
+                                    <th>{{ get_text('type') }}</th>
+                                    <th>{{ get_text('breed') }}</th>
+                                    <th>{{ get_text('owner') }}</th>
+                                    <th>{{ get_text('age') }}</th>
+                                    <th>{{ get_text('action') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for animal in all_animals %}
+                                <tr>
+                                    <td><strong>#{{ animal.id }}</strong></td>
+                                    <td>{{ animal.name }}</td>
+                                    <td>
+                                        <span class="badge bg-secondary">{{ animal.animal_type }}</span>
+                                    </td>
+                                    <td>{{ animal.breed }}</td>
+                                    <td>
+                                        {% if animal.users %}
+                                            {{ animal.users.name }}
+                                        {% else %}
+                                            <span class="text-muted">Unknown</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ animal.age }} yrs</td>
+                                    <td>
+                                        <a href="{{ url_for('vet_animal_detail', animal_id=animal.id) }}" 
+                                           class="btn btn-sm btn-primary">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-paw fa-3x mb-3 opacity-25"></i>
+                        <p>No animals in the system yet</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.opacity-25 { opacity: 0.25; }
+.opacity-50 { opacity: 0.5; }
+</style>
+{% endblock %}

@@ -536,39 +536,51 @@
                                 <i class="fas fa-tachometer-alt me-1"></i>{{ get_text('dashboard') }}
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('health_assessment') }}">
-                                <i class="fas fa-stethoscope me-1"></i>{{ get_text('health_check') }}
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{{ url_for('voice_quiz') }}">
-                                <i class="fas fa-microphone-alt me-1"></i>{{ get_text('voice_analysis') }}
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-th-large me-1"></i>{{ get_text('services') }}
-                            </a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ url_for('veterinarians') }}">
-                                    <i class="fas fa-user-md me-2"></i>{{ get_text('find_veterinarians') }}
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('knowledge_base') }}">
-                                    <i class="fas fa-book-medical me-2"></i>{{ get_text('knowledge_base') }}
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('subsidies') }}">
-                                    <i class="fas fa-hand-holding-usd me-2"></i>{{ get_text('subsidies') }}
-                                </a></li>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item" href="{{ url_for('animals') }}">
-                                    <i class="fas fa-paw me-2"></i>{{ get_text('my_animals') }}
-                                </a></li>
-                                <li><a class="dropdown-item" href="{{ url_for('lands') }}">
-                                    <i class="fas fa-map-marked-alt me-2"></i>{{ get_text('my_farm_lands') }}
-                                </a></li>
-                            </ul>
-                        </li>
+                        
+                        {% if current_user.user_type == 'farmer' %}
+                            <!-- Farmer Navigation -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('health_assessment') }}">
+                                    <i class="fas fa-stethoscope me-1"></i>{{ get_text('health_check') }}
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('voice_quiz') }}">
+                                    <i class="fas fa-microphone-alt me-1"></i>{{ get_text('voice_analysis') }}
+                                </a>
+                            </li>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-th-large me-1"></i>{{ get_text('services') }}
+                                </a>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="{{ url_for('veterinarians') }}">
+                                        <i class="fas fa-user-md me-2"></i>{{ get_text('find_veterinarians') }}
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('knowledge_base') }}">
+                                        <i class="fas fa-book-medical me-2"></i>{{ get_text('knowledge_base') }}
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('subsidies') }}">
+                                        <i class="fas fa-hand-holding-usd me-2"></i>{{ get_text('subsidies') }}
+                                    </a></li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('animals') }}">
+                                        <i class="fas fa-paw me-2"></i>{{ get_text('my_animals') }}
+                                    </a></li>
+                                    <li><a class="dropdown-item" href="{{ url_for('lands') }}">
+                                        <i class="fas fa-map-marked-alt me-2"></i>{{ get_text('my_farm_lands') }}
+                                    </a></li>
+                                </ul>
+                            </li>
+                        {% elif current_user.user_type == 'veterinarian' %}
+                            <!-- Veterinarian Navigation -->
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ url_for('knowledge_base') }}">
+                                    <i class="fas fa-book-medical me-1"></i>{{ get_text('knowledge_base') }}
+                                </a>
+                            </li>
+                        {% endif %}
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-user me-1"></i>{{ current_user.name }}

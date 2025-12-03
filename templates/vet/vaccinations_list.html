@@ -1,0 +1,91 @@
+{% extends "layout.html" %}
+
+{% block title %}My Vaccinations - {{ get_text('app_name') }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="mb-3">
+        <a href="{{ url_for('vet_dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h4 class="mb-0"><i class="fas fa-syringe"></i> All Vaccinations Administered by Me</h4>
+        </div>
+        <div class="card-body p-0">
+            {% if vaccinations %}
+            <div class="alert alert-info m-3">
+                <i class="fas fa-info-circle"></i> Total vaccinations: {{ vaccinations|length }}
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Date</th>
+                            <th>Animal</th>
+                            <th>Type</th>
+                            <th>Vaccine</th>
+                            <th>Dose</th>
+                            <th>Batch #</th>
+                            <th>Next Due</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for vac in vaccinations %}
+                        <tr>
+                            <td>{{ vac.vaccination_date | format_date('%Y-%m-%d') }}</td>
+                            <td>
+                                <a href="{{ url_for('vet_animal_detail', animal_id=vac.animal_id) }}" class="text-decoration-none">
+                                    {{ vac.animals.name }}
+                                </a>
+                            </td>
+                            <td><span class="badge bg-secondary">{{ vac.animals.animal_type }}</span></td>
+                            <td><strong>{{ vac.vaccine_name }}</strong></td>
+                            <td>{{ vac.dose or 'N/A' }}</td>
+                            <td>{{ vac.batch_number or 'N/A' }}</td>
+                            <td>
+                                {% if vac.next_due_date %}
+                                    {{ vac.next_due_date | format_date('%Y-%m-%d') }}
+                                {% else %}
+                                    <span class="text-muted">Not set</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('vet_animal_detail', animal_id=vac.animal_id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    <i class="fas fa-eye"></i> View Animal
+                                </a>
+                            </td>
+                        </tr>
+                        {% if vac.notes %}
+                        <tr>
+                            <td colspan="8" class="bg-light">
+                                <small><strong>Notes:</strong> {{ vac.notes }}</small>
+                            </td>
+                        </tr>
+                        {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5 text-muted">
+                <i class="fas fa-syringe fa-3x mb-3 opacity-25"></i>
+                <h4>No Vaccinations Yet</h4>
+                <p>You haven't administered any vaccinations yet.</p>
+                <a href="{{ url_for('vet_animal_search') }}" class="btn btn-success">
+                    <i class="fas fa-search"></i> Search Animal to Add Vaccination
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.opacity-25 { opacity: 0.25; }
+</style>
+{% endblock %}

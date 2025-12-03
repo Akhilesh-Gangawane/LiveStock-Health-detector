@@ -277,6 +277,168 @@ class DB:
         except Exception as e:
             print(f"Error: {e}")
             return None
+    
+    # ============================================
+    # VETERINARIAN-SPECIFIC METHODS
+    # ============================================
+    
+    @staticmethod
+    def get_all_animals_for_vet():
+        """Get all animals with owner information for vet dashboard"""
+        try:
+            # Get all animals with user info
+            response = supabase.table('animals').select('*, users!animals_user_id_fkey(name, email, phone, location)').execute()
+            return response.data if response.data else []
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
+    
+    @staticmethod
+    def get_animal_by_id(animal_id):
+        """Get animal by ID (for vet access) with owner info"""
+        try:
+            response = supabase.table('animals').select('*, users!animals_user_id_fkey(name, email, phone, location, farm_name)').eq('id', animal_id).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    @staticmethod
+    def search_animals(query):
+        """Search animals by ID, name, or animal type"""
+        try:
+            # Try to search by ID first
+            if query.isdigit():
+                response = supabase.table('animals').select('*, users!animals_user_id_fkey(name, email, phone)').eq('id', int(query)).execute()
+                if response.data:
+                    return response.data
+            
+            # Search by name or animal type
+            response = supabase.table('animals').select('*, users!animals_user_id_fkey(name, email, phone)').or_(f'name.ilike.%{query}%,animal_type.ilike.%{query}%').execute()
+            return response.data if response.data else []
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
+    
+    @staticmethod
+    def add_vaccination_by_vet(vet_id, animal_id, data):
+        """Add vaccination record by veterinarian"""
+        try:
+            data['vet_id'] = vet_id
+            data['animal_id'] = animal_id
+            response = supabase.table('vaccinations').insert(data).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    @staticmethod
+    def update_vaccination(vac_id, vet_id, data):
+        """Update vaccination record (only by the vet who created it)"""
+        try:
+            response = supabase.table('vaccinations').update(data).eq('id', vac_id).eq('vet_id', vet_id).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    @staticmethod
+    def delete_vaccination(vac_id, vet_id):
+        """Delete vaccination record (only by the vet who created it)"""
+        try:
+            response = supabase.table('vaccinations').delete().eq('id', vac_id).eq('vet_id', vet_id).execute()
+            return True if response.data else False
+        except Exception as e:
+            print(f"Error: {e}")
+            return False
+    
+    @staticmethod
+    def get_vaccinations_by_vet(vet_id):
+        """Get all vaccinations administered by a specific vet"""
+        try:
+            response = supabase.table('vaccinations').select('*, animals(name, animal_type), users!vaccinations_vet_id_fkey(name)').eq('vet_id', vet_id).order('vaccination_date', desc=True).execute()
+            return response.data if response.data else []
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
+    
+    @staticmethod
+    def get_animal_diagnoses(animal_id):
+        """Get all disease diagnoses for an animal"""
+        try:
+            response = supabase.table('animal_diseases').select('*, diseases(name, description, recommended_treatment, severity), users!animal_diseases_diagnosed_by_vet_id_fkey(name)').eq('animal_id', animal_id).order('date_diagnosed', desc=True).execute()
+            return response.data if response.data else []
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
+    
+    @staticmethod
+    def add_diagnosis(vet_id, animal_id, disease_id, data):
+        """Add disease diagnosis by veterinarian"""
+        try:
+            data['diagnosed_by_vet_id'] = vet_id
+            data['animal_id'] = animal_id
+            data['disease_id'] = disease_id
+            response = supabase.table('animal_diseases').insert(data).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    @staticmethod
+    def update_diagnosis(diagnosis_id, vet_id, data):
+        """Update diagnosis record (only by the vet who created it)"""
+        try:
+            response = supabase.table('animal_diseases').update(data).eq('id', diagnosis_id).eq('diagnosed_by_vet_id', vet_id).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    @staticmethod
+    def get_vet_stats(vet_id):
+        """Get statistics for vet dashboard"""
+        try:
+            # Count vaccinations
+            vac_response = supabase.table('vaccinations').select('id', count='exact').eq('vet_id', vet_id).execute()
+            total_vaccinations = vac_response.count if vac_response.count else 0
+            
+            # Count diagnoses
+            diag_response = supabase.table('animal_diseases').select('id', count='exact').eq('diagnosed_by_vet_id', vet_id).execute()
+            total_diagnoses = diag_response.count if diag_response.count else 0
+            
+            # Count unique animals treated
+            animals_response = supabase.table('vaccinations').select('animal_id').eq('vet_id', vet_id).execute()
+            unique_animals = len(set([a['animal_id'] for a in animals_response.data])) if animals_response.data else 0
+            
+            return {
+                'total_vaccinations': total_vaccinations,
+                'total_diagnoses': total_diagnoses,
+                'unique_animals': unique_animals
+            }
+        except Exception as e:
+            print(f"Error: {e}")
+            return {'total_vaccinations': 0, 'total_diagnoses': 0, 'unique_animals': 0}
+    
+    @staticmethod
+    def get_disease_by_id(disease_id):
+        """Get disease information by ID"""
+        try:
+            response = supabase.table('diseases').select('*').eq('id', disease_id).execute()
+            return response.data[0] if response.data else None
+        except Exception as e:
+            print(f"Error: {e}")
+            return None
+    
+    @staticmethod
+    def search_diseases(query):
+        """Search diseases by name"""
+        try:
+            response = supabase.table('diseases').select('*').ilike('name', f'%{query}%').execute()
+            return response.data if response.data else []
+        except Exception as e:
+            print(f"Error: {e}")
+            return []
 
 # Load user callback for Flask-Login
 @login_manager.user_loader
@@ -789,7 +951,68 @@ LANGUAGES = {
         'already_have_account': 'आधीच खाते आहे?',
         'dont_have_account': 'खाते नाही?',
         'sign_up': 'साइन अप',
-        'sign_in': 'साइन इन'
+        'sign_in': 'साइन इन',
+        
+        # Veterinarian specific translations
+        'vet_dashboard': 'पशुवैद्य डॅशबोर्ड',
+        'search_animal': 'जनावर शोधा',
+        'search_animal_by_id': 'आयडीद्वारे जनावर शोधा',
+        'enter_animal_id': 'जनावर आयडी प्रविष्ट करा',
+        'animal_id': 'जनावर आयडी',
+        'animals_treated': 'उपचार केलेले जनावरे',
+        'vaccinations_given': 'दिलेले लसीकरण',
+        'diagnoses_made': 'केलेले निदान',
+        'recent_vaccinations': 'अलीकडील लसीकरण',
+        'recent_animals': 'अलीकडील जनावरे',
+        'owner': 'मालक',
+        'owner_information': 'मालकाची माहिती',
+        'animal_profile': 'जनावराचे प्रोफाइल',
+        'vaccination_history': 'लसीकरण इतिहास',
+        'diagnosis_history': 'निदान इतिहास',
+        'add_diagnosis': 'निदान जोडा',
+        'disease': 'रोग',
+        'severity': 'तीव्रता',
+        'status': 'स्थिती',
+        'active': 'सक्रिय',
+        'recovering': 'बरे होत आहे',
+        'recovered': 'बरे झाले',
+        'chronic': 'जुनाट',
+        'symptoms_observed': 'निरीक्षण केलेली लक्षणे',
+        'treatment_given': 'दिलेले उपचार',
+        'follow_up_date': 'पाठपुरावा तारीख',
+        'recovery_date': 'पुनर्प्राप्ती तारीख',
+        'diagnosed_by': 'निदान केले',
+        'dose': 'डोस',
+        'batch_number': 'बॅच क्रमांक',
+        'next_due': 'पुढील देय',
+        'view_all': 'सर्व पहा',
+        'no_records': 'कोणतेही रेकॉर्ड नाहीत',
+        'search_results': 'शोध परिणाम',
+        'found': 'सापडले',
+        'matching': 'जुळणारे',
+        'clinic': 'दवाखाना',
+        'license_number': 'परवाना क्रमांक',
+        'view_animal': 'जनावर पहा',
+        'animal_not_found': 'जनावर सापडले नाही',
+        'search_by_id_name_type': 'आयडी, नाव किंवा प्रकारानुसार शोधा',
+        'you_can_also_search': 'तुम्ही नाव किंवा प्रकारानुसार देखील शोधू शकता',
+        'enter_numbers_only': 'कृपया फक्त संख्या प्रविष्ट करा',
+        'view_complete_profile': 'संपूर्ण प्रोफाइल पहा आणि रेकॉर्ड जोडा',
+        'search_animal_btn': 'जनावर शोधा',
+        'back_to_dashboard': 'डॅशबोर्डवर परत',
+        'vaccination_record_added': 'लसीकरण रेकॉर्ड जोडले',
+        'diagnosis_added': 'निदान जोडले',
+        'record_updated': 'रेकॉर्ड अद्यतनित केले',
+        'record_deleted': 'रेकॉर्ड हटवले',
+        'access_denied': 'प्रवेश नाकारला',
+        'vets_only': 'फक्त पशुवैद्यांसाठी',
+        'farmers_only': 'फक्त शेतकऱ्यांसाठी',
+        'e.g.': 'उदा.',
+        'date': 'तारीख',
+        'vaccine': 'लस',
+        'action': 'कृती',
+        'type': 'प्रकार',
+        'id': 'आयडी'
     }
 }
 
@@ -1851,8 +2074,29 @@ def logout():
     return redirect(url_for('index'))
 
 @app.route('/dashboard')
+@app.route('/dashboard')
 @login_required
 def dashboard():
+    """Main dashboard - redirects based on user type"""
+    # Debug logging
+    print(f"Dashboard accessed by user: {current_user.email}, type: {current_user.user_type}")
+    
+    # Check user type and redirect accordingly
+    if current_user.user_type == 'veterinarian':
+        print(f"Redirecting to vet_dashboard")
+        return redirect(url_for('vet_dashboard'))
+    else:
+        print(f"Redirecting to farmer_dashboard")
+        return redirect(url_for('farmer_dashboard'))
+
+@app.route('/farmer/dashboard')
+@login_required
+def farmer_dashboard():
+    """Farmer dashboard with all features"""
+    if current_user.user_type != 'farmer':
+        flash('Access denied. Farmers only.', 'error')
+        return redirect(url_for('dashboard'))
+    
     # Get user statistics
     animals = DB.get_user_animals(current_user.id)
     lands = DB.get_user_lands(current_user.id)
@@ -1883,15 +2127,279 @@ def dashboard():
                          recent_animals=recent_animals,
                          recent_predictions=recent_predictions)
 
+@app.route('/vet/dashboard')
+@login_required
+def vet_dashboard():
+    """Veterinarian dashboard - separate from farmer features"""
+    print(f"Vet dashboard accessed by: {current_user.email}, type: {current_user.user_type}")
+    
+    if current_user.user_type != 'veterinarian':
+        print(f"Access denied - user type is {current_user.user_type}, not veterinarian")
+        flash('Access denied. Veterinarians only.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Get vet statistics
+    stats = DB.get_vet_stats(current_user.id)
+    
+    # Get recent vaccinations by this vet
+    recent_vaccinations = DB.get_vaccinations_by_vet(current_user.id)[:10]
+    
+    # Get all animals (limited view for dashboard)
+    all_animals = DB.get_all_animals_for_vet()[:20]  # Show first 20
+    
+    return render_template('vet/dashboard.html', 
+                         stats=stats,
+                         recent_vaccinations=recent_vaccinations,
+                         all_animals=all_animals)
+
+@app.route('/vet/animal/<int:animal_id>')
+@login_required
+def vet_animal_detail(animal_id):
+    """View animal details for veterinarian"""
+    if current_user.user_type != 'veterinarian':
+        flash('Access denied. Veterinarians only.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    # Get animal with owner info
+    animal = DB.get_animal_by_id(animal_id)
+    if not animal:
+        flash('Animal not found.', 'error')
+        return redirect(url_for('vet_dashboard'))
+    
+    # Get vaccination history
+    vaccinations = DB.get_animal_vaccinations(animal_id)
+    
+    # Get diagnosis history
+    diagnoses = DB.get_animal_diagnoses(animal_id)
+    
+    # Get all diseases for dropdown
+    all_diseases = DB.get_all_diseases()
+    
+    return render_template('vet/animal_detail.html',
+                         animal=animal,
+                         vaccinations=vaccinations,
+                         diagnoses=diagnoses,
+                         all_diseases=all_diseases)
+
+@app.route('/vet/animal/search', methods=['GET', 'POST'])
+@login_required
+def vet_animal_search():
+    """Search for animals by ID or name"""
+    if current_user.user_type != 'veterinarian':
+        flash('Access denied. Veterinarians only.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    if request.method == 'POST':
+        query = request.form.get('search_query', '').strip()
+        if query:
+            animals = DB.search_animals(query)
+            if len(animals) == 1:
+                # If only one result, redirect to animal detail
+                return redirect(url_for('vet_animal_detail', animal_id=animals[0]['id']))
+            return render_template('vet/search_results.html', animals=animals, query=query)
+        else:
+            flash('Please enter a search query.', 'warning')
+    
+    return render_template('vet/search.html')
+
+@app.route('/vet/vaccinate', methods=['POST'])
+@login_required
+def vet_add_vaccination():
+    """Add vaccination record"""
+    if current_user.user_type != 'veterinarian':
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    try:
+        animal_id = request.form.get('animal_id')
+        vaccine_name = request.form.get('vaccine_name')
+        dose = request.form.get('dose', '')
+        batch_number = request.form.get('batch_number', '')
+        vaccination_date = request.form.get('vaccination_date')
+        next_due_date = request.form.get('next_due_date', None)
+        notes = request.form.get('notes', '')
+        
+        if not all([animal_id, vaccine_name, vaccination_date]):
+            flash('Please fill in all required fields.', 'error')
+            return redirect(request.referrer or url_for('vet_dashboard'))
+        
+        data = {
+            'vaccine_name': vaccine_name,
+            'dose': dose,
+            'batch_number': batch_number,
+            'vaccination_date': vaccination_date,
+            'next_due_date': next_due_date if next_due_date else None,
+            'administered_by': current_user.name,
+            'notes': notes
+        }
+        
+        result = DB.add_vaccination_by_vet(current_user.id, int(animal_id), data)
+        
+        if result:
+            flash('Vaccination record added successfully!', 'success')
+        else:
+            flash('Failed to add vaccination record.', 'error')
+        
+        return redirect(url_for('vet_animal_detail', animal_id=animal_id))
+    
+    except Exception as e:
+        print(f"Error adding vaccination: {e}")
+        flash('An error occurred while adding vaccination.', 'error')
+        return redirect(request.referrer or url_for('vet_dashboard'))
+
+@app.route('/vet/vaccinate/<int:vac_id>/edit', methods=['POST'])
+@login_required
+def vet_edit_vaccination(vac_id):
+    """Edit vaccination record"""
+    if current_user.user_type != 'veterinarian':
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    try:
+        data = {
+            'vaccine_name': request.form.get('vaccine_name'),
+            'dose': request.form.get('dose', ''),
+            'batch_number': request.form.get('batch_number', ''),
+            'vaccination_date': request.form.get('vaccination_date'),
+            'next_due_date': request.form.get('next_due_date', None),
+            'notes': request.form.get('notes', '')
+        }
+        
+        result = DB.update_vaccination(vac_id, current_user.id, data)
+        
+        if result:
+            flash('Vaccination record updated successfully!', 'success')
+        else:
+            flash('Failed to update vaccination record.', 'error')
+        
+        return redirect(request.referrer or url_for('vet_dashboard'))
+    
+    except Exception as e:
+        print(f"Error updating vaccination: {e}")
+        flash('An error occurred while updating vaccination.', 'error')
+        return redirect(request.referrer or url_for('vet_dashboard'))
+
+@app.route('/vet/vaccinate/<int:vac_id>/delete', methods=['POST'])
+@login_required
+def vet_delete_vaccination(vac_id):
+    """Delete vaccination record"""
+    if current_user.user_type != 'veterinarian':
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    try:
+        result = DB.delete_vaccination(vac_id, current_user.id)
+        
+        if result:
+            flash('Vaccination record deleted successfully!', 'success')
+        else:
+            flash('Failed to delete vaccination record.', 'error')
+        
+        return redirect(request.referrer or url_for('vet_dashboard'))
+    
+    except Exception as e:
+        print(f"Error deleting vaccination: {e}")
+        flash('An error occurred while deleting vaccination.', 'error')
+        return redirect(request.referrer or url_for('vet_dashboard'))
+
+@app.route('/vet/diagnose', methods=['POST'])
+@login_required
+def vet_add_diagnosis():
+    """Add disease diagnosis"""
+    if current_user.user_type != 'veterinarian':
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    try:
+        animal_id = request.form.get('animal_id')
+        disease_id = request.form.get('disease_id')
+        date_diagnosed = request.form.get('date_diagnosed')
+        severity = request.form.get('severity', 'medium')
+        status = request.form.get('status', 'active')
+        symptoms_observed = request.form.get('symptoms_observed', '')
+        treatment_given = request.form.get('treatment_given', '')
+        notes = request.form.get('notes', '')
+        follow_up_date = request.form.get('follow_up_date', None)
+        
+        if not all([animal_id, disease_id, date_diagnosed]):
+            flash('Please fill in all required fields.', 'error')
+            return redirect(request.referrer or url_for('vet_dashboard'))
+        
+        data = {
+            'date_diagnosed': date_diagnosed,
+            'severity': severity,
+            'status': status,
+            'symptoms_observed': symptoms_observed,
+            'treatment_given': treatment_given,
+            'notes': notes,
+            'follow_up_date': follow_up_date if follow_up_date else None
+        }
+        
+        result = DB.add_diagnosis(current_user.id, int(animal_id), int(disease_id), data)
+        
+        if result:
+            flash('Diagnosis added successfully!', 'success')
+        else:
+            flash('Failed to add diagnosis.', 'error')
+        
+        return redirect(url_for('vet_animal_detail', animal_id=animal_id))
+    
+    except Exception as e:
+        print(f"Error adding diagnosis: {e}")
+        flash('An error occurred while adding diagnosis.', 'error')
+        return redirect(request.referrer or url_for('vet_dashboard'))
+
+@app.route('/vet/diagnose/<int:diagnosis_id>/update', methods=['POST'])
+@login_required
+def vet_update_diagnosis(diagnosis_id):
+    """Update diagnosis status"""
+    if current_user.user_type != 'veterinarian':
+        return jsonify({'success': False, 'message': 'Access denied'}), 403
+    
+    try:
+        data = {
+            'status': request.form.get('status'),
+            'treatment_given': request.form.get('treatment_given', ''),
+            'notes': request.form.get('notes', ''),
+            'recovery_date': request.form.get('recovery_date', None)
+        }
+        
+        result = DB.update_diagnosis(diagnosis_id, current_user.id, data)
+        
+        if result:
+            flash('Diagnosis updated successfully!', 'success')
+        else:
+            flash('Failed to update diagnosis.', 'error')
+        
+        return redirect(request.referrer or url_for('vet_dashboard'))
+    
+    except Exception as e:
+        print(f"Error updating diagnosis: {e}")
+        flash('An error occurred while updating diagnosis.', 'error')
+        return redirect(request.referrer or url_for('vet_dashboard'))
+
+@app.route('/vet/vaccinations')
+@login_required
+def vet_vaccinations_list():
+    """List all vaccinations by this vet"""
+    if current_user.user_type != 'veterinarian':
+        flash('Access denied. Veterinarians only.', 'error')
+        return redirect(url_for('dashboard'))
+    
+    vaccinations = DB.get_vaccinations_by_vet(current_user.id)
+    return render_template('vet/vaccinations_list.html', vaccinations=vaccinations)
+
 @app.route('/animals')
 @login_required
 def animals():
+    if current_user.user_type != 'farmer':
+        flash('Access denied. Farmers only.', 'error')
+        return redirect(url_for('dashboard'))
     user_animals = DB.get_user_animals(current_user.id)
     return render_template('dashboard/animals.html', animals=user_animals)
 
 @app.route('/add_animal', methods=['GET', 'POST'])
 @login_required
 def add_animal():
+    if current_user.user_type != 'farmer':
+        flash('Access denied. Farmers only.', 'error')
+        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         data = request.get_json() if request.is_json else request.form
         
@@ -1931,12 +2439,18 @@ def add_animal():
 @app.route('/lands')
 @login_required
 def lands():
+    if current_user.user_type != 'farmer':
+        flash('Access denied. Farmers only.', 'error')
+        return redirect(url_for('dashboard'))
     user_lands = DB.get_user_lands(current_user.id)
     return render_template('dashboard/lands.html', lands=user_lands)
 
 @app.route('/add_land', methods=['GET', 'POST'])
 @login_required
 def add_land():
+    if current_user.user_type != 'farmer':
+        flash('Access denied. Farmers only.', 'error')
+        return redirect(url_for('dashboard'))
     if request.method == 'POST':
         data = request.get_json() if request.is_json else request.form
         
