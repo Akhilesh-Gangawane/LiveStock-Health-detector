@@ -43,7 +43,7 @@ except Exception:
 
 # Settings
 RANDOM_STATE = 42
-RARE_LABEL_THRESHOLD = 5      # merge disease labels with count < this into 'Other'
+RARE_LABEL_THRESHOLD = 3      # merge disease labels with count < this into 'Other' (lowered from 5 to keep more diseases)
 TEST_SIZE = 0.15
 CALIB_SIZE = 0.15              # portion of full dataset (we will do stratified splits accordingly)
 VERBOSE = True
@@ -316,7 +316,9 @@ for animal in sorted(df['Animal_Type'].unique()):
     X_test_s_sc = scaler_synd.transform(X_test_s) if len(X_test_s) > 0 else X_test_s
 
     # Train base syndrome model (RandomForest) — simple & robust
-    rf_synd = RandomForestClassifier(n_estimators=200, class_weight='balanced', random_state=RANDOM_STATE)
+    # Increased n_estimators and added max_depth for better confidence
+    rf_synd = RandomForestClassifier(n_estimators=300, max_depth=15, min_samples_split=2, 
+                                      class_weight='balanced', random_state=RANDOM_STATE)
     rf_synd.fit(X_train_s_sc, y_train_s)
     
     # Calibrate using held-out calibration set (cv='prefit')
@@ -441,8 +443,9 @@ for animal in sorted(df['Animal_Type'].unique()):
 
         # Train ensemble of 3 base estimators (RF, XGB, LGBM) and average predicted probabilities
         models = {}
-        # RandomForest
-        rf = RandomForestClassifier(n_estimators=200, class_weight='balanced', random_state=RANDOM_STATE)
+        # RandomForest - increased complexity for better confidence
+        rf = RandomForestClassifier(n_estimators=300, max_depth=15, min_samples_split=2,
+                                     class_weight='balanced', random_state=RANDOM_STATE)
         rf.fit(X_res, y_res)
         # Calibrate RF with held-out calibration set if possible
         try:
