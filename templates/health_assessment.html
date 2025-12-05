@@ -206,8 +206,8 @@
                     <label class="form-label">{{ get_text('animal_type') }} *</label>
                     <select class="form-select" id="animal_type" name="animal_type" required>
                         <option value="">{{ get_text('select_animal_type') }}</option>
-                        {% for animal in animals %}
-                            <option value="{{ animal }}">{{ animal }}</option>
+                        {% for animal_en, animal_display in animals_data %}
+                            <option value="{{ animal_en }}">{{ animal_display }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -251,8 +251,8 @@
                     <label class="form-label">{{ get_text('primary_symptom') }} *</label>
                     <select class="form-select" name="symptom1" required>
                         <option value="">{{ get_text('select_primary_symptom') }}</option>
-                        {% for symptom in symptoms %}
-                            <option value="{{ symptom }}" {% if symptom == 'Cough' %}selected{% endif %}>{{ symptom }}</option>
+                        {% for symptom_en, symptom_display in symptoms_data %}
+                            <option value="{{ symptom_en }}" {% if symptom_en == 'Cough' %}selected{% endif %}>{{ symptom_display }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -260,8 +260,8 @@
                     <label class="form-label">{{ get_text('secondary_symptom') }} *</label>
                     <select class="form-select" name="symptom2" required>
                         <option value="">{{ get_text('select_secondary_symptom') }}</option>
-                        {% for symptom in symptoms %}
-                            <option value="{{ symptom }}" {% if symptom == 'Lethargy' %}selected{% endif %}>{{ symptom }}</option>
+                        {% for symptom_en, symptom_display in symptoms_data %}
+                            <option value="{{ symptom_en }}" {% if symptom_en == 'Lethargy' %}selected{% endif %}>{{ symptom_display }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -269,8 +269,8 @@
                     <label class="form-label">{{ get_text('additional_symptom') }} *</label>
                     <select class="form-select" name="symptom3" required>
                         <option value="">{{ get_text('select_additional_symptom') }}</option>
-                        {% for symptom in symptoms %}
-                            <option value="{{ symptom }}" {% if symptom == 'Loss of appetite' %}selected{% endif %}>{{ symptom }}</option>
+                        {% for symptom_en, symptom_display in symptoms_data %}
+                            <option value="{{ symptom_en }}" {% if symptom_en == 'Loss of appetite' %}selected{% endif %}>{{ symptom_display }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -278,8 +278,8 @@
                     <label class="form-label">{{ get_text('other_symptom') }} *</label>
                     <select class="form-select" name="symptom4" required>
                         <option value="">{{ get_text('select_other_symptom') }}</option>
-                        {% for symptom in symptoms %}
-                            <option value="{{ symptom }}" {% if symptom == 'Nasal discharge' %}selected{% endif %}>{{ symptom }}</option>
+                        {% for symptom_en, symptom_display in symptoms_data %}
+                            <option value="{{ symptom_en }}" {% if symptom_en == 'Nasal discharge' %}selected{% endif %}>{{ symptom_display }}</option>
                         {% endfor %}
                     </select>
                 </div>
@@ -428,13 +428,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     
                     try {
                         const response = await fetch(`/get_breeds/${animalType}`);
-                        const breeds = await response.json();
+                        const breedsData = await response.json();
                         
                         breedSelect.innerHTML = '<option value="">Select Breed</option>';
-                        breeds.forEach(breed => {
+                        breedsData.forEach(([breedValue, breedDisplay]) => {
                             const option = document.createElement('option');
-                            option.value = breed;
-                            option.textContent = breed;
+                            option.value = breedValue;
+                            option.textContent = breedDisplay;
                             breedSelect.appendChild(option);
                         });
                     } catch (error) {

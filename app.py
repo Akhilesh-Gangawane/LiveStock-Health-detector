@@ -1530,10 +1530,15 @@ class AnimalSpecificDiseasePredictor:
 # Global variables
 predictor = None
 breed_data = {}
+breed_data_mr = {}  # Marathi breed names
+symptom_translations = {}  # Symptom translations
+animal_translations = {}  # Animal type translations
+breed_translations = {}  # Breed translations
 
 # Voice quiz variables
 voice_quiz_sessions = {}
 tts_lock = threading.Lock()
+tts_engine_ref = {'engine': None, 'speaking': False}  # Global TTS engine reference
 recognizer = sr.Recognizer()
 
 # Voice quiz questions (English and Marathi)
@@ -1636,7 +1641,7 @@ VOICE_QUIZ_QUESTIONS = [
 
 def load_and_train_model():
     """Load pre-trained hierarchical models and display accuracy metrics"""
-    global predictor, breed_data
+    global predictor, breed_data, breed_data_mr, symptom_translations, animal_translations, breed_translations
     
     print("Loading Pre-trained Hierarchical Disease Prediction Models...")
     print("=" * 60)
@@ -1645,10 +1650,166 @@ def load_and_train_model():
         # Load breed data from CSV
         df = pd.read_csv('cleaned_animal_disease_prediction.csv')
         
+        # Animal type translations
+        animal_translations = {
+            'Dog': 'कुत्रा',
+            'Cat': 'मांजर',
+            'Cow': 'गाय',
+            'Horse': 'घोडा',
+            'Rabbit': 'ससा',
+            'Sheep': 'मेंढी',
+            'Goat': 'शेळी',
+            'Pig': 'डुकर'
+        }
+        
+        # Common breed translations (can be expanded)
+        breed_translations = {
+            # Dog breeds
+            'Labrador': 'लॅब्राडोर',
+            'German Shepherd': 'जर्मन शेफर्ड',
+            'Golden Retriever': 'गोल्डन रिट्रीव्हर',
+            'Beagle': 'बीगल',
+            'Bulldog': 'बुलडॉग',
+            'Poodle': 'पूडल',
+            'Rottweiler': 'रॉटवेलर',
+            'Chihuahua': 'चिहुआहुआ',
+            'Dachshund': 'डॅचशंड',
+            'Boxer': 'बॉक्सर',
+            'Husky': 'हस्की',
+            'Doberman Pinscher': 'डोबरमन पिंशर',
+            'Pit Bull': 'पिट बुल',
+            'Corgi': 'कॉर्गी',
+            'Shih Tzu': 'शिह त्झू',
+            'Border Collie': 'बॉर्डर कॉली',
+            'Cocker Spaniel': 'कॉकर स्पॅनियल',
+            'Dalmatian': 'डाल्मेशियन',
+            'Akita': 'अकिता',
+            # Cat breeds
+            'Siamese': 'सियामीज',
+            'Persian': 'पर्शियन',
+            'Maine Coon': 'मेन कून',
+            'Bengal': 'बंगाल',
+            'Ragdoll': 'रॅगडॉल',
+            'British Shorthair': 'ब्रिटिश शॉर्टहेअर',
+            'Abyssinian': 'अबिसिनियन',
+            'Sphynx': 'स्फिंक्स',
+            'Scottish Fold': 'स्कॉटिश फोल्ड',
+            'Russian Blue': 'रशियन ब्लू',
+            'Burmese': 'बर्मीज',
+            'American Curl': 'अमेरिकन कर्ल',
+            'Manx': 'मँक्स',
+            'Bombay': 'बॉम्बे',
+            'Devon Rex': 'डेव्हन रेक्स',
+            'Siberian': 'सायबेरियन',
+            # Cow breeds
+            'Holstein': 'होल्स्टीन',
+            'Jersey': 'जर्सी',
+            'Angus': 'अँगस',
+            'Hereford': 'हेरफोर्ड',
+            'Simmental': 'सिमेंटल',
+            'Brahman': 'ब्राह्मण',
+            'Charolais': 'शॅरोलेस',
+            'Limousin': 'लिमोसिन',
+            'Guernsey': 'ग्वेर्नसे',
+            'Brown Swiss': 'ब्राउन स्विस',
+            'Red Angus': 'रेड अँगस',
+            'Shorthorn': 'शॉर्टहॉर्न',
+            'Aberdeen Angus': 'अॅबरडीन अँगस',
+            # Horse breeds
+            'Thoroughbred': 'थरोब्रेड',
+            'Arabian': 'अरेबियन',
+            'Quarter Horse': 'क्वार्टर हॉर्स',
+            'Clydesdale': 'क्लाइड्सडेल',
+            'Appaloosa': 'अॅपलूसा',
+            'Morgan': 'मॉर्गन',
+            'Standardbred': 'स्टँडर्डब्रेड',
+            'Percheron': 'पर्चेरॉन',
+            'Tennessee Walker': 'टेनेसी वॉकर',
+            'Welsh Pony': 'वेल्श पोनी',
+            'Shetland Pony': 'शेटलँड पोनी',
+            'Paint': 'पेंट',
+            'Pinto': 'पिंटो',
+            'Mustang': 'मस्टँग',
+            'Belgian': 'बेल्जियन',
+            'Shire': 'शायर',
+            # Sheep breeds
+            'Merino': 'मेरिनो',
+            'Suffolk': 'सफोक',
+            'Dorper': 'डॉर्पर',
+            'Cheviot': 'शेव्हिओट',
+            'Romney': 'रॉमनी',
+            'Lincoln': 'लिंकन',
+            'Texel': 'टेक्सेल',
+            'Dorset': 'डॉर्सेट',
+            'Finnsheep': 'फिनशीप',
+            'Leicester Longwool': 'लीसेस्टर लाँगवूल',
+            'Border Leicester': 'बॉर्डर लीसेस्टर',
+            # Goat breeds
+            'Boer': 'बोअर',
+            'Alpine': 'अल्पाइन',
+            'Nubian': 'न्युबियन',
+            'Toggenburg': 'टोगेनबर्ग',
+            'Saanen': 'सानेन',
+            'LaMancha': 'लामांचा',
+            'Kiko': 'किको',
+            'Nigerian Dwarf': 'नायजेरियन ड्वार्फ',
+            # Pig breeds
+            'Yorkshire': 'यॉर्कशायर',
+            'Duroc': 'ड्युरॉक',
+            'Berkshire': 'बर्कशायर',
+            'Tamworth': 'टॅमवर्थ',
+            'Poland China': 'पोलंड चायना',
+            'Landrace': 'लँडरेस',
+            'Large White': 'लार्ज व्हाइट',
+            'Wessex Saddleback': 'वेसेक्स सॅडलबॅक',
+            # Rabbit breeds
+            'Holland Lop': 'हॉलंड लॉप',
+            'Mini Rex': 'मिनी रेक्स',
+            'Flemish Giant': 'फ्लेमिश जायंट',
+            'English Angora': 'इंग्लिश अँगोरा',
+            'Himalayan': 'हिमालयन',
+            'Dutch': 'डच',
+            'Mini Lop': 'मिनी लॉप',
+            'English Spot': 'इंग्लिश स्पॉट',
+            # Generic
+            'Mixed': 'मिश्र'
+        }
+        
         breed_data = {}
+        breed_data_mr = {}
         for animal in df['Animal_Type'].unique():
             breeds = df[df['Animal_Type'] == animal]['Breed'].unique().tolist()
             breed_data[animal] = sorted(breeds)
+            # Translate breeds to Marathi
+            breed_data_mr[animal] = sorted([breed_translations.get(b, b) for b in breeds])
+        
+        # Create symptom translations dictionary
+        symptom_translations = {
+            'Fever': 'ताप',
+            'Cough': 'खोकला',
+            'Lethargy': 'सुस्ती',
+            'Loss of appetite': 'भूक न लागणे',
+            'Appetite Loss': 'भूक न लागणे',
+            'Vomiting': 'उलट्या',
+            'Diarrhea': 'अतिसार',
+            'Nasal discharge': 'नाकातून स्राव',
+            'Nasal Discharge': 'नाकातून स्राव',
+            'Eye discharge': 'डोळ्यातून स्राव',
+            'Eye Discharge': 'डोळ्यातून स्राव',
+            'Labored breathing': 'कष्टकरी श्वास',
+            'Labored Breathing': 'कष्टकरी श्वास',
+            'Lameness': 'लंगडेपणा',
+            'Skin lesions': 'त्वचेवर जखम',
+            'Skin Lesions': 'त्वचेवर जखम',
+            'Swelling': 'सूज',
+            'Excessive drooling': 'जास्त लाळ येणे',
+            'Seizures': 'फिट येणे',
+            'Coughing': 'खोकला',
+            'Sneezing': 'शिंका येणे',
+            'Weight Loss': 'वजन कमी होणे',
+            'Dehydration': 'निर्जलीकरण',
+            'None': 'काहीही नाही'
+        }
         
         print("Loaded breeds from CSV:")
         for animal, breeds in breed_data.items():
@@ -1794,11 +1955,16 @@ def initialize_database():
 # Voice Quiz Helper Functions
 def speak_text_voice_quiz(text, language='en'):
     """Speak text using pyttsx3 with thread safety"""
+    global tts_engine_ref
+    
     def _speak():
         with tts_lock:
             engine = None
             try:
                 engine = pyttsx3.init()
+                tts_engine_ref['engine'] = engine
+                tts_engine_ref['speaking'] = True
+                
                 if language == 'mr':
                     voices = engine.getProperty('voices')
                     for voice in voices:
@@ -1817,6 +1983,8 @@ def speak_text_voice_quiz(text, language='en'):
             except Exception as e:
                 print(f"[TTS ERROR] {e}")
             finally:
+                tts_engine_ref['speaking'] = False
+                tts_engine_ref['engine'] = None
                 if engine:
                     try:
                         engine.stop()
@@ -2133,14 +2301,31 @@ def index():
 @app.route('/health_assessment')
 def health_assessment():
     """Health assessment page"""
-    animals = list(breed_data.keys()) if breed_data else ['Dog', 'Cat', 'Cow', 'Horse']
-    symptoms = [
+    animals_en = list(breed_data.keys()) if breed_data else ['Dog', 'Cat', 'Cow', 'Horse']
+    symptoms_en = [
         'Fever', 'Cough', 'Lethargy', 'Loss of appetite', 'Vomiting', 'Diarrhea',
         'Nasal discharge', 'Eye discharge', 'Labored breathing', 'Lameness',
         'Skin lesions', 'Swelling', 'Excessive drooling', 'Seizures'
     ]
     
-    return render_template('health_assessment.html', animals=animals, symptoms=symptoms)
+    # Get current language
+    lang = get_language()
+    
+    # Translate animals if Marathi
+    if lang == 'mr' and animal_translations:
+        animals_data = [(a, animal_translations.get(a, a)) for a in animals_en]
+    else:
+        animals_data = [(a, a) for a in animals_en]
+    
+    # Translate symptoms if Marathi
+    if lang == 'mr' and symptom_translations:
+        symptoms = [symptom_translations.get(s, s) for s in symptoms_en]
+        symptoms_data = list(zip(symptoms_en, symptoms))
+    else:
+        symptoms = symptoms_en
+        symptoms_data = list(zip(symptoms_en, symptoms_en))
+    
+    return render_template('health_assessment.html', animals_data=animals_data, symptoms=symptoms, symptoms_data=symptoms_data)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -2784,8 +2969,24 @@ def predict():
 
 @app.route('/get_breeds/<animal_type>')
 def get_breeds(animal_type):
-    breeds = breed_data.get(animal_type, [])
-    return jsonify(breeds)
+    lang = get_language()
+    breeds_en = breed_data.get(animal_type, [])
+    
+    if lang == 'mr' and breed_translations:
+        # Return array of [english_value, marathi_display]
+        breeds_data = [[b, breed_translations.get(b, b)] for b in breeds_en]
+    else:
+        breeds_data = [[b, b] for b in breeds_en]
+    
+    return jsonify(breeds_data)
+
+@app.route('/get_symptoms_translated')
+def get_symptoms_translated():
+    """Get symptom translations for current language"""
+    lang = get_language()
+    if lang == 'mr' and symptom_translations:
+        return jsonify(symptom_translations)
+    return jsonify({})
 
 @app.route('/model_status')
 def model_status():
@@ -3201,6 +3402,23 @@ def voice_quiz_speak():
         return jsonify({"success": True})
     
     return jsonify({"success": False, "error": "No text provided"}), 400
+
+@app.route('/voice_quiz_stop', methods=['POST'])
+def voice_quiz_stop():
+    """Stop speaking"""
+    global tts_engine_ref
+    try:
+        # Try to stop any ongoing TTS
+        if tts_engine_ref['speaking'] and tts_engine_ref['engine']:
+            try:
+                tts_engine_ref['engine'].stop()
+                tts_engine_ref['speaking'] = False
+                print("[TTS] Speech stopped by user")
+            except Exception as e:
+                print(f"[TTS] Error stopping speech: {e}")
+        return jsonify({"success": True})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 @app.route('/voice_quiz_result')
 def voice_quiz_result():

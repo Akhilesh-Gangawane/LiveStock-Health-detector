@@ -29,11 +29,11 @@ class PashuCareEnhanced {
                     
                     try {
                         const response = await fetch(`/get_breeds/${animalType}`);
-                        const breeds = await response.json();
+                        const breedsData = await response.json();
                         
-                        this.populateBreeds(breedSelect, breeds);
+                        this.populateBreeds(breedSelect, breedsData);
                         this.animateElement(breedSelect, 'fadeInUp');
-                        this.showNotification(`Loaded ${breeds.length} breeds for ${animalType}`, 'success');
+                        this.showNotification(`Loaded ${breedsData.length} breeds for ${animalType}`, 'success');
                     } catch (error) {
                         console.error('Error loading breeds:', error);
                         breedSelect.innerHTML = '<option value="">Error loading breeds</option>';
@@ -57,13 +57,14 @@ class PashuCareEnhanced {
         element.classList.add('loading');
     }
 
-    populateBreeds(breedSelect, breeds) {
+    populateBreeds(breedSelect, breedsData) {
         breedSelect.innerHTML = '<option value="">Select Breed</option>';
-        breeds.forEach((breed, index) => {
+        breedsData.forEach((breedPair, index) => {
             setTimeout(() => {
                 const option = document.createElement('option');
-                option.value = breed;
-                option.textContent = breed;
+                // breedPair is [english_value, display_text]
+                option.value = breedPair[0];
+                option.textContent = breedPair[1];
                 breedSelect.appendChild(option);
             }, index * 50); // Staggered animation
         });

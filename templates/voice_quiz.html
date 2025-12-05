@@ -130,6 +130,18 @@
         transform: translateY(-2px);
     }
     
+    .voice-btn-stop {
+        background: #ff4444;
+        color: white;
+        border: 2px solid #cc0000;
+    }
+    
+    .voice-btn-stop:hover {
+        background: #cc0000;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(255, 68, 68, 0.4);
+    }
+    
     .voice-btn:disabled {
         opacity: 0.5;
         cursor: not-allowed;
@@ -259,6 +271,10 @@
                     <button class="voice-btn voice-btn-secondary" id="speakQuestionBtn" onclick="speakQuestion()">
                         <i class="fas fa-volume-up"></i>
                         {{ get_text('repeat_question') if current_language == 'en' else 'प्रश्न पुन्हा ऐका' }}
+                    </button>
+                    <button class="voice-btn voice-btn-stop" id="stopSpeakBtn" onclick="stopSpeaking()" style="display: none;">
+                        <i class="fas fa-stop-circle"></i>
+                        {{ get_text('stop') if current_language == 'en' else 'थांबवा' }}
                     </button>
                 </div>
             </div>
@@ -398,17 +414,55 @@ function selectOption(option, btn) {
     btn.classList.add('selected');
 }
 
+let isSpeaking = false;
+
 function speakQuestion() {
     const question = questions[currentQuestionIndex];
-    const questionText = currentLanguage === 'mr' ? question.question_mr : question.question;
+    // Always speak in English, regardless of display language
+    const questionText = question.question;
+    
+    isSpeaking = true;
+    const stopBtn = document.getElementById('stopSpeakBtn');
+    const speakBtn = document.getElementById('speakQuestionBtn');
+    
+    if (stopBtn) stopBtn.style.display = 'inline-flex';
+    if (speakBtn) speakBtn.disabled = true;
     
     fetch('/voice_quiz_speak', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
             text: questionText,
-            language: currentLanguage
+            language: 'en'  // Always use English for speech
         })
+    }).then(() => {
+        isSpeaking = false;
+        if (stopBtn) stopBtn.style.display = 'none';
+        if (speakBtn) speakBtn.disabled = false;
+    }).catch((error) => {
+        console.error('Speech error:', error);
+        isSpeaking = false;
+        if (stopBtn) stopBtn.style.display = 'none';
+        if (speakBtn) speakBtn.disabled = false;
+    });
+}
+
+function stopSpeaking() {
+    const stopBtn = document.getElementById('stopSpeakBtn');
+    const speakBtn = document.getElementById('speakQuestionBtn');
+    
+    fetch('/voice_quiz_stop', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'}
+    }).then(() => {
+        isSpeaking = false;
+        if (stopBtn) stopBtn.style.display = 'none';
+        if (speakBtn) speakBtn.disabled = false;
+    }).catch((error) => {
+        console.error('Stop error:', error);
+        isSpeaking = false;
+        if (stopBtn) stopBtn.style.display = 'none';
+        if (speakBtn) speakBtn.disabled = false;
     });
 }
 
