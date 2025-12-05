@@ -1297,14 +1297,16 @@ class AnimalSpecificDiseasePredictor:
         # Handle trivial case (only one disease)
         if model_info.get('type') == 'trivial':
             disease = model_info['disease']
+            # Boost confidence for trivial cases with high syndrome confidence
+            trivial_confidence = 0.90 if synd_conf > 0.7 else 0.85
             return {
                 'animal_type': animal_type,
                 'predicted_disease': disease,
-                'confidence': 0.85,  # High but not 100%
+                'confidence': trivial_confidence,
                 'model_accuracy': '85-95%',
                 'syndrome': syndrome_label,
                 'syndrome_confidence': synd_conf,
-                'top_3_predictions': [{'disease': disease, 'probability': 0.85}],
+                'top_3_predictions': [{'disease': disease, 'probability': trivial_confidence}],
                 'vital_signs_analysis': self._get_vital_signs_analysis(input_data),
                 'syndrome_analysis': self._get_syndrome_analysis(input_data),
                 'condition_severity': self._get_condition_severity(input_data)
@@ -1364,16 +1366,23 @@ class AnimalSpecificDiseasePredictor:
         predicted_disease = le_disease.inverse_transform([best_idx])[0]
         confidence = float(avg_proba[best_idx])
         
-        # Adjust confidence based on syndrome confidence (compound probability)
-        adjusted_confidence = confidence * synd_conf
+        # Adjust confidence based on syndrome confidence (use weighted average instead of multiplication)
+        # This prevents double penalty: if both are 70%, result is 70% not 49%
+        adjusted_confidence = 0.7 * confidence + 0.3 * synd_conf
+        
+        # Apply minimum confidence boost for high-confidence predictions
+        if confidence > 0.75 and synd_conf > 0.6:
+            adjusted_confidence = max(adjusted_confidence, 0.75)
         
         # Get top 3 predictions
         top_indices = np.argsort(avg_proba)[::-1][:3]
         top_predictions = []
         for idx in top_indices:
             disease = le_disease.inverse_transform([int(idx)])[0]
-            prob = float(avg_proba[int(idx)]) * synd_conf  # Adjust by syndrome confidence
-            top_predictions.append({'disease': disease, 'probability': prob})
+            prob = float(avg_proba[int(idx)])
+            # Use same weighted approach for top predictions
+            adjusted_prob = 0.7 * prob + 0.3 * synd_conf
+            top_predictions.append({'disease': disease, 'probability': adjusted_prob})
         
         return {
             'animal_type': animal_type,
