@@ -9,7 +9,7 @@
     
     .result-card {
         border: none;
-        border-radius: var(--border-radius-lg);
+        border-radius: var(--radius-lg);
         box-shadow: var(--shadow-lg);
         margin-bottom: 2rem;
         overflow: hidden;
@@ -22,11 +22,24 @@
     }
     
     .result-header {
-        background: var(--bg-gradient-primary);
+        background: var(--gradient-primary);
         color: white;
         padding: 1.5rem;
         position: relative;
         overflow: hidden;
+    }
+    
+    /* Ensure text visibility in light mode */
+    .result-header h3,
+    .result-header h4,
+    .result-header p {
+        color: white !important;
+        text-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+    
+    .result-header .opacity-90 {
+        opacity: 1 !important;
+        color: rgba(255, 255, 255, 0.95) !important;
     }
     
     .result-header::before {
@@ -48,7 +61,7 @@
     .confidence-meter {
         position: relative;
         height: 20px;
-        background: var(--grey-200);
+        background: var(--border);
         border-radius: 10px;
         overflow: hidden;
         margin: 0.5rem 0;
@@ -80,7 +93,7 @@
     
     .prediction-card {
         border: 2px solid transparent;
-        border-radius: var(--border-radius-md);
+        border-radius: var(--radius-md);
         transition: var(--transition);
         height: 100%;
         position: relative;
@@ -102,8 +115,8 @@
         align-items: center;
         gap: 0.5rem;
         padding: 0.5rem 1rem;
-        border-radius: var(--border-radius-md);
-        font-weight: var(--font-weight-medium);
+        border-radius: var(--radius-md);
+        font-weight: 500;
         margin: 0.25rem;
         transition: var(--transition);
     }
@@ -132,8 +145,8 @@
         align-items: center;
         gap: 1rem;
         padding: 0.75rem;
-        background: var(--grey-50);
-        border-radius: var(--border-radius-sm);
+        background: var(--background);
+        border-radius: var(--radius-sm);
         margin: 0.5rem 0;
     }
     
@@ -144,7 +157,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
-        font-weight: var(--font-weight-bold);
+        font-weight: 700;
         color: white;
         font-size: 0.9rem;
     }
@@ -157,10 +170,10 @@
     }
     
     .summary-section {
-        background: var(--grey-50);
+        background: var(--background);
         padding: 1.5rem;
-        border-radius: var(--border-radius-md);
-        border-left: 4px solid var(--primary-green);
+        border-radius: var(--radius-md);
+        border-left: 4px solid var(--primary);
     }
     
     .symptom-list {
@@ -176,13 +189,13 @@
         gap: 0.5rem;
         padding: 0.5rem;
         background: white;
-        border-radius: var(--border-radius-sm);
-        border: 1px solid var(--grey-200);
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border);
         transition: var(--transition);
     }
     
     .symptom-item:hover {
-        background: var(--primary-green-light);
+        background: var(--primary-light);
         transform: translateX(5px);
     }
     
@@ -196,11 +209,83 @@
     
     .action-btn {
         padding: 1rem 2rem;
-        border-radius: var(--border-radius-md);
-        font-weight: var(--font-weight-semibold);
+        border-radius: var(--radius-md);
+        font-weight: 600;
         transition: var(--transition);
         position: relative;
         overflow: hidden;
+        border: 2px solid transparent;
+    }
+    
+    /* Enhanced button visibility for light mode */
+    .action-btn.btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: white;
+    }
+    
+    .action-btn.btn-outline-primary:hover {
+        background: var(--primary);
+        color: white;
+        border-color: var(--primary);
+    }
+    
+    .action-btn.btn-outline-info {
+        border-color: var(--info);
+        color: var(--info);
+        background: white;
+    }
+    
+    .action-btn.btn-outline-info:hover {
+        background: var(--info);
+        color: white;
+        border-color: var(--info);
+    }
+    
+    .action-btn.btn-outline-success {
+        border-color: var(--success);
+        color: var(--success);
+        background: white;
+    }
+    
+    .action-btn.btn-outline-success:hover {
+        background: var(--success);
+        color: white;
+        border-color: var(--success);
+    }
+    
+    /* Dark mode button adjustments */
+    .dark-theme .action-btn.btn-outline-primary {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: transparent;
+    }
+    
+    .dark-theme .action-btn.btn-outline-primary:hover {
+        background: var(--primary);
+        color: var(--background);
+    }
+    
+    .dark-theme .action-btn.btn-outline-info {
+        border-color: var(--info);
+        color: var(--info);
+        background: transparent;
+    }
+    
+    .dark-theme .action-btn.btn-outline-info:hover {
+        background: var(--info);
+        color: var(--background);
+    }
+    
+    .dark-theme .action-btn.btn-outline-success {
+        border-color: var(--success);
+        color: var(--success);
+        background: transparent;
+    }
+    
+    .dark-theme .action-btn.btn-outline-success:hover {
+        background: var(--success);
+        color: var(--background);
     }
     
     .action-btn::before {
@@ -222,7 +307,7 @@
         text-align: center;
         padding: 3rem;
         background: linear-gradient(135deg, #fff5f5, #fed7d7);
-        border-radius: var(--border-radius-lg);
+        border-radius: var(--radius-lg);
         border: 2px solid #feb2b2;
     }
     
@@ -283,10 +368,10 @@
                 <div class="result-header">
                     <div class="d-flex align-items-center justify-content-between">
                         <div>
-                            <h3 class="mb-1">
+                            <h3 class="mb-1 text-white">
                                 <i class="fas fa-robot me-2"></i>AI Diagnosis Complete
                             </h3>
-                            <p class="mb-0 opacity-90">Analysis based on symptoms and vital signs</p>
+                            <p class="mb-0 text-white" style="opacity: 0.95;">Analysis based on symptoms and vital signs</p>
                         </div>
                         <div class="text-end">
                             <div class="badge bg-light text-dark fs-6 px-3 py-2">
@@ -389,10 +474,10 @@
             <!-- Top 3 Predictions -->
             <div class="result-card">
                 <div class="result-header bg-info">
-                    <h4 class="mb-1">
+                    <h4 class="mb-1 text-white">
                         <i class="fas fa-list-ol me-2"></i>Alternative Diagnoses
                     </h4>
-                    <p class="mb-0 opacity-90">Ranked by probability based on AI analysis</p>
+                    <p class="mb-0 text-white" style="opacity: 0.95;">Ranked by probability based on AI analysis</p>
                 </div>
                 <div class="card-body p-4">
                     <div class="row g-4">
@@ -465,10 +550,10 @@
             <!-- Input Summary -->
             <div class="result-card">
                 <div class="result-header bg-secondary">
-                    <h4 class="mb-1">
+                    <h4 class="mb-1 text-white">
                         <i class="fas fa-clipboard-list me-2"></i>Assessment Summary
                     </h4>
-                    <p class="mb-0 opacity-90">Complete overview of provided information</p>
+                    <p class="mb-0 text-white" style="opacity: 0.95;">Complete overview of provided information</p>
                 </div>
                 <div class="card-body p-4">
                     <div class="input-summary-grid">
