@@ -1,4 +1,4 @@
-++++++++++++++++# 🌿 PashuCare - AI-Powered Livestock Health Management
+                    # 🌿 PashuCare - AI-Powered Livestock Health Management
 
 <div align="center">
 
@@ -43,24 +43,24 @@
 
 ---
 
-## 🎯 Overview
+## Overview
 
 PashuCare is an innovative AI-powered platform designed to revolutionize livestock health management for farmers and veterinarians. The system provides real-time disease prediction, comprehensive farm management, and a complete veterinary portal, all wrapped in a beautiful bilingual interface supporting English and Marathi.
 
 ### Key Highlights
 
-- 🤖 **AI-Powered Disease Prediction** - Machine learning models with 100% training accuracy
-- 🌐 **Bilingual Support** - Full English and Marathi (मराठी) interface
-- 🎨 **Dual Theme System** - Beautiful light and dark modes
-- 👨‍🌾 **Complete Farm Management** - Animals, lands, and health records
-- 🩺 **Veterinary Portal** - Professional tools for veterinarians
-- 📱 **Progressive Web App** - Works offline with PWA support
+-  **AI-Powered Disease Prediction** - Machine learning models with 100% training accuracy
+-  **Bilingual Support** - Full English and Marathi (मराठी) interface
+-  **Dual Theme System** - Beautiful light and dark modes
+-  **Complete Farm Management** - Animals, lands, and health records
+-  **Veterinary Portal** - Professional tools for veterinarians
+-  **Progressive Web App** - Works offline with PWA support
 
 ---
 
-## ✨ Features
+## Features
 
-### 🤖 AI-Powered Health Detection
+### AI-Powered Health Detection
 
 - **Advanced ML Models**: Random Forest, XGBoost, and LightGBM classifiers
 - **Animal-Specific Analysis**: 8 animal types supported (Dog, Cat, Cow, Horse, Sheep, Goat, Pig, Rabbit)
@@ -70,7 +70,7 @@ PashuCare is an innovative AI-powered platform designed to revolutionize livesto
 - **Confidence Metrics**: Detailed probability scores for predictions
 - **Top 3 Predictions**: Alternative diagnoses ranked by probability
 
-### 🌐 Bilingual Support
+### Bilingual Support
 
 - **English**: Complete interface in English
 - **मराठी (Marathi)**: Full Marathi translation for local farmers
@@ -78,7 +78,7 @@ PashuCare is an innovative AI-powered platform designed to revolutionize livesto
 - **Persistent Choice**: Language preference saved automatically
 - **Voice Support**: Text-to-speech in both languages
 
-### 🎨 Dual Theme System
+### Dual Theme System
 
 - **🌿 Light Mode**: Eco-tech harmony with teal green and harvest yellow
 - **🌌 Dark Mode**: Modern AgriTech with mint green and deep charcoal
@@ -86,7 +86,7 @@ PashuCare is an innovative AI-powered platform designed to revolutionize livesto
 - **Eye Comfort**: Dark mode optimized for evening use
 - **Persistent Theme**: User preference automatically saved
 
-### 👨‍🌾 Complete Farm Management
+###  Complete Farm Management
 
 - **User Accounts**: Secure registration and authentication system
 - **Animal Management**: Add, track, and manage livestock records
@@ -95,7 +95,7 @@ PashuCare is an innovative AI-powered platform designed to revolutionize livesto
 - **Prediction History**: Track all health assessments and results
 - **Profile Management**: Update user information and preferences
 
-### 🩺 Veterinary Features
+###  Veterinary Features
 
 - **Vet Portal**: Dedicated dashboard for veterinarians
 - **Animal Lookup**: Search by ID, name, or type
@@ -104,14 +104,14 @@ PashuCare is an innovative AI-powered platform designed to revolutionize livesto
 - **Statistics Dashboard**: Track animals treated, vaccinations given, diagnoses made
 - **Appointment Scheduling**: Manage vet appointments
 
-### 🏥 Veterinary Network
+###  Veterinary Network
 
 - Professional veterinarian directory with ratings and specializations
 - Direct contact via phone, WhatsApp, and email
 - Location-based vet finder with multilingual support
 - Vet profiles with experience and credentials
 
-### 📱 Progressive Web App (PWA)
+###  Progressive Web App (PWA)
 
 - **Offline Support**: Works without internet connection
 - **Installable**: Add to home screen on mobile devices
@@ -120,7 +120,7 @@ PashuCare is an innovative AI-powered platform designed to revolutionize livesto
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 > **Screenshots the AI disease predictor**
 
@@ -148,7 +148,7 @@ PashuCare is an innovative AI-powered platform designed to revolutionize livesto
 > </p>
 
 
-## 📋 Prerequisites
+##  Prerequisites
 
 Before you begin, ensure you have the following installed:
 
@@ -175,7 +175,7 @@ Before you begin, ensure you have the following installed:
 
 ---
 
-## 🚀 Installation
+## Installation
 
 ### Step 1: Clone the Repository
 
@@ -282,7 +282,7 @@ python -c "import flask; print(flask.__version__)"
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### Environment Variables
 
@@ -318,7 +318,7 @@ app.config['SESSION_COOKIE_HTTPONLY'] = True
 
 ---
 
-## 🎯 Usage
+## Usage
 
 ### Starting the Application
 
@@ -347,21 +347,21 @@ The application will be available at `http://localhost:5000`
 
 ### User Roles
 
-#### 👨‍🌾 Farmer
+#### Farmer
 - Register and manage animals
 - Track farm lands
 - Run health assessments
 - View prediction history
 - Contact veterinarians
 
-#### 👨‍⚕️ Veterinarian
+#### Veterinarian
 - Search and view animal records
 - Add vaccination records
 - Create diagnoses
 - Update treatment plans
 - View statistics dashboard
 
-#### 👤 Guest
+#### Guest
 - Use AI prediction features
 - Browse knowledge base
 - View veterinarian directory
@@ -397,7 +397,7 @@ The application will be available at `http://localhost:5000`
 
 ---
 
-## 📚 API Documentation
+## API Documentation
 
 ### Authentication Endpoints
 
@@ -536,7 +536,7 @@ LiveStock-Health-detector/
 
 ---
 
-## 🗄️ Database Setup
+## Database Setup
 
 ### Quick Setup (5 minutes)
 
@@ -606,7 +606,7 @@ veterinarians (1) ──→ (many) vaccinations
 
 ---
 
-## 🧪 Testing
+## Testing
 
 ### Running Tests
 
@@ -649,7 +649,7 @@ tests/
 
 ---
 
-## 🚢 Deployment
+##  Deployment
 
 ### Production Checklist
 
@@ -730,7 +730,7 @@ FLASK_DEBUG=False
 
 ---
 
-## 🛠️ Technology Stack
+## Technology Stack
 
 ### Backend
 
@@ -770,7 +770,7 @@ FLASK_DEBUG=False
 
 ---
 
-## 🔒 Security
+## Security
 
 ### Authentication Security
 
@@ -805,7 +805,7 @@ FLASK_DEBUG=False
 
 ---
 
-## ⚡ Performance
+## Performance
 
 ### Optimization Features
 
@@ -832,7 +832,7 @@ FLASK_DEBUG=False
 
 ---
 
-## 🌐 Browser Support
+## Browser Support
 
 | Browser | Version | Support |
 |---------|---------|---------|
@@ -852,7 +852,7 @@ FLASK_DEBUG=False
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues and Solutions
 
@@ -1008,7 +1008,7 @@ A: Supabase handles this, but for large scale, consider dedicated PostgreSQL.
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 We welcome contributions! Please follow these guidelines:
 
@@ -1080,7 +1080,7 @@ Use GitHub Issues with:
 
 ---
 
-## 📜 Code of Conduct
+## Code of Conduct
 
 ### Our Pledge
 
@@ -1155,7 +1155,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📞 Support
+## Support
 
 ### Get Help
 
@@ -1165,7 +1165,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## 📊 Project Status
+## Project Status
 
 **Current Version**: 2.0  
 **Status**: ✅ Production Ready  
