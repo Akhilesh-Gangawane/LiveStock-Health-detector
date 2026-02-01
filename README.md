@@ -1,4 +1,4 @@
-                    # 🌿 PashuCare - AI-Powered Livestock Health Management
+                                                                                🌿 PashuCare - AI-Powered Livestock Health Management
 
 <div align="center">
 
