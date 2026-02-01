@@ -1,4 +1,4 @@
-<div align="center">🌿 PashuCare - AI-Powered Livestock Health Management </div>
+<div align="center" font-size:24px>🌿 PashuCare - AI-Powered Livestock Health Management </div>
 
 <div align="center">
 
